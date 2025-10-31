@@ -250,5 +250,5 @@ Educational project for Software Engineering class.
 
 ---
 
-**Built with ❤️ by [Your Team Name]**
+**Built with ❤️ by [SBUA]**
 
