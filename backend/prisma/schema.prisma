@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  customer
+  admin
+  manager
+  server
+  kitchen
+}
+
+enum TableStatus {
+  available
+  occupied
+  reserved
+  maintenance
+}
+
+enum ReservationStatus {
+  confirmed
+  completed
+  cancelled
+  no_show
+}
+
+enum OrderStatus {
+  pending
+  preparing
+  ready
+  served
+  cancelled
+}
+
+enum MenuCategory {
+  appetizers
+  mains
+  desserts
+  drinks
+  specials
+}
+
+model User {
+  id            String        @id @default(uuid())
+  email         String        @unique
+  passwordHash  String        @map("password_hash")
+  firstName     String        @map("first_name")
+  lastName      String        @map("last_name")
+  phone         String?
+  role          UserRole      @default(customer)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+  
+  reservations  Reservation[]
+  
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model Table {
+  id           String       @id @default(uuid())
+  tableNumber  String       @unique @map("table_number")
+  capacity     Int
+  location     String?
+  status       TableStatus  @default(available)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  
+  reservations Reservation[]
+  orders       Order[]
+  
+  @@index([status])
+  @@index([capacity])
+  @@map("tables")
+}
+
+model Reservation {
+  id                 String            @id @default(uuid())
+  userId             String            @map("user_id")
+  tableId            String?           @map("table_id")
+  date               DateTime          @db.Date
+  time               DateTime          @db.Time
+  partySize          Int               @map("party_size")
+  status             ReservationStatus @default(confirmed)
+  specialRequest     String?           @map("special_request") @db.Text
+  confirmationNumber String            @unique @map("confirmation_number")
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+  
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  table              Table?            @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  orders             Order[]
+  
+  @@index([userId])
+  @@index([tableId])
+  @@index([date])
+  @@index([status])
+  @@index([confirmationNumber])
+  @@index([date, time])
+  @@map("reservations")
+}
+
+model MenuItem {
+  id               String        @id @default(uuid())
+  name             String
+  description      String?       @db.Text
+  price            Decimal       @db.Decimal(10, 2)
+  category         MenuCategory
+  imageUrl         String?       @map("image_url")
+  available        Boolean       @default(true)
+  dietaryTags      Json          @default("[]") @map("dietary_tags")
+  preparationTime  Int           @default(15) @map("preparation_time")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+  
+  orderItems       OrderItem[]
+  
+  @@index([category])
+  @@index([available])
+  @@map("menu_items")
+}
+
+model Order {
+  id             String      @id @default(uuid())
+  orderNumber    String      @unique @map("order_number")
+  reservationId  String?     @map("reservation_id")
+  tableId        String?     @map("table_id")
+  status         OrderStatus @default(pending)
+  orderTime      DateTime    @default(now()) @map("order_time")
+  readyTime      DateTime?   @map("ready_time")
+  notes          String?     @db.Text
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+  
+  reservation    Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  table          Table?       @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  orderItems     OrderItem[]
+  
+  @@index([reservationId])
+  @@index([tableId])
+  @@index([status])
+  @@index([orderTime])
+  @@map("orders")
+}
+
+model OrderItem {
+  id            String   @id @default(uuid())
+  orderId       String   @map("order_id")
+  menuItemId    String   @map("menu_item_id")
+  quantity      Int
+  priceAtOrder  Decimal  @map("price_at_order") @db.Decimal(10, 2)
+  specialNotes  String?  @map("special_notes") @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem      MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Restrict)
+  
+  @@index([orderId])
+  @@index([menuItemId])
+  @@map("order_items")
+}
+
