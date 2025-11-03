@@ -250,5 +250,5 @@ Educational project for Software Engineering class.
 
 ---
 
-**Built with ❤️ by [SBUA]**
+**Built with ❤️ by [SEUA]**
 
