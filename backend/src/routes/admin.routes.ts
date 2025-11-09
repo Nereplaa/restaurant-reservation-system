@@ -1,138 +1,114 @@
 import { Router } from 'express';
 import { authenticateToken, authorizeRoles } from '../middleware/auth.middleware';
 import { UserRole } from '@prisma/client';
+import {
+  getDashboardStats,
+  getAllReservations,
+  assignTableToReservation,
+  updateReservationStatus,
+  getAllCustomers,
+  getCustomerById,
+} from '../controllers/admin.controller';
+import {
+  createMenuItem,
+  updateMenuItem,
+  deleteMenuItem,
+} from '../controllers/menu.controller';
+import {
+  createTable,
+  updateTable,
+  deleteTable,
+} from '../controllers/table.controller';
 
 const router = Router();
 
-// All admin routes require admin role
+// All admin routes require admin or manager role
 router.use(authenticateToken);
 router.use(authorizeRoles(UserRole.admin, UserRole.manager));
 
 /**
  * @route   GET /api/v1/admin/dashboard/stats
  * @desc    Get dashboard statistics
- * @access  Private (Admin)
+ * @access  Private (Admin, Manager)
  */
-router.get('/dashboard/stats', (req, res) => {
-  res.json({ message: 'Dashboard stats - TODO: Implement' });
-});
+router.get('/dashboard/stats', getDashboardStats);
 
 /**
  * @route   GET /api/v1/admin/reservations
  * @desc    Get all reservations with filters
- * @access  Private (Admin)
+ * @access  Private (Admin, Manager)
  */
-router.get('/reservations', (req, res) => {
-  res.json({ message: 'Admin - Get all reservations - TODO: Implement' });
-});
+router.get('/reservations', getAllReservations);
 
 /**
  * @route   PATCH /api/v1/admin/reservations/:id/assign-table
  * @desc    Assign table to reservation
- * @access  Private (Admin)
+ * @access  Private (Admin, Manager)
  */
-router.patch('/reservations/:id/assign-table', (req, res) => {
-  res.json({ message: 'Assign table to reservation - TODO: Implement' });
-});
+router.patch('/reservations/:id/assign-table', assignTableToReservation);
 
 /**
  * @route   PATCH /api/v1/admin/reservations/:id/status
  * @desc    Update reservation status
- * @access  Private (Admin)
+ * @access  Private (Admin, Manager)
  */
-router.patch('/reservations/:id/status', (req, res) => {
-  res.json({ message: 'Update reservation status - TODO: Implement' });
-});
+router.patch('/reservations/:id/status', updateReservationStatus);
 
 /**
  * @route   GET /api/v1/admin/customers
  * @desc    Get all customers
- * @access  Private (Admin)
+ * @access  Private (Admin, Manager)
  */
-router.get('/customers', (req, res) => {
-  res.json({ message: 'Get customers - TODO: Implement' });
-});
+router.get('/customers', getAllCustomers);
 
 /**
  * @route   GET /api/v1/admin/customers/:id
  * @desc    Get customer details
- * @access  Private (Admin)
+ * @access  Private (Admin, Manager)
  */
-router.get('/customers/:id', (req, res) => {
-  res.json({ message: `Get customer ${req.params.id} - TODO: Implement` });
-});
+router.get('/customers/:id', getCustomerById);
 
 /**
  * @route   POST /api/v1/admin/menu
  * @desc    Create menu item
- * @access  Private (Admin)
+ * @access  Private (Admin, Manager)
  */
-router.post('/menu', (req, res) => {
-  res.json({ message: 'Create menu item - TODO: Implement' });
-});
+router.post('/menu', createMenuItem);
 
 /**
  * @route   PUT /api/v1/admin/menu/:id
  * @desc    Update menu item
- * @access  Private (Admin)
+ * @access  Private (Admin, Manager)
  */
-router.put('/menu/:id', (req, res) => {
-  res.json({ message: `Update menu item ${req.params.id} - TODO: Implement` });
-});
+router.put('/menu/:id', updateMenuItem);
 
 /**
  * @route   DELETE /api/v1/admin/menu/:id
  * @desc    Delete menu item
- * @access  Private (Admin)
+ * @access  Private (Admin, Manager)
  */
-router.delete('/menu/:id', (req, res) => {
-  res.json({ message: `Delete menu item ${req.params.id} - TODO: Implement` });
-});
+router.delete('/menu/:id', deleteMenuItem);
 
 /**
  * @route   POST /api/v1/admin/tables
  * @desc    Create table
- * @access  Private (Admin)
+ * @access  Private (Admin, Manager)
  */
-router.post('/tables', (req, res) => {
-  res.json({ message: 'Create table - TODO: Implement' });
-});
+router.post('/tables', createTable);
 
 /**
  * @route   PUT /api/v1/admin/tables/:id
  * @desc    Update table
- * @access  Private (Admin)
+ * @access  Private (Admin, Manager)
  */
-router.put('/tables/:id', (req, res) => {
-  res.json({ message: `Update table ${req.params.id} - TODO: Implement` });
-});
+router.put('/tables/:id', updateTable);
 
 /**
  * @route   DELETE /api/v1/admin/tables/:id
  * @desc    Delete table
- * @access  Private (Admin)
+ * @access  Private (Admin, Manager)
  */
-router.delete('/tables/:id', (req, res) => {
-  res.json({ message: `Delete table ${req.params.id} - TODO: Implement` });
-});
-
-/**
- * @route   GET /api/v1/admin/settings
- * @desc    Get restaurant settings
- * @access  Private (Admin)
- */
-router.get('/settings', (req, res) => {
-  res.json({ message: 'Get settings - TODO: Implement' });
-});
-
-/**
- * @route   PUT /api/v1/admin/settings
- * @desc    Update restaurant settings
- * @access  Private (Admin)
- */
-router.put('/settings', (req, res) => {
-  res.json({ message: 'Update settings - TODO: Implement' });
-});
+router.delete('/tables/:id', deleteTable);
 
 export default router;
 

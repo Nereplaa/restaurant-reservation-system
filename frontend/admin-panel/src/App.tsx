@@ -1,39 +1,50 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Sidebar from './components/Sidebar';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import ReservationsPage from './pages/ReservationsPage';
+import CustomersPage from './pages/CustomersPage';
+import TablesPage from './pages/TablesPage';
+import MenuPage from './pages/MenuPage';
+import OrdersPage from './pages/OrdersPage';
+import SettingsPage from './pages/SettingsPage';
 
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-100">
+    <AuthProvider>
+      <Router>
         <Routes>
-          <Route path="/" element={
-            <div className="flex items-center justify-center min-h-screen">
-              <div className="text-center">
-                <h1 className="text-4xl font-bold text-blue-600 mb-4">
-                  Admin Panel
-                </h1>
-                <p className="text-gray-600 mb-8">
-                  Restaurant Management System
-                </p>
-                <div className="space-y-2 text-left max-w-md mx-auto bg-white p-6 rounded-lg shadow">
-                  <h2 className="font-semibold text-lg mb-3">Pages to implement:</h2>
-                  <ul className="space-y-1 text-gray-700">
-                    <li>✅ Project structure created</li>
-                    <li>⏳ LoginPage</li>
-                    <li>⏳ DashboardPage (with charts)</li>
-                    <li>⏳ ReservationsPage</li>
-                    <li>⏳ CustomersPage</li>
-                    <li>⏳ TablesPage</li>
-                    <li>⏳ MenuPage</li>
-                    <li>⏳ OrdersPage</li>
-                    <li>⏳ SettingsPage</li>
-                  </ul>
+          {/* Public Route */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* Protected Routes with Sidebar Layout */}
+          <Route
+            path="/*"
+            element={
+              <ProtectedRoute>
+                <div className="flex min-h-screen bg-gray-100">
+                  <Sidebar />
+                  <div className="flex-1 overflow-x-hidden">
+                    <Routes>
+                      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                      <Route path="/dashboard" element={<DashboardPage />} />
+                      <Route path="/reservations" element={<ReservationsPage />} />
+                      <Route path="/customers" element={<CustomersPage />} />
+                      <Route path="/tables" element={<TablesPage />} />
+                      <Route path="/menu" element={<MenuPage />} />
+                      <Route path="/orders" element={<OrdersPage />} />
+                      <Route path="/settings" element={<SettingsPage />} />
+                    </Routes>
+                  </div>
                 </div>
-              </div>
-            </div>
-          } />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
-      </div>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
 

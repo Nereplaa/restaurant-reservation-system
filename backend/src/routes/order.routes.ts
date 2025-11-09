@@ -1,6 +1,12 @@
 import { Router } from 'express';
 import { authenticateToken, authorizeRoles } from '../middleware/auth.middleware';
 import { UserRole } from '@prisma/client';
+import {
+  getAllOrders,
+  createOrder,
+  updateOrderStatus,
+  getOrderById,
+} from '../controllers/order.controller';
 
 const router = Router();
 
@@ -12,9 +18,7 @@ const router = Router();
 router.get('/', 
   authenticateToken,
   authorizeRoles(UserRole.admin, UserRole.kitchen, UserRole.server),
-  (req, res) => {
-    res.json({ message: 'Get orders - TODO: Implement' });
-  }
+  getAllOrders
 );
 
 /**
@@ -25,9 +29,18 @@ router.get('/',
 router.post('/',
   authenticateToken,
   authorizeRoles(UserRole.admin, UserRole.server),
-  (req, res) => {
-    res.json({ message: 'Create order - TODO: Implement' });
-  }
+  createOrder
+);
+
+/**
+ * @route   GET /api/v1/orders/:id
+ * @desc    Get order by ID
+ * @access  Private (Admin, Kitchen, Server)
+ */
+router.get('/:id',
+  authenticateToken,
+  authorizeRoles(UserRole.admin, UserRole.kitchen, UserRole.server),
+  getOrderById
 );
 
 /**
@@ -38,9 +51,7 @@ router.post('/',
 router.patch('/:id/status',
   authenticateToken,
   authorizeRoles(UserRole.admin, UserRole.kitchen),
-  (req, res) => {
-    res.json({ message: `Update order ${req.params.id} status - TODO: Implement` });
-  }
+  updateOrderStatus
 );
 
 export default router;
