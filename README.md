@@ -728,5 +728,4 @@ For issues or questions:
 **⭐ If you find this project helpful, please give it a star!**
 
 ---
-
-Made with ❤️ and ☕ by the team
+**Built with ❤️ by [SEUA]**
