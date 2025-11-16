@@ -39,13 +39,19 @@ export interface Table {
 export interface MenuItem {
   id: string;
   name: string;
+  nameTr?: string;
   description: string;
+  detailedInfo?: string;
   category: string;
   price: number;
   imageUrl: string | null;
   available: boolean;
   preparationTime: number;
   dietaryTags: string[];
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
   createdAt: string;
   updatedAt: string;
 }

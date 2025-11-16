@@ -1,30 +1,55 @@
 # Admin Panel
 
-React frontend for restaurant staff to manage all operations.
+React-based administrative dashboard for the Restaurant Service System.
 
-## Quick Start
+## Features
 
-### With Docker (Recommended)
+- Dashboard with real-time statistics
+- User management
+- Menu item CRUD operations
+- Order management and tracking
+- Table management
+- Reservation oversight
+- Role-based access control
+
+## Tech Stack
+
+- React 18 with TypeScript
+- Vite for fast development
+- React Router for navigation
+- Axios for API calls
+- TailwindCSS for styling
+
+## Development
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Backend API running on port 5000
+
+### Setup
+
 ```bash
-cd restaurant-service-system
-docker-compose up -d admin-panel
-```
-
-### Local Development
-```bash
-cd frontend/admin-panel
+# Install dependencies
 npm install
+
+# Copy environment file
+cp .env.example .env
+
+# Start development server
 npm run dev
 ```
 
-Open http://localhost:3001
+Visit http://localhost:3001
 
-## Scripts
+### Build for Production
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Check code quality
+```bash
+npm run build
+```
+
+Output in `dist/` directory.
 
 ## Environment Variables
 
@@ -34,35 +59,37 @@ Create `.env` file:
 VITE_API_URL=http://localhost:5000/api/v1
 ```
 
-## Features
+## Test Accounts
 
-- Dashboard with statistics
-- Reservation management
-- Table management
-- Menu management
-- Order management
-- Customer management
-- Settings
+- Admin: admin@restaurant.com / admin123
+- Manager: manager@restaurant.com / manager123
 
-## Login Credentials
+## Project Structure
 
-**Admin:**
-- Email: `admin@restaurant.com`
-- Password: `admin123`
+```
+src/
+├── components/       # Reusable components
+│   ├── Sidebar.tsx  # Navigation sidebar
+│   └── ProtectedRoute.tsx
+├── contexts/        # React contexts (Auth)
+├── pages/           # Page components
+│   ├── DashboardPage.tsx
+│   ├── OrdersPage.tsx
+│   ├── MenuPage.tsx
+│   ├── TablesPage.tsx
+│   └── ...
+├── services/        # API service layer
+├── types/           # TypeScript types
+└── App.tsx          # Main app component
+```
 
-**Kitchen Staff:**
-- Email: `kitchen@restaurant.com`
-- Password: `kitchen123`
+## Available Scripts
 
-## Tech Stack
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Axios
-- React Router
+## License
 
-## Documentation
-
-See main [README.md](../../README.md) for full documentation.
+MIT

@@ -20,7 +20,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend API
+  # Python FastAPI Backend
   backend:
     build:
       context: ./backend
@@ -30,24 +30,27 @@ services:
     ports:
       - "5000:5000"
     environment:
-      NODE_ENV: production
       PORT: 5000
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/restaurant_db?schema=public
+      HOST: 0.0.0.0
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/restaurant_db
       JWT_SECRET: your-super-secret-jwt-key-change-this-in-production-min-32-chars
-      JWT_EXPIRES_IN: 24h
+      JWT_ALGORITHM: HS256
+      JWT_EXPIRATION_MINUTES: 1440
       CORS_ORIGINS: http://localhost:3000,http://localhost:3001,http://localhost:3002
+      LOG_LEVEL: INFO
     depends_on:
       postgres:
         condition: service_healthy
     command: >
-      sh -c "npm run db:migrate:deploy && npm run db:seed && npm start"
+      sh -c "python seed.py && python run.py"
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5000/health"]
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # Customer App
+  # Customer App (React)
   customer-app:
     build:
       context: ./frontend/customer-app
@@ -61,7 +64,7 @@ services:
     environment:
       VITE_API_URL: http://localhost:5000/api/v1
 
-  # Admin Panel
+  # Admin Panel (React)
   admin-panel:
     build:
       context: ./frontend/admin-panel
@@ -75,7 +78,7 @@ services:
     environment:
       VITE_API_URL: http://localhost:5000/api/v1
 
-  # Kitchen Display
+  # Kitchen Display (React)
   kitchen-display:
     build:
       context: ./kitchen-display

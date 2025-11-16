@@ -1,30 +1,53 @@
 # Customer App
 
-React frontend for customers to browse menu and make reservations.
+React-based customer-facing application for the Restaurant Service System.
 
-## Quick Start
+## Features
 
-### With Docker (Recommended)
+- Browse menu items with filtering
+- User registration and authentication
+- Create and manage reservations
+- View reservation history
+- Responsive design with TailwindCSS
+
+## Tech Stack
+
+- React 18 with TypeScript
+- Vite for fast development
+- React Router for navigation
+- Axios for API calls
+- TailwindCSS for styling
+
+## Development
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Backend API running on port 5000
+
+### Setup
+
 ```bash
-cd restaurant-service-system
-docker-compose up -d customer-app
-```
-
-### Local Development
-```bash
-cd frontend/customer-app
+# Install dependencies
 npm install
+
+# Copy environment file
+cp .env.example .env
+
+# Start development server
 npm run dev
 ```
 
-Open http://localhost:3000
+Visit http://localhost:3000
 
-## Scripts
+### Build for Production
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Check code quality
+```bash
+npm run build
+```
+
+Output in `dist/` directory.
 
 ## Environment Variables
 
@@ -32,26 +55,27 @@ Create `.env` file:
 
 ```env
 VITE_API_URL=http://localhost:5000/api/v1
-VITE_SOCKET_URL=http://localhost:5000
 ```
 
-## Features
+## Project Structure
 
-- Browse menu with categories
-- Make reservations
-- View and manage bookings
-- User authentication
-- Responsive design
+```
+src/
+├── components/       # Reusable components
+├── contexts/        # React contexts (Auth)
+├── pages/           # Page components
+├── services/        # API service layer
+├── types/           # TypeScript types
+└── App.tsx          # Main app component
+```
 
-## Tech Stack
+## Available Scripts
 
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Axios
-- React Router
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
-## Documentation
+## License
 
-See main [README.md](../../README.md) for full documentation.
+MIT
