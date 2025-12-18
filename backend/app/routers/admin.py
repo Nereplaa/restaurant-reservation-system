@@ -25,66 +25,51 @@ async def get_stats(
     """
     Get dashboard statistics (admin/manager only)
     """
-    # Count users
-    total_users = db.query(func.count(User.id)).scalar()
+    from datetime import date
+    today = date.today()
     
-    # Count reservations by status
-    total_reservations = db.query(func.count(Reservation.id)).scalar()
-    confirmed_reservations = db.query(func.count(Reservation.id)).filter(
-        Reservation.status == ReservationStatus.confirmed
-    ).scalar()
+    # Count total customers
+    total_customers = db.query(func.count(User.id)).filter(
+        User.role == UserRole.customer
+    ).scalar() or 0
     
-    # Count orders by status
-    total_orders = db.query(func.count(Order.id)).scalar()
-    pending_orders = db.query(func.count(Order.id)).filter(
-        Order.status == OrderStatus.pending
-    ).scalar()
-    preparing_orders = db.query(func.count(Order.id)).filter(
-        Order.status == OrderStatus.preparing
-    ).scalar()
+    # Count today's reservations
+    today_reservations = db.query(func.count(Reservation.id)).filter(
+        Reservation.date == today
+    ).scalar() or 0
     
-    # Count menu items
-    total_menu_items = db.query(func.count(MenuItem.id)).scalar()
-    available_menu_items = db.query(func.count(MenuItem.id)).filter(
-        MenuItem.available == True
-    ).scalar()
+    # Count active orders (pending + preparing)
+    active_orders = db.query(func.count(Order.id)).filter(
+        Order.status.in_([OrderStatus.pending, OrderStatus.preparing])
+    ).scalar() or 0
     
     # Count tables by status
-    total_tables = db.query(func.count(Table.id)).scalar()
     available_tables = db.query(func.count(Table.id)).filter(
         Table.status == TableStatus.available
-    ).scalar()
+    ).scalar() or 0
     occupied_tables = db.query(func.count(Table.id)).filter(
         Table.status == TableStatus.occupied
-    ).scalar()
+    ).scalar() or 0
+    
+    # Today's revenue - calculating from order items for served orders today
+    # For now, set to 0 as the Order model doesn't have total_amount
+    today_revenue = 0.0
     
     stats = {
-        "users": {
-            "total": total_users
-        },
-        "reservations": {
-            "total": total_reservations,
-            "confirmed": confirmed_reservations
-        },
-        "orders": {
-            "total": total_orders,
-            "pending": pending_orders,
-            "preparing": preparing_orders
-        },
-        "menu_items": {
-            "total": total_menu_items,
-            "available": available_menu_items
-        },
-        "tables": {
-            "total": total_tables,
-            "available": available_tables,
-            "occupied": occupied_tables
-        }
+        "todayReservations": today_reservations,
+        "todayRevenue": today_revenue,
+        "totalCustomers": total_customers,
+        "activeOrders": active_orders,
+        "availableTables": available_tables,
+        "occupiedTables": occupied_tables
     }
     
     logger.info(f"Admin stats requested by {current_user.email}")
     
-    return stats
+    return {
+        "success": True,
+        "data": stats
+    }
 
 
 @router.get("/users")
@@ -97,20 +82,23 @@ async def get_all_users(
     """
     users = db.query(User).all()
     
-    # Remove password hashes from response
+    # Remove password hashes from response, use camelCase for frontend
     users_data = []
     for user in users:
         user_dict = {
-            "id": user.id,
+            "id": str(user.id),
             "email": user.email,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
+            "firstName": user.first_name,
+            "lastName": user.last_name,
             "phone": user.phone,
-            "role": user.role,
-            "created_at": user.created_at,
-            "updated_at": user.updated_at
+            "role": user.role.value if user.role else None,
+            "createdAt": user.created_at.isoformat() if user.created_at else None,
+            "updatedAt": user.updated_at.isoformat() if user.updated_at else None
         }
         users_data.append(user_dict)
     
-    return users_data
+    return {
+        "success": True,
+        "data": users_data
+    }
 

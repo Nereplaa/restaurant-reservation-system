@@ -2,6 +2,7 @@
 Authentication schemas
 """
 from pydantic import BaseModel, EmailStr
+from typing import Any
 from app.schemas.user import UserResponse
 
 
@@ -24,6 +25,18 @@ class TokenResponse(BaseModel):
     """Token response schema"""
     user: UserResponse
     token: str
+
+
+class WrappedTokenResponse(BaseModel):
+    """Wrapped token response for frontend compatibility"""
+    success: bool = True
+    data: TokenResponse
+
+
+class WrappedUserResponse(BaseModel):
+    """Wrapped user response for frontend compatibility"""
+    success: bool = True
+    data: UserResponse
 
 
 class MessageResponse(BaseModel):

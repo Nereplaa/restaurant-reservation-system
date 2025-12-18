@@ -66,9 +66,9 @@ python run.py
 ```
 
 The API will be available at:
-- API: http://localhost:5000
-- API Docs: http://localhost:5000/api/docs
-- Health Check: http://localhost:5000/health
+- API: http://localhost:7001
+- API Docs: http://localhost:7001/api/docs
+- Health Check: http://localhost:7001/health
 
 ### Docker
 
@@ -238,12 +238,12 @@ Create a `.env` file in the backend directory:
 
 ```env
 # Server Configuration
-PORT=5000
+PORT=7001
 HOST=0.0.0.0
 ENVIRONMENT=development
 
 # Database
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/restaurant_db
+DATABASE_URL=postgresql://postgres:postgres@localhost:7005/restaurant_db
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key-change-in-production
@@ -251,7 +251,7 @@ JWT_ALGORITHM=HS256
 JWT_EXPIRATION_MINUTES=1440
 
 # CORS (comma-separated origins)
-CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002
+CORS_ORIGINS=http://localhost:7002,http://localhost:7003,http://localhost:7004
 
 # Logging
 LOG_LEVEL=INFO
@@ -329,7 +329,7 @@ docker build -t restaurant-backend .
 ### Run Container
 
 ```bash
-docker run -p 5000:5000 --env-file .env restaurant-backend
+docker run -p 7001:7001 --env-file .env restaurant-backend
 ```
 
 ### Docker Compose
@@ -350,24 +350,24 @@ docker-compose down
 
 ### API Testing
 
-Visit http://localhost:5000/api/docs for interactive Swagger UI
+Visit http://localhost:7001/api/docs for interactive Swagger UI
 
 ### Manual Testing
 
 ```bash
 # Health check
-curl http://localhost:5000/health
+curl http://localhost:7001/health
 
 # Login
-curl -X POST http://localhost:5000/api/v1/auth/login \
+curl -X POST http://localhost:7001/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@restaurant.com","password":"admin123"}'
 
 # Get menu (no auth required)
-curl http://localhost:5000/api/v1/menu
+curl http://localhost:7001/api/v1/menu
 
 # Get authenticated user (requires token)
-curl http://localhost:5000/api/v1/auth/me \
+curl http://localhost:7001/api/v1/auth/me \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -396,7 +396,7 @@ Main Python packages (see requirements.txt for complete list):
 
 ### Port Already in Use
 - Change PORT in .env
-- Or stop the process using port 5000
+- Or stop the process using port 7001
 
 ### Import Errors
 - Activate virtual environment

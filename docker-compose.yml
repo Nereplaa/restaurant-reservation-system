@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: restaurant_db
     ports:
-      - "5432:5432"
+      - "7005:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -28,16 +28,16 @@ services:
     container_name: restaurant-backend
     restart: unless-stopped
     ports:
-      - "5000:5000"
+      - "7001:7001"
     environment:
-      PORT: 5000
+      PORT: 7001
       HOST: 0.0.0.0
       ENVIRONMENT: production
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/restaurant_db
       JWT_SECRET: your-super-secret-jwt-key-change-this-in-production-min-32-chars
       JWT_ALGORITHM: HS256
       JWT_EXPIRATION_MINUTES: 1440
-      CORS_ORIGINS: http://localhost:3000,http://localhost:3001,http://localhost:3002
+      CORS_ORIGINS: http://localhost:7002,http://localhost:7003,http://localhost:7004
       LOG_LEVEL: INFO
     depends_on:
       postgres:
@@ -45,7 +45,7 @@ services:
     command: >
       sh -c "python seed.py && python run.py"
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health')"]
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:7001/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -58,11 +58,11 @@ services:
     container_name: restaurant-customer-app
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "7002:7002"
     depends_on:
       - backend
     environment:
-      VITE_API_URL: http://localhost:5000/api/v1
+      VITE_API_URL: http://localhost:7001/api/v1
 
   # Admin Panel (React)
   admin-panel:
@@ -72,11 +72,11 @@ services:
     container_name: restaurant-admin-panel
     restart: unless-stopped
     ports:
-      - "3001:3001"
+      - "7003:7003"
     depends_on:
       - backend
     environment:
-      VITE_API_URL: http://localhost:5000/api/v1
+      VITE_API_URL: http://localhost:7001/api/v1
 
   # Kitchen Display (React)
   kitchen-display:
@@ -86,11 +86,11 @@ services:
     container_name: restaurant-kitchen-display
     restart: unless-stopped
     ports:
-      - "3002:3002"
+      - "7004:7004"
     depends_on:
       - backend
     environment:
-      VITE_API_URL: http://localhost:5000/api/v1
+      VITE_API_URL: http://localhost:7001/api/v1
 
 volumes:
   postgres_data:
@@ -99,4 +99,3 @@ volumes:
 networks:
   default:
     name: restaurant-network
-

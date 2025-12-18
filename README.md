@@ -1,5 +1,6 @@
 # Restaurant Service System
 
+
 A complete restaurant management system with Python FastAPI backend and React frontends.
 
 ## Overview
@@ -46,10 +47,10 @@ docker-compose up --build
 ```
 
 Then access:
-- Customer App: http://localhost:3000
-- Admin Panel: http://localhost:3001
-- Kitchen Display: http://localhost:3002
-- API Documentation: http://localhost:5000/api/docs
+- Customer App: http://localhost:7002
+- Admin Panel: http://localhost:7003
+- Kitchen Display: http://localhost:7004
+- API Documentation: http://localhost:7001/api/docs
 
 ### Local Development
 
@@ -153,18 +154,18 @@ Full API documentation available at `/api/docs` when server is running.
 
 ### Backend (.env)
 ```env
-PORT=5000
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/restaurant_db
+PORT=7001
+DATABASE_URL=postgresql://postgres:postgres@localhost:7005/restaurant_db
 JWT_SECRET=your-secret-key
 JWT_ALGORITHM=HS256
 JWT_EXPIRATION_MINUTES=1440
-CORS_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:3002
+CORS_ORIGINS=http://localhost:7002,http://localhost:7003,http://localhost:7004
 LOG_LEVEL=INFO
 ```
 
 ### Frontend (.env)
 ```env
-VITE_API_URL=http://localhost:5000/api/v1
+VITE_API_URL=http://localhost:7001/api/v1
 ```
 
 ## Development

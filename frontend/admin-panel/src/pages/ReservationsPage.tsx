@@ -20,7 +20,7 @@ export default function ReservationsPage() {
   const fetchData = async () => {
     try {
       const [reservationsRes, tablesRes] = await Promise.all([
-        api.get('/admin/reservations'),
+        api.get('/reservations'),
         api.get('/tables')
       ]);
 
@@ -49,9 +49,9 @@ export default function ReservationsPage() {
     if (!selectedReservation) return;
 
     try {
-      const response = await api.put(`/admin/reservations/${selectedReservation.id}`, {
+      const response = await api.patch(`/reservations/${selectedReservation.id}`, {
         status: selectedStatus,
-        tableId: selectedTable || null,
+        table_id: selectedTable || null,
       });
 
       if (response.data.success) {
@@ -74,8 +74,8 @@ export default function ReservationsPage() {
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
-  const filteredReservations = filterStatus === 'ALL' 
-    ? reservations 
+  const filteredReservations = filterStatus === 'ALL'
+    ? reservations
     : reservations.filter(r => r.status === filterStatus);
 
   if (isLoading) {

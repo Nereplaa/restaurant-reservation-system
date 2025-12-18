@@ -26,11 +26,11 @@ Wait 2-3 minutes for all services to start.
 
 ### Step 3: Access Applications
 
-- **Customer App**: http://localhost:3000
-- **Admin Panel**: http://localhost:3001
-- **Kitchen Display**: http://localhost:3002
-- **API Documentation**: http://localhost:5000/api/docs
-- **API Health Check**: http://localhost:5000/health
+- **Customer App**: http://localhost:7002
+- **Admin Panel**: http://localhost:7003
+- **Kitchen Display**: http://localhost:7004
+- **API Documentation**: http://localhost:7001/api/docs
+- **API Health Check**: http://localhost:7001/health
 
 ## Option 2: Local Development
 
@@ -63,7 +63,7 @@ python seed.py
 python run.py
 ```
 
-Backend runs at http://localhost:5000
+Backend runs at http://localhost:7001
 
 ### Frontend Setup
 
@@ -114,34 +114,34 @@ After seeding, use these credentials:
 
 ```bash
 # Health check
-curl http://localhost:5000/health
+curl http://localhost:7001/health
 
 # Login
-curl -X POST http://localhost:5000/api/v1/auth/login \
+curl -X POST http://localhost:7001/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@restaurant.com","password":"admin123"}'
 
 # Get menu items
-curl http://localhost:5000/api/v1/menu
+curl http://localhost:7001/api/v1/menu
 ```
 
 ### 2. Test Frontend Apps
 
-1. Open Customer App (http://localhost:3000)
+1. Open Customer App (http://localhost:7002)
 2. Browse menu items
 3. Try logging in with customer account
 4. Create a test reservation
 
 ### 3. Test Admin Panel
 
-1. Open Admin Panel (http://localhost:3001)
+1. Open Admin Panel (http://localhost:7003)
 2. Login with admin credentials
 3. View dashboard statistics
 4. Browse orders, reservations, tables
 
 ### 4. Test Kitchen Display
 
-1. Open Kitchen Display (http://localhost:3002)
+1. Open Kitchen Display (http://localhost:7004)
 2. See real-time order updates
 3. Test order status changes
 
@@ -169,8 +169,8 @@ Change ports in `docker-compose.yml` or `.env` files:
 ```yaml
 # docker-compose.yml
 ports:
-  - "5001:5000"  # Backend
-  - "3010:3000"  # Customer App
+  - "7010:7001"  # Backend
+  - "7020:7002"  # Customer App
 ```
 
 ### Database Connection Error
@@ -187,14 +187,14 @@ pg_isready
 
 Verify DATABASE_URL in `backend/.env`:
 ```env
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/restaurant_db
+DATABASE_URL=postgresql://postgres:postgres@localhost:7005/restaurant_db
 ```
 
 ### Frontend Can't Connect to Backend
 
 Check VITE_API_URL in frontend `.env` files:
 ```env
-VITE_API_URL=http://localhost:5000/api/v1
+VITE_API_URL=http://localhost:7001/api/v1
 ```
 
 ### Python Module Not Found
@@ -256,7 +256,7 @@ docker-compose down
 
 ## Next Steps
 
-1. **Explore API**: Visit http://localhost:5000/api/docs for interactive API documentation
+1. **Explore API**: Visit http://localhost:7001/api/docs for interactive API documentation
 2. **Read Documentation**: See `backend/README.md` for detailed backend info
 3. **Check Project Structure**: See `PROJECT-STRUCTURE.md` for architecture details
 4. **Customize**: Modify menu items, add features, adjust styling
@@ -283,7 +283,7 @@ cd frontend/customer-app && npm run dev
 cd backend && python seed.py
 
 # View API docs
-http://localhost:5000/api/docs
+http://localhost:7001/api/docs
 ```
 
 ## Development Tips

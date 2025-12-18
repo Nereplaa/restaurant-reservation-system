@@ -61,21 +61,6 @@ const BookingPage = () => {
     );
   }
 
-  // Generate time slots (11 AM to 9 PM, every 30 minutes)
-  const timeSlots = [];
-  for (let hour = 11; hour <= 21; hour++) {
-    for (let minute of [0, 30]) {
-      if (hour === 21 && minute === 30) break; // Don't go past 9 PM
-      const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      const displayTime = new Date(`2000-01-01T${time}`).toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-      });
-      timeSlots.push({ value: time, label: displayTime });
-    }
-  }
-
   // Get today's date for min attribute
   const today = new Date().toISOString().split('T')[0];
 
@@ -125,21 +110,18 @@ const BookingPage = () => {
               <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
                 Time *
               </label>
-              <select
+              <input
+                type="time"
                 id="time"
                 name="time"
                 required
+                min="11:00"
+                max="21:00"
                 value={formData.time}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                <option value="">Select a time</option>
-                {timeSlots.map((slot) => (
-                  <option key={slot.value} value={slot.value}>
-                    {slot.label}
-                  </option>
-                ))}
-              </select>
+              />
+              <p className="mt-1 text-sm text-gray-500">Available hours: 11:00 AM - 9:00 PM</p>
             </div>
 
             <div>

@@ -54,7 +54,7 @@ Output in `dist/` directory.
 Create `.env` file:
 
 ```env
-VITE_API_URL=http://localhost:5000/api/v1
+VITE_API_URL=http://localhost:7001/api/v1
 ```
 
 ## Project Structure

@@ -59,24 +59,58 @@ async def create_reservation(
     return ReservationResponse.model_validate(new_reservation)
 
 
-@router.get("/", response_model=List[ReservationResponse])
+@router.get("/")
 async def get_reservations(
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    limit: int = None
 ):
     """
     Get all reservations for current user (or all for admin/staff)
     """
     if current_user.role in [UserRole.admin, UserRole.manager, UserRole.server]:
         # Admin/staff can see all reservations
-        reservations = db.query(Reservation).order_by(Reservation.date.desc()).all()
+        query = db.query(Reservation).order_by(Reservation.date.desc())
+        if limit:
+            query = query.limit(limit)
+        reservations = query.all()
     else:
         # Customers only see their own reservations
-        reservations = db.query(Reservation).filter(
+        query = db.query(Reservation).filter(
             Reservation.user_id == current_user.id
-        ).order_by(Reservation.date.desc()).all()
+        ).order_by(Reservation.date.desc())
+        if limit:
+            query = query.limit(limit)
+        reservations = query.all()
     
-    return [ReservationResponse.model_validate(r) for r in reservations]
+    # Format response for frontend
+    reservation_list = []
+    for r in reservations:
+        reservation_dict = {
+            "id": str(r.id),
+            "userId": str(r.user_id),
+            "tableId": str(r.table_id) if r.table_id else None,
+            "guestCount": r.party_size,
+            "reservationDate": r.date.isoformat() if r.date else None,
+            "reservationTime": r.time.strftime("%H:%M") if r.time else None,
+            "status": r.status.value.upper() if r.status else None,
+            "specialRequests": r.special_request,
+            "confirmationNumber": r.confirmation_number,
+            "createdAt": r.created_at.isoformat() if r.created_at else None,
+            "updatedAt": r.updated_at.isoformat() if r.updated_at else None,
+            "user": {
+                "firstName": r.user.first_name if r.user else None,
+                "lastName": r.user.last_name if r.user else None
+            } if r.user else None
+        }
+        reservation_list.append(reservation_dict)
+    
+    return {
+        "success": True,
+        "data": {
+            "reservations": reservation_list
+        }
+    }
 
 
 @router.get("/{reservation_id}", response_model=ReservationResponse)

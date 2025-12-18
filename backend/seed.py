@@ -68,7 +68,7 @@ def seed_database():
         )
         
         customer_user = User(
-            email="customer@example.com",
+            email="john.doe@example.com",
             password_hash=hash_password("customer123"),
             first_name="John",
             last_name="Doe",
@@ -308,7 +308,7 @@ def seed_database():
         print("  Manager: manager@restaurant.com / manager123")
         print("  Server: server@restaurant.com / server123")
         print("  Kitchen: kitchen@restaurant.com / kitchen123")
-        print("  Customer: customer@example.com / customer123")
+        print("  Customer: john.doe@example.com / customer123")
         
     except Exception as e:
         print(f"❌ Error seeding database: {e}")

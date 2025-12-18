@@ -4,7 +4,7 @@ Authentication routes
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, MessageResponse
+from app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, WrappedTokenResponse, WrappedUserResponse, MessageResponse
 from app.schemas.user import UserResponse
 from app.models.user import User
 from app.utils.auth import hash_password, verify_password, create_access_token
@@ -15,7 +15,7 @@ import re
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
-@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=WrappedTokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(request: RegisterRequest, db: Session = Depends(get_db)):
     """
     Register a new user
@@ -68,13 +68,16 @@ async def register(request: RegisterRequest, db: Session = Depends(get_db)):
     
     logger.info(f"New user registered: {new_user.email}")
     
-    return TokenResponse(
-        user=UserResponse.model_validate(new_user),
-        token=token
+    return WrappedTokenResponse(
+        success=True,
+        data=TokenResponse(
+            user=UserResponse.model_validate(new_user),
+            token=token
+        )
     )
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=WrappedTokenResponse)
 async def login(request: LoginRequest, db: Session = Depends(get_db)):
     """
     Login user
@@ -104,18 +107,24 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
     
     logger.info(f"User logged in: {user.email}")
     
-    return TokenResponse(
-        user=UserResponse.model_validate(user),
-        token=token
+    return WrappedTokenResponse(
+        success=True,
+        data=TokenResponse(
+            user=UserResponse.model_validate(user),
+            token=token
+        )
     )
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me", response_model=WrappedUserResponse)
 async def get_current_user_info(current_user: User = Depends(get_current_user)):
     """
     Get current authenticated user information
     """
-    return UserResponse.model_validate(current_user)
+    return WrappedUserResponse(
+        success=True,
+        data=UserResponse.model_validate(current_user)
+    )
 
 
 @router.post("/logout", response_model=MessageResponse)

@@ -14,7 +14,7 @@ from app.utils.logger import logger
 router = APIRouter(prefix="/tables", tags=["Tables"])
 
 
-@router.get("/", response_model=List[TableResponse])
+@router.get("/")
 async def get_tables(
     status_filter: Optional[TableStatus] = Query(None),
     db: Session = Depends(get_db)
@@ -28,7 +28,25 @@ async def get_tables(
         query = query.filter(Table.status == status_filter)
     
     tables = query.order_by(Table.table_number).all()
-    return [TableResponse.model_validate(table) for table in tables]
+    
+    # Format for frontend with camelCase
+    tables_data = []
+    for table in tables:
+        table_dict = {
+            "id": str(table.id),
+            "tableNumber": table.table_number,
+            "capacity": table.capacity,
+            "location": table.location,
+            "status": table.status.value if table.status else None,
+            "createdAt": table.created_at.isoformat() if table.created_at else None,
+            "updatedAt": table.updated_at.isoformat() if table.updated_at else None
+        }
+        tables_data.append(table_dict)
+    
+    return {
+        "success": True,
+        "data": tables_data
+    }
 
 
 @router.get("/{table_id}", response_model=TableResponse)

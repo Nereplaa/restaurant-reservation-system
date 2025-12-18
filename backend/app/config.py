@@ -10,20 +10,20 @@ class Settings(BaseSettings):
     """Application settings"""
     
     # Server
-    PORT: int = 5000
+    PORT: int = 7001
     HOST: str = "0.0.0.0"
     ENVIRONMENT: str = "development"
     
     # Database
-    DATABASE_URL: str
+    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:7005/restaurant_db"
     
     # JWT
-    JWT_SECRET: str
+    JWT_SECRET: str = "your-super-secret-jwt-key-change-this-in-production-min-32-chars"
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRATION_MINUTES: int = 1440
     
     # CORS
-    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001,http://localhost:3002"
+    CORS_ORIGINS: str = "http://localhost:7002,http://localhost:7003,http://localhost:7004"
     
     # Logging
     LOG_LEVEL: str = "INFO"

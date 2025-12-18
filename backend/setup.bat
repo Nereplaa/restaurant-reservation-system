@@ -76,9 +76,9 @@ echo 1. Start the server:
 echo    python run.py
 echo.
 echo 2. Access the API:
-echo    • API: http://localhost:5000
-echo    • Docs: http://localhost:5000/api/docs
-echo    • Health: http://localhost:5000/health
+echo    • API: http://localhost:7001
+echo    • Docs: http://localhost:7001/api/docs
+echo    • Health: http://localhost:7001/health
 echo.
 echo 3. Test accounts:
 echo    • Admin: admin@restaurant.com / admin123
