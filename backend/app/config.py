@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     
     # Logging
     LOG_LEVEL: str = "INFO"
+
+    # Local LLM / chatbot configuration (for LM Studio or similar)
+    LLM_API_URL: str | None = None  # e.g. "http://localhost:1234/v1/chat/completions"
+    LLM_API_KEY: str | None = None
+    LLM_MODEL: str | None = "openai/gpt-oss-20b"  # e.g. model name shown in LM Studio
     
     @property
     def cors_origins_list(self) -> List[str]:

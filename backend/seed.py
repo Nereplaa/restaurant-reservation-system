@@ -4,7 +4,7 @@ Database seeding script
 from app.database import SessionLocal, engine, Base
 from app.models import User, Table, MenuItem, Reservation, Order, OrderItem
 from app.models.user import UserRole
-from app.models.table import TableStatus
+from app.models.table import TableStatus, TableArea
 from app.models.menu_item import MenuCategory
 from app.models.reservation import ReservationStatus
 from app.models.order import OrderStatus
@@ -80,16 +80,74 @@ def seed_database():
         db.commit()
         print("✓ Users created")
         
-        # Create tables
+        # Create tables with enhanced features
+        # Rules:
+        # - TERRACE: 8 tables, smoking ALLOWED
+        # - MAIN_HALL: 16 tables, smoking NOT allowed
+        # - VIP: 2 rooms, smoking ALLOWED
+        # - Window seats: 6 total (2 terrace, 4 main hall)
+        # - Wall seats: 10 total (3 terrace, 7 main hall)
+        
         tables_data = [
-            {"table_number": "T-01", "capacity": 2, "location": "Main Floor"},
-            {"table_number": "T-02", "capacity": 4, "location": "Main Floor"},
-            {"table_number": "T-03", "capacity": 4, "location": "Main Floor"},
-            {"table_number": "T-04", "capacity": 6, "location": "Main Floor"},
-            {"table_number": "T-05", "capacity": 8, "location": "Private Room"},
-            {"table_number": "T-06", "capacity": 2, "location": "Patio"},
-            {"table_number": "T-07", "capacity": 4, "location": "Patio"},
-            {"table_number": "T-08", "capacity": 6, "location": "Patio"},
+            # ========== TERRACE TABLES (8) - Smoking Allowed ==========
+            # 2 window, 3 wall, 3 center
+            {"table_number": "T-01", "capacity": 2, "area": TableArea.TERRACE, "location": "Teras - Cam Kenarı", 
+             "smoking_allowed": True, "is_window": True, "is_wall": False, "is_vip": False},
+            {"table_number": "T-02", "capacity": 4, "area": TableArea.TERRACE, "location": "Teras - Cam Kenarı",
+             "smoking_allowed": True, "is_window": True, "is_wall": False, "is_vip": False},
+            {"table_number": "T-03", "capacity": 2, "area": TableArea.TERRACE, "location": "Teras - Duvar Kenarı",
+             "smoking_allowed": True, "is_window": False, "is_wall": True, "is_vip": False},
+            {"table_number": "T-04", "capacity": 4, "area": TableArea.TERRACE, "location": "Teras - Duvar Kenarı",
+             "smoking_allowed": True, "is_window": False, "is_wall": True, "is_vip": False},
+            {"table_number": "T-05", "capacity": 6, "area": TableArea.TERRACE, "location": "Teras - Duvar Kenarı",
+             "smoking_allowed": True, "is_window": False, "is_wall": True, "is_vip": False},
+            {"table_number": "T-06", "capacity": 4, "area": TableArea.TERRACE, "location": "Teras - Merkez",
+             "smoking_allowed": True, "is_window": False, "is_wall": False, "is_vip": False},
+            {"table_number": "T-07", "capacity": 6, "area": TableArea.TERRACE, "location": "Teras - Merkez",
+             "smoking_allowed": True, "is_window": False, "is_wall": False, "is_vip": False},
+            {"table_number": "T-08", "capacity": 8, "area": TableArea.TERRACE, "location": "Teras - Merkez",
+             "smoking_allowed": True, "is_window": False, "is_wall": False, "is_vip": False},
+            
+            # ========== MAIN HALL TABLES (16) - No Smoking ==========
+            # 4 window, 7 wall, 5 center
+            {"table_number": "H-01", "capacity": 2, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Cam Kenarı",
+             "smoking_allowed": False, "is_window": True, "is_wall": False, "is_vip": False},
+            {"table_number": "H-02", "capacity": 2, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Cam Kenarı",
+             "smoking_allowed": False, "is_window": True, "is_wall": False, "is_vip": False},
+            {"table_number": "H-03", "capacity": 4, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Cam Kenarı",
+             "smoking_allowed": False, "is_window": True, "is_wall": False, "is_vip": False},
+            {"table_number": "H-04", "capacity": 4, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Cam Kenarı",
+             "smoking_allowed": False, "is_window": True, "is_wall": False, "is_vip": False},
+            {"table_number": "H-05", "capacity": 2, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Duvar Kenarı",
+             "smoking_allowed": False, "is_window": False, "is_wall": True, "is_vip": False},
+            {"table_number": "H-06", "capacity": 2, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Duvar Kenarı",
+             "smoking_allowed": False, "is_window": False, "is_wall": True, "is_vip": False},
+            {"table_number": "H-07", "capacity": 4, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Duvar Kenarı",
+             "smoking_allowed": False, "is_window": False, "is_wall": True, "is_vip": False},
+            {"table_number": "H-08", "capacity": 4, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Duvar Kenarı",
+             "smoking_allowed": False, "is_window": False, "is_wall": True, "is_vip": False},
+            {"table_number": "H-09", "capacity": 6, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Duvar Kenarı",
+             "smoking_allowed": False, "is_window": False, "is_wall": True, "is_vip": False},
+            {"table_number": "H-10", "capacity": 6, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Duvar Kenarı",
+             "smoking_allowed": False, "is_window": False, "is_wall": True, "is_vip": False},
+            {"table_number": "H-11", "capacity": 8, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Duvar Kenarı",
+             "smoking_allowed": False, "is_window": False, "is_wall": True, "is_vip": False},
+            {"table_number": "H-12", "capacity": 2, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Merkez",
+             "smoking_allowed": False, "is_window": False, "is_wall": False, "is_vip": False},
+            {"table_number": "H-13", "capacity": 4, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Merkez",
+             "smoking_allowed": False, "is_window": False, "is_wall": False, "is_vip": False},
+            {"table_number": "H-14", "capacity": 4, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Merkez",
+             "smoking_allowed": False, "is_window": False, "is_wall": False, "is_vip": False},
+            {"table_number": "H-15", "capacity": 6, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Merkez",
+             "smoking_allowed": False, "is_window": False, "is_wall": False, "is_vip": False},
+            {"table_number": "H-16", "capacity": 8, "area": TableArea.MAIN_HALL, "location": "Ana Salon - Merkez",
+             "smoking_allowed": False, "is_window": False, "is_wall": False, "is_vip": False},
+            
+            # ========== VIP ROOMS (2) - Smoking Allowed ==========
+            {"table_number": "V-01", "capacity": 8, "area": TableArea.VIP, "location": "VIP Oda 1",
+             "smoking_allowed": True, "is_window": False, "is_wall": False, "is_vip": True},
+            {"table_number": "V-02", "capacity": 12, "area": TableArea.VIP, "location": "VIP Oda 2",
+             "smoking_allowed": True, "is_window": False, "is_wall": False, "is_vip": True},
         ]
         
         for table_data in tables_data:
@@ -97,7 +155,7 @@ def seed_database():
             db.add(table)
         
         db.commit()
-        print("✓ Tables created")
+        print("✓ Tables created (8 Terrace + 16 Main Hall + 2 VIP = 26 total)")
         
         # Create menu items - Turkish Restaurant Menu
         menu_items = [
