@@ -51,8 +51,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const response = await api.get('/auth/me');
           if (response.data.success) {
             const userData = response.data.data;
-            // Only allow ADMIN and KITCHEN_STAFF roles
-            if (userData.role === 'ADMIN' || userData.role === 'KITCHEN_STAFF') {
+            // Only allow admin and kitchen roles
+            if (userData.role === 'admin' || userData.role === 'kitchen' || userData.role === 'manager') {
               setUser(userData);
             } else {
               // Not an admin, clear token
@@ -80,8 +80,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.data.success) {
         const { user, token } = response.data.data;
         
-        // Only allow ADMIN and KITCHEN_STAFF to login to admin panel
-        if (user.role !== 'ADMIN' && user.role !== 'KITCHEN_STAFF') {
+        // Only allow admin, kitchen, and manager to login to admin panel
+        if (user.role !== 'admin' && user.role !== 'kitchen' && user.role !== 'manager') {
           throw new Error('You do not have permission to access the admin panel');
         }
         

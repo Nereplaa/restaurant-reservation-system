@@ -54,13 +54,19 @@ export interface CreateReservationData {
 export interface MenuItem {
   id: string;
   name: string;
+  nameTr?: string;
   description?: string;
+  detailedInfo?: string;
   price: number;
-  category: 'appetizers' | 'mains' | 'desserts' | 'drinks' | 'specials';
+  category: 'soups' | 'appetizers' | 'mains' | 'kebabs' | 'grills' | 'desserts' | 'drinks' | 'specials';
   imageUrl?: string;
   available: boolean;
   dietaryTags: string[];
   preparationTime: number;
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
 }
 
 // AI Chat types

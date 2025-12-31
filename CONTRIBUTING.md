@@ -1,363 +1,145 @@
-# Contributing to Restaurant Management System
+# Contributing Guidelines
 
-Thank you for considering contributing to this project! 🎉
-
----
+Thank you for considering contributing to the Restaurant Service System!
 
 ## How to Contribute
 
-### 1. Fork the Repository
+### Reporting Bugs
 
-Click the "Fork" button at the top right of this repository.
+1. Check if the bug has already been reported in Issues
+2. Create a new issue with:
+   - Clear title and description
+   - Steps to reproduce
+   - Expected vs actual behavior
+   - Environment details (OS, Python version, etc.)
+   - Screenshots if applicable
 
-### 2. Clone Your Fork
+### Suggesting Features
 
-```bash
-git clone https://github.com/YOUR-USERNAME/restaurant-service-system.git
-cd restaurant-service-system
-```
+1. Open an issue with tag "enhancement"
+2. Describe the feature and its use case
+3. Explain why it would be useful
+4. Consider implementation details
 
-### 3. Create a Branch
+### Pull Requests
 
-```bash
-git checkout -b feature/your-feature-name
-```
-
-Branch naming conventions:
-- `feature/` - New features
-- `bugfix/` - Bug fixes
-- `docs/` - Documentation updates
-- `refactor/` - Code refactoring
-
-### 4. Make Your Changes
-
-- Write clean, readable code
-- Follow existing code style
-- Add comments for complex logic
-- Update documentation as needed
-
-### 5. Test Your Changes
-
-```bash
-# Backend tests
-cd backend
-npm test
-
-# Frontend tests
-cd frontend/customer-app
-npm test
-```
-
-### 6. Commit Your Changes
-
-Use meaningful commit messages:
-
-```bash
-git add .
-git commit -m "feat(customer): add email verification"
-```
-
-**Commit Message Format:**
-```
-type(scope): description
-
-[optional body]
-
-[optional footer]
-```
-
-**Types:**
-- `feat` - New feature
-- `fix` - Bug fix
-- `docs` - Documentation
-- `style` - Code style (formatting)
-- `refactor` - Code refactoring
-- `test` - Adding tests
-- `chore` - Maintenance
-
-**Examples:**
-```
-feat(admin): add export to CSV functionality
-fix(auth): resolve token expiration issue
-docs(readme): update installation instructions
-refactor(api): improve error handling
-```
-
-### 7. Push to Your Fork
-
-```bash
-git push origin feature/your-feature-name
-```
-
-### 8. Create a Pull Request
-
-1. Go to the original repository
-2. Click "New Pull Request"
-3. Select your fork and branch
-4. Fill out the PR template
-5. Submit!
-
----
-
-## Code Style Guidelines
-
-### TypeScript/JavaScript
-
-- Use TypeScript for all new code
-- Use meaningful variable names
-- Add JSDoc comments for functions
-- Follow ESLint configuration
-- Use async/await over promises
-
-**Example:**
-```typescript
-/**
- * Create a new reservation
- * @param userId - The ID of the user making the reservation
- * @param reservationData - The reservation details
- * @returns Promise with created reservation
- */
-async function createReservation(
-  userId: string,
-  reservationData: ReservationInput
-): Promise<Reservation> {
-  // Implementation
-}
-```
-
-### React Components
-
-- Use functional components with hooks
-- Keep components small and focused
-- Extract reusable logic into custom hooks
-- Use TypeScript interfaces for props
-
-**Example:**
-```typescript
-interface ButtonProps {
-  text: string;
-  onClick: () => void;
-  variant?: 'primary' | 'secondary';
-  disabled?: boolean;
-}
-
-export const Button: React.FC<ButtonProps> = ({
-  text,
-  onClick,
-  variant = 'primary',
-  disabled = false,
-}) => {
-  // Implementation
-};
-```
-
-### CSS/Tailwind
-
-- Use Tailwind utility classes
-- Keep custom CSS minimal
-- Use consistent spacing (4, 8, 16, 24, 32)
-- Mobile-first responsive design
-
----
+1. Fork the repository
+2. Create a new branch from `main`
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+3. Make your changes
+4. Test thoroughly
+5. Commit with clear messages
+   ```bash
+   git commit -m "Add feature: description"
+   ```
+6. Push to your fork
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+7. Open a Pull Request
 
 ## Development Setup
 
-### Prerequisites
-
-- Node.js 18+
-- PostgreSQL 14+
-- Docker (optional)
-
-### Setup
+### Backend
 
 ```bash
-# Install dependencies
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python seed.py
+python run.py
+```
+
+### Frontend
+
+```bash
+cd frontend/customer-app  # or admin-panel, kitchen-display
 npm install
-
-# Setup environment
-cp .env.example .env
-
-# Setup database
-npm run db:migrate
-npm run db:seed
-
-# Start development
 npm run dev
 ```
 
----
+## Code Style
+
+### Python
+
+- Follow PEP 8 style guide
+- Use type hints
+- Write docstrings for functions and classes
+- Format with Black: `black app/`
+- Lint with Flake8: `flake8 app/`
+
+### TypeScript/React
+
+- Follow ESLint rules
+- Use TypeScript for type safety
+- Use functional components
+- Follow React best practices
 
 ## Testing
 
-### Unit Tests
+### Backend Tests
 
 ```bash
-# Backend
 cd backend
-npm test
+pytest
+```
 
-# Frontend
+### Frontend Tests
+
+```bash
 cd frontend/customer-app
 npm test
 ```
 
-### Manual Testing
+## Database Changes
 
-1. Start all services
-2. Test the feature thoroughly
-3. Check different user roles
-4. Test error cases
-5. Verify responsive design
+When modifying database models:
 
----
+1. Update SQLAlchemy models in `backend/app/models/`
+2. Create migration:
+   ```bash
+   cd backend
+   alembic revision --autogenerate -m "description"
+   ```
+3. Review generated migration
+4. Test migration:
+   ```bash
+   alembic upgrade head
+   ```
 
-## Pull Request Guidelines
+## Commit Message Guidelines
 
-### Before Submitting
+Format: `<type>: <subject>`
 
-- [ ] Code follows style guidelines
-- [ ] Tests pass
-- [ ] Documentation is updated
-- [ ] Commit messages are clear
-- [ ] No console.log statements
-- [ ] No commented-out code
-- [ ] Branch is up to date with main
+Types:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, etc.)
+- `refactor`: Code refactoring
+- `test`: Adding tests
+- `chore`: Maintenance tasks
 
-### PR Description Template
-
-```markdown
-## Description
-Brief description of changes
-
-## Type of Change
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Documentation update
-
-## Testing
-How to test the changes
-
-## Screenshots (if applicable)
-Add screenshots for UI changes
-
-## Checklist
-- [ ] Code follows style guidelines
-- [ ] Tests added/updated
-- [ ] Documentation updated
-- [ ] No breaking changes
+Examples:
 ```
-
----
-
-## Reporting Bugs
-
-### Before Reporting
-
-1. Check if the bug is already reported
-2. Try the latest version
-3. Reproduce the bug consistently
-
-### Bug Report Template
-
-```markdown
-**Describe the bug**
-Clear description of the bug
-
-**To Reproduce**
-Steps to reproduce:
-1. Go to '...'
-2. Click on '...'
-3. See error
-
-**Expected behavior**
-What should happen
-
-**Screenshots**
-If applicable
-
-**Environment:**
-- OS: [e.g., Windows 11]
-- Browser: [e.g., Chrome 120]
-- Version: [e.g., 1.0.0]
-
-**Additional context**
-Any other information
+feat: Add table filtering by status
+fix: Resolve reservation date validation
+docs: Update API endpoint documentation
 ```
-
----
-
-## Feature Requests
-
-### Feature Request Template
-
-```markdown
-**Is your feature request related to a problem?**
-Clear description
-
-**Describe the solution**
-What you want to happen
-
-**Alternatives considered**
-Other solutions you've thought about
-
-**Additional context**
-Any other information
-```
-
----
 
 ## Code Review Process
 
-1. **Automated Checks** - CI/CD runs tests
-2. **Code Review** - At least one team member reviews
-3. **Discussion** - Address feedback
-4. **Approval** - Get approval from maintainer
-5. **Merge** - Maintainer merges the PR
-
----
-
-## Communication
-
-- Be respectful and constructive
-- Ask questions if unclear
-- Provide helpful feedback
-- Acknowledge good work
-
----
-
-## Project Structure
-
-```
-restaurant-service-system/
-├── backend/           # Backend API
-├── frontend/          # Frontend apps
-├── kitchen-display/   # Kitchen display
-├── docs/             # Documentation
-└── docker/           # Docker configs
-```
-
----
-
-## Resources
-
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [React Documentation](https://react.dev/)
-- [Express.js Guide](https://expressjs.com/)
-- [Prisma Documentation](https://www.prisma.io/docs)
-- [Tailwind CSS](https://tailwindcss.com/docs)
-
----
+1. All PRs require review before merging
+2. Address review comments
+3. Keep PRs focused and reasonably sized
+4. Ensure CI/CD checks pass
 
 ## Questions?
 
-- Create an issue for questions
-- Contact maintainers
-- Check documentation
+Open an issue for discussion or clarification.
 
----
-
-**Thank you for contributing! 🙏**
-
-Every contribution, no matter how small, helps make this project better!
+Thank you for contributing!
 

@@ -12,7 +12,7 @@ export default function TablesPage() {
     tableNumber: '',
     capacity: 2,
     location: '',
-    status: 'AVAILABLE',
+    status: 'available',
   });
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default function TablesPage() {
       tableNumber: '',
       capacity: 2,
       location: '',
-      status: 'AVAILABLE',
+      status: 'available',
     });
     setShowModal(true);
   };
@@ -90,16 +90,16 @@ export default function TablesPage() {
       tableNumber: '',
       capacity: 2,
       location: '',
-      status: 'AVAILABLE',
+      status: 'available',
     });
   };
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      AVAILABLE: 'bg-green-100 text-green-800',
-      OCCUPIED: 'bg-red-100 text-red-800',
-      RESERVED: 'bg-yellow-100 text-yellow-800',
-      MAINTENANCE: 'bg-gray-100 text-gray-800',
+      available: 'bg-green-100 text-green-800',
+      occupied: 'bg-red-100 text-red-800',
+      reserved: 'bg-yellow-100 text-yellow-800',
+      maintenance: 'bg-gray-100 text-gray-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
@@ -183,19 +183,19 @@ export default function TablesPage() {
       <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6">
           <p className="text-sm opacity-80">Available</p>
-          <p className="text-3xl font-bold mt-2">{tables.filter(t => t.status === 'AVAILABLE').length}</p>
+          <p className="text-3xl font-bold mt-2">{tables.filter(t => t.status === 'available').length}</p>
         </div>
         <div className="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl p-6">
           <p className="text-sm opacity-80">Occupied</p>
-          <p className="text-3xl font-bold mt-2">{tables.filter(t => t.status === 'OCCUPIED').length}</p>
+          <p className="text-3xl font-bold mt-2">{tables.filter(t => t.status === 'occupied').length}</p>
         </div>
         <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl p-6">
           <p className="text-sm opacity-80">Reserved</p>
-          <p className="text-3xl font-bold mt-2">{tables.filter(t => t.status === 'RESERVED').length}</p>
+          <p className="text-3xl font-bold mt-2">{tables.filter(t => t.status === 'reserved').length}</p>
         </div>
         <div className="bg-gradient-to-br from-gray-500 to-gray-600 text-white rounded-xl p-6">
           <p className="text-sm opacity-80">Maintenance</p>
-          <p className="text-3xl font-bold mt-2">{tables.filter(t => t.status === 'MAINTENANCE').length}</p>
+          <p className="text-3xl font-bold mt-2">{tables.filter(t => t.status === 'maintenance').length}</p>
         </div>
       </div>
 
@@ -258,10 +258,10 @@ export default function TablesPage() {
                   onChange={(e) => setCurrentTable({ ...currentTable, status: e.target.value as any })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="AVAILABLE">Available</option>
-                  <option value="OCCUPIED">Occupied</option>
-                  <option value="RESERVED">Reserved</option>
-                  <option value="MAINTENANCE">Maintenance</option>
+                  <option value="available">Available</option>
+                  <option value="occupied">Occupied</option>
+                  <option value="reserved">Reserved</option>
+                  <option value="maintenance">Maintenance</option>
                 </select>
               </div>
 

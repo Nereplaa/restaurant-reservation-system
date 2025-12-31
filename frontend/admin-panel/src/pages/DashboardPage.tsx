@@ -15,8 +15,8 @@ export default function DashboardPage() {
   const fetchDashboardData = async () => {
     try {
       const [statsRes, reservationsRes] = await Promise.all([
-        api.get('/admin/dashboard/stats'),
-        api.get('/admin/reservations', { params: { limit: 5 } })
+        api.get('/admin/stats'),
+        api.get('/reservations', { params: { limit: 5 } })
       ]);
 
       if (statsRes.data.success) {

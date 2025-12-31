@@ -14,7 +14,7 @@ export default function CustomersPage() {
 
   const fetchCustomers = async () => {
     try {
-      const response = await api.get('/admin/customers');
+      const response = await api.get('/admin/users');
       if (response.data.success) {
         setCustomers(response.data.data);
       }
@@ -105,13 +105,14 @@ export default function CustomersPage() {
                     {customer.phone || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      customer.role === 'ADMIN' 
-                        ? 'bg-purple-100 text-purple-800' 
-                        : customer.role === 'KITCHEN_STAFF'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-blue-100 text-blue-800'
-                    }`}>
+                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${customer.role === 'admin'
+                        ? 'bg-purple-100 text-purple-800'
+                        : customer.role === 'kitchen'
+                          ? 'bg-green-100 text-green-800'
+                          : customer.role === 'manager'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-blue-100 text-blue-800'
+                      }`}>
                       {customer.role}
                     </span>
                   </td>
@@ -150,9 +151,9 @@ export default function CustomersPage() {
           </p>
         </div>
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6">
-          <p className="text-sm opacity-80">Admin Users</p>
+          <p className="text-sm opacity-80">Staff Users</p>
           <p className="text-3xl font-bold mt-2">
-            {customers.filter(c => c.role === 'ADMIN' || c.role === 'KITCHEN_STAFF').length}
+            {customers.filter(c => c.role === 'admin' || c.role === 'kitchen' || c.role === 'manager' || c.role === 'server').length}
           </p>
         </div>
       </div>

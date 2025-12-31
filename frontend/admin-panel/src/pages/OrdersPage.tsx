@@ -44,11 +44,11 @@ export default function OrdersPage() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      PENDING: 'bg-yellow-100 text-yellow-800',
-      PREPARING: 'bg-blue-100 text-blue-800',
-      READY: 'bg-green-100 text-green-800',
-      SERVED: 'bg-gray-100 text-gray-800',
-      CANCELLED: 'bg-red-100 text-red-800',
+      pending: 'bg-yellow-100 text-yellow-800',
+      preparing: 'bg-blue-100 text-blue-800',
+      ready: 'bg-green-100 text-green-800',
+      served: 'bg-gray-100 text-gray-800',
+      cancelled: 'bg-red-100 text-red-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
@@ -91,7 +91,7 @@ export default function OrdersPage() {
         >
           All
         </button>
-        {['PENDING', 'PREPARING', 'READY', 'SERVED', 'CANCELLED'].map(status => (
+        {['pending', 'preparing', 'ready', 'served', 'cancelled'].map(status => (
           <button
             key={status}
             onClick={() => setFilterStatus(status)}
@@ -101,7 +101,7 @@ export default function OrdersPage() {
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
-            {status}
+            {status.charAt(0).toUpperCase() + status.slice(1)}
           </button>
         ))}
       </div>
@@ -161,17 +161,17 @@ export default function OrdersPage() {
               >
                 View Details
               </button>
-              {order.status !== 'SERVED' && order.status !== 'CANCELLED' && (
+              {order.status !== 'served' && order.status !== 'cancelled' && (
                 <select
                   value={order.status}
                   onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                 >
-                  <option value="PENDING">Pending</option>
-                  <option value="PREPARING">Preparing</option>
-                  <option value="READY">Ready</option>
-                  <option value="SERVED">Served</option>
-                  <option value="CANCELLED">Cancelled</option>
+                  <option value="pending">Pending</option>
+                  <option value="preparing">Preparing</option>
+                  <option value="ready">Ready</option>
+                  <option value="served">Served</option>
+                  <option value="cancelled">Cancelled</option>
                 </select>
               )}
             </div>
@@ -260,9 +260,9 @@ export default function OrdersPage() {
 
       {/* Stats */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-5 gap-6">
-        {['PENDING', 'PREPARING', 'READY', 'SERVED', 'CANCELLED'].map(status => (
+        {['pending', 'preparing', 'ready', 'served', 'cancelled'].map(status => (
           <div key={status} className="bg-white rounded-xl shadow-lg p-6">
-            <p className="text-sm text-gray-600 mb-2">{status}</p>
+            <p className="text-sm text-gray-600 mb-2">{status.charAt(0).toUpperCase() + status.slice(1)}</p>
             <p className="text-3xl font-bold text-gray-800">
               {orders.filter(o => o.status === status).length}
             </p>

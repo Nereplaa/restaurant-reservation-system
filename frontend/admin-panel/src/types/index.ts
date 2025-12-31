@@ -4,7 +4,7 @@ export interface User {
   firstName: string;
   lastName: string;
   phone: string | null;
-  role: 'CUSTOMER' | 'ADMIN' | 'KITCHEN_STAFF';
+  role: 'customer' | 'admin' | 'manager' | 'server' | 'kitchen';
   createdAt: string;
   updatedAt: string;
 }
@@ -17,7 +17,7 @@ export interface Reservation {
   reservationDate: string;
   reservationTime: string;
   duration: number;
-  status: 'PENDING' | 'CONFIRMED' | 'SEATED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW';
+  status: 'confirmed' | 'completed' | 'cancelled' | 'no_show';
   specialRequests: string | null;
   confirmationNumber: string;
   createdAt: string;
@@ -31,7 +31,7 @@ export interface Table {
   tableNumber: string;
   capacity: number;
   location: string;
-  status: 'AVAILABLE' | 'OCCUPIED' | 'RESERVED' | 'MAINTENANCE';
+  status: 'available' | 'occupied' | 'reserved' | 'maintenance';
   createdAt: string;
   updatedAt: string;
 }
@@ -39,13 +39,19 @@ export interface Table {
 export interface MenuItem {
   id: string;
   name: string;
+  nameTr?: string;
   description: string;
+  detailedInfo?: string;
   category: string;
   price: number;
   imageUrl: string | null;
   available: boolean;
   preparationTime: number;
   dietaryTags: string[];
+  calories?: number;
+  protein?: number;
+  carbs?: number;
+  fat?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -54,7 +60,7 @@ export interface Order {
   id: string;
   tableId: string;
   userId: string | null;
-  status: 'PENDING' | 'PREPARING' | 'READY' | 'SERVED' | 'CANCELLED';
+  status: 'pending' | 'preparing' | 'ready' | 'served' | 'cancelled';
   totalAmount: number;
   notes: string | null;
   createdAt: string;

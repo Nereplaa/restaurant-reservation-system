@@ -20,7 +20,7 @@ export default function ReservationsPage() {
   const fetchData = async () => {
     try {
       const [reservationsRes, tablesRes] = await Promise.all([
-        api.get('/admin/reservations'),
+        api.get('/reservations'),
         api.get('/tables')
       ]);
 
@@ -49,9 +49,9 @@ export default function ReservationsPage() {
     if (!selectedReservation) return;
 
     try {
-      const response = await api.put(`/admin/reservations/${selectedReservation.id}`, {
+      const response = await api.patch(`/reservations/${selectedReservation.id}`, {
         status: selectedStatus,
-        tableId: selectedTable || null,
+        table_id: selectedTable || null,
       });
 
       if (response.data.success) {
@@ -66,18 +66,16 @@ export default function ReservationsPage() {
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      PENDING: 'bg-yellow-100 text-yellow-800',
-      CONFIRMED: 'bg-blue-100 text-blue-800',
-      SEATED: 'bg-green-100 text-green-800',
-      COMPLETED: 'bg-gray-100 text-gray-800',
-      CANCELLED: 'bg-red-100 text-red-800',
-      NO_SHOW: 'bg-purple-100 text-purple-800',
+      confirmed: 'bg-blue-100 text-blue-800',
+      completed: 'bg-gray-100 text-gray-800',
+      cancelled: 'bg-red-100 text-red-800',
+      no_show: 'bg-purple-100 text-purple-800',
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
-  const filteredReservations = filterStatus === 'ALL' 
-    ? reservations 
+  const filteredReservations = filterStatus === 'ALL'
+    ? reservations
     : reservations.filter(r => r.status === filterStatus);
 
   if (isLoading) {
@@ -111,12 +109,10 @@ export default function ReservationsPage() {
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
         >
           <option value="ALL">All</option>
-          <option value="PENDING">Pending</option>
-          <option value="CONFIRMED">Confirmed</option>
-          <option value="SEATED">Seated</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="CANCELLED">Cancelled</option>
-          <option value="NO_SHOW">No Show</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="no_show">No Show</option>
         </select>
       </div>
 
@@ -212,12 +208,10 @@ export default function ReservationsPage() {
                   onChange={(e) => setSelectedStatus(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="PENDING">Pending</option>
-                  <option value="CONFIRMED">Confirmed</option>
-                  <option value="SEATED">Seated</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="CANCELLED">Cancelled</option>
-                  <option value="NO_SHOW">No Show</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="no_show">No Show</option>
                 </select>
               </div>
 
@@ -232,7 +226,7 @@ export default function ReservationsPage() {
                 >
                   <option value="">No table assigned</option>
                   {tables
-                    .filter(t => t.status === 'AVAILABLE' || t.id === selectedReservation.tableId)
+                    .filter(t => t.status === 'available' || t.id === selectedReservation.tableId)
                     .map(table => (
                       <option key={table.id} value={table.id}>
                         Table {table.tableNumber} - Capacity: {table.capacity} ({table.location})
