@@ -36,91 +36,114 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-6"
+      style={{
+        background: `
+          radial-gradient(900px 600px at 18% 12%, rgba(207,212,220,0.12), transparent 60%),
+          radial-gradient(800px 520px at 85% 18%, rgba(255,255,255,0.06), transparent 60%),
+          linear-gradient(180deg, #0f1a2b, #16233a)
+        `
+      }}
+    >
       <div className="max-w-md w-full">
-        {/* Header */}
+        {/* Brand */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">🍽️ Restaurant Admin</h1>
-          <p className="text-blue-300">Management System</p>
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl border border-white/[0.16] bg-white/10 flex items-center justify-center overflow-hidden">
+            <img src="/images/logo.png" alt="BORCELLE" className="w-full h-full object-cover" />
+          </div>
+          <h1 className="font-playfair text-2xl font-medium text-white tracking-wide mb-1">
+            Restaurant Admin
+          </h1>
+          <p className="text-[11px] tracking-[0.12em] uppercase text-[#9aa3b2]">
+            Management System
+          </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Admin Login</h2>
+        <div className="glass-panel rounded-2xl p-6">
+          <h2 className="font-playfair text-xl font-medium text-white text-center mb-6">
+            Sign In
+          </h2>
 
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-              {error}
+            <div className="mb-4 p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-white/90 text-sm">
+              ⚠️ {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">
                 Email Address
               </label>
               <input
-                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input-premium w-full"
                 placeholder="admin@restaurant.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">
                 Password
               </label>
               <input
-                id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter your password"
+                className="input-premium w-full"
+                placeholder="••••••••"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full btn-primary py-3 rounded-[14px] font-medium text-[13px] tracking-wide disabled:opacity-50"
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  Signing in...
+                </span>
+              ) : 'Sign In'}
             </button>
           </form>
 
           {/* Demo Accounts */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600 mb-3 text-center">Demo Accounts:</p>
+          <div className="mt-6 pt-6 border-t border-white/[0.12]">
+            <p className="text-[11px] text-white/60 uppercase tracking-wider text-center mb-3">
+              Demo Accounts
+            </p>
             <div className="space-y-2">
               <button
                 onClick={fillDemoAdmin}
-                className="w-full px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg text-sm transition-colors"
+                className="w-full btn-secondary py-2.5 rounded-[14px] text-[12px]"
               >
-                👑 Fill Admin Credentials
+                👑 Admin Account
               </button>
               <button
                 onClick={fillDemoKitchen}
-                className="w-full px-4 py-2 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg text-sm transition-colors"
+                className="w-full btn-secondary py-2.5 rounded-[14px] text-[12px]"
               >
-                👨‍🍳 Fill Kitchen Staff Credentials
+                👨‍🍳 Kitchen Staff Account
               </button>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-6 text-center text-blue-200 text-sm">
-          <p>© 2025 Restaurant Management System</p>
-          <p className="mt-1">For authorized personnel only</p>
+        <div className="mt-6 text-center">
+          <p className="text-white/40 text-[11px] tracking-wider">
+            © BORCELLE • Restaurant Management System
+          </p>
         </div>
       </div>
     </div>
   );
 }
-

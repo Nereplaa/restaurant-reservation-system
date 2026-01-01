@@ -49,6 +49,71 @@ async def get_tables(
     }
 
 
+@router.get("/available")
+async def get_available_tables(
+    date: str = Query(..., description="Date in YYYY-MM-DD format"),
+    time: str = Query(..., description="Time in HH:MM format"),
+    party_size: int = Query(1, ge=1, description="Minimum party size"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get available tables for a specific date and time, filtered by capacity.
+    Returns only tables that:
+    1. Have capacity >= party_size
+    2. Are not reserved for the given date and time slot (±2 hours)
+    """
+    from app.models.reservation import Reservation, ReservationStatus
+    from datetime import datetime, timedelta
+    
+    # Parse date and time
+    try:
+        reservation_date = datetime.strptime(date, "%Y-%m-%d").date()
+        reservation_time = datetime.strptime(time, "%H:%M").time()
+    except ValueError:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="Invalid date or time format")
+    
+    # Get all tables with sufficient capacity
+    all_tables = db.query(Table).filter(
+        Table.capacity >= party_size
+    ).order_by(Table.capacity.asc(), Table.table_number).all()
+    
+    # Get reservations for that date within the time window (±2 hours)
+    time_start = datetime.combine(reservation_date, reservation_time) - timedelta(hours=2)
+    time_end = datetime.combine(reservation_date, reservation_time) + timedelta(hours=2)
+    
+    reserved_table_ids = db.query(Reservation.table_id).filter(
+        Reservation.date == reservation_date,
+        Reservation.table_id.isnot(None),
+        Reservation.status == ReservationStatus.confirmed
+    ).all()
+    reserved_ids = {str(r[0]) for r in reserved_table_ids if r[0]}
+    
+    # Filter available tables
+    available_tables = []
+    for table in all_tables:
+        if str(table.id) not in reserved_ids:
+            table_dict = {
+                "id": str(table.id),
+                "tableNumber": table.table_number,
+                "capacity": table.capacity,
+                "location": table.location,
+                "status": table.status.value if table.status else None
+            }
+            available_tables.append(table_dict)
+    
+    return {
+        "success": True,
+        "data": available_tables,
+        "meta": {
+            "date": date,
+            "time": time,
+            "partySize": party_size,
+            "totalAvailable": len(available_tables)
+        }
+    }
+
+
 @router.get("/{table_id}", response_model=TableResponse)
 async def get_table(table_id: str, db: Session = Depends(get_db)):
     """

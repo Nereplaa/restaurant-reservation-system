@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BORCELLE — Fine Dining</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      /* Navy • White • Silver palette */
+      --bg: #0f1a2b;                 /* lacivert */
+      --bg2:#16233a;                 /* koyu lacivert */
+      --paper: rgba(255, 255, 255, .92);   /* beyaz kart */
+      --paper2: rgba(255, 255, 255, .82);  /* soft beyaz */
+      --text: #0f1a2b;               /* lacivert metin */
+      --muted:#7b8698;               /* gümüş-gri */
+      --accent:#cfd4dc;              /* gümüş */
+      --accent2:#9aa3b2;             /* koyu gümüş */
+      --line: rgba(255,255,255,.14); /* koyu zeminde çizgi */
+      --shadow: 0 26px 80px rgba(0,0,0,.28);
+      --radius: 22px;
+      --max: 1120px;
+    }
+
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{
+      margin:0;
+      font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(900px 600px at 18% 12%, rgba(207,212,220,.12), transparent 60%),
+        radial-gradient(800px 520px at 85% 18%, rgba(255,255,255,.06), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      overflow-x:hidden;
+    }
+
+    /* ===== NAVBAR (fixed) ===== */
+    .navbar{
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: rgba(15,26,43,.78);
+      border-bottom: 1px solid rgba(255,255,255,.14);
+    }
+    .nav-inner{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+    }
+    body{ padding-top: 76px; } /* navbar yüksekliği */
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      min-width: 240px;
+    }
+    .logo{
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.16);
+      overflow:hidden;
+      background: rgba(255,255,255,.10);
+      display:grid;
+      place-items:center;
+      flex: 0 0 auto;
+    }
+    .logo img{
+      width:100%;
+      height:100%;
+      object-fit: cover;
+    }
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      line-height:1.1;
+    }
+    .brand-text .name{
+      font-family:"Playfair Display",serif;
+      font-weight: 600;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      font-size: 15px;
+      color:#fff;
+    }
+    .brand-text .tag{
+      margin-top: 5px;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent2);
+    }
+
+    .nav-links{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+    .nav-links a{
+      text-decoration:none;
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      transition: .18s ease;
+    }
+    .nav-links a:hover{
+      color: #fff;
+      border-color: rgba(207,212,220,.35);
+      background: rgba(255,255,255,.10);
+    }
+
+    /* ===== HERO (Video giriş) ===== */
+    .hero{
+      position: relative;
+      height: min(82vh, 820px);
+      min-height: 560px;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .hero-video{
+      position:absolute;
+      inset:0;
+      z-index:-2;
+      overflow:hidden;
+      background:#000;
+    }
+    .hero-video iframe{
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform: translate(-50%,-50%);
+      width: 150vw;
+      height: 150vh;
+      pointer-events:none;
+      filter: saturate(1.25) contrast(1.15) brightness(1.08);
+    }
+    .hero-overlay{
+      position:absolute;
+      inset:0;
+      z-index:-1;
+      /* lacivert overlay: video görünür ama premium */
+      background:
+        radial-gradient(70% 100% at 20% 18%, rgba(255,255,255,.12), rgba(0,0,0,.45) 72%),
+        linear-gradient(180deg, rgba(15,26,43,.35), rgba(15,26,43,.70));
+    }
+    .hero-inner{
+      max-width: var(--max);
+      width:100%;
+      padding: 76px 18px 52px;
+      text-align:center;
+      display:grid;
+      gap: 14px;
+    }
+    .hero-inner h1{
+      margin:0;
+      font-family:"Playfair Display",serif;
+      font-weight: 500;
+      font-size: clamp(36px, 4.2vw, 60px);
+      letter-spacing:.02em;
+      color: #fff;
+      text-shadow: 0 18px 60px rgba(0,0,0,.55);
+    }
+    .hero-inner p{
+      margin: 0 auto;
+      max-width: 76ch;
+      color: rgba(255,255,255,.90);
+      line-height: 1.85;
+      font-weight: 300;
+      font-size: 15px;
+      text-shadow: 0 10px 40px rgba(0,0,0,.45);
+    }
+    .hero-badges{
+      margin-top: 10px;
+      display:flex;
+      gap: 10px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+    .pill{
+      border: 1px solid rgba(255,255,255,.28);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.92);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* ===== SECTIONS ===== */
+    section{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 54px 18px;
+    }
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .section-title h2{
+      margin:0;
+      font-family:"Playfair Display",serif;
+      font-weight: 500;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-size: 14px;
+      color: #fff;
+    }
+    .section-title .line{
+      height:1px;
+      flex:1;
+      background: linear-gradient(90deg, rgba(207,212,220,.85), transparent);
+      opacity:.85;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.08fr .92fr;
+      gap: 18px;
+    }
+    @media(max-width: 980px){
+      .grid{ grid-template-columns:1fr; }
+      .hero-video iframe{ width: 190vw; height: 150vh; }
+      .brand{ min-width: unset; }
+    }
+
+    .card{
+      border: 1px solid rgba(255,255,255,.14);
+      background: var(--paper);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .soft{ background: var(--paper2); }
+
+    .label{
+      font-size: 12px;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .text{
+      margin:0;
+      color: #1b2434;
+      line-height: 1.9;
+      font-weight: 300;
+      font-size: 14.7px;
+    }
+
+    /* ===== MENU ===== */
+    .menu-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap:wrap;
+      margin-bottom: 14px;
+    }
+    .menu-title{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+    }
+    .menu-title h3{
+      margin:0;
+      font-family:"Playfair Display",serif;
+      font-weight: 600;
+      letter-spacing:.06em;
+      font-size: 20px;
+      color: #0f1a2b;
+    }
+    .menu-title span{
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing:.12em;
+      text-transform: uppercase;
+    }
+    .menu-note{
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.65;
+      max-width: 52ch;
+    }
+
+    .menu-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media(max-width: 860px){
+      .menu-grid{ grid-template-columns: 1fr; }
+    }
+
+    .cat{
+      border: 1px solid rgba(15,26,43,.10);
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(255,255,255,.72);
+    }
+    .cat-title{
+      font-size: 12px;
+      letter-spacing:.14em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .item{ margin-bottom: 12px; }
+    .row{
+      display:flex;
+      align-items:baseline;
+      gap: 10px;
+    }
+    .title{
+      font-size: 13.9px;
+      font-weight: 650;
+      color: #0f1a2b;
+    }
+    .dots{
+      flex:1;
+      border-bottom: 1px dashed rgba(15,26,43,.25);
+      transform: translateY(-3px);
+      opacity:.9;
+    }
+    .meta{
+      display:flex;
+      align-items:baseline;
+      gap: 10px;
+      white-space: nowrap;
+      font-size: 12.5px;
+      color: #2a3447;
+    }
+    .kcal{
+      color: var(--muted);
+      font-weight: 400;
+    }
+    .desc{
+      margin-top: 6px;
+      color: #556070;
+      font-size: 12.9px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* ===== DRINKS ===== */
+    .drink-block{
+      border: 1px solid rgba(15,26,43,.10);
+      background: rgba(255,255,255,.72);
+      border-radius: 16px;
+      padding: 14px;
+      line-height: 1.8;
+      color:#1b2434;
+      font-weight: 300;
+      font-size: 13.5px;
+    }
+    .drink-block b{ font-weight: 600; }
+
+    /* ===== GALLERY ===== */
+    .gallery-grid{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    @media(max-width: 1100px){
+      .gallery-grid{ grid-template-columns: repeat(2, 1fr); }
+    }
+    @media(max-width: 560px){
+      .gallery-grid{ grid-template-columns: 1fr; }
+    }
+    .gallery-grid img{
+      width:100%;
+      height: 170px;
+      object-fit: cover;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.10);
+      box-shadow: 0 12px 40px rgba(0,0,0,.22);
+      transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
+      filter: contrast(1.03) saturate(1.05);
+    }
+    .gallery-grid img:hover{
+      transform: translateY(-3px);
+      box-shadow: 0 18px 55px rgba(0,0,0,.28);
+      filter: contrast(1.06) saturate(1.10);
+    }
+
+    /* ===== Footer ===== */
+    footer{
+      border-top: 1px solid rgba(255,255,255,.12);
+      padding: 18px;
+      text-align:center;
+      color: var(--accent2);
+      font-size: 12px;
+      letter-spacing:.10em;
+      background: rgba(15,26,43,.85);
+    }
+    footer b{ color:#fff; }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="nav-inner">
+      <div class="brand">
+        <!-- Logo: aynı klasöre logo.png koy -->
+        <div class="logo" title="BORCELLE">
+          <img src="logo.png" alt="BORCELLE Logo">
+        </div>
+        <div class="brand-text">
+          <div class="name">BORCELLE</div>
+          <div class="tag">ESTD • 2004</div>
+        </div>
+      </div>
+
+      <div class="nav-links">
+        <a href="#home">Anasayfa</a>
+        <a href="#menu">Tadım Menüsü</a>
+        <a href="#galeri">Galeri</a>
+        <a href="#hakkimizda">Misyon & Vizyon</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header class="hero" id="home">
+    <div class="hero-video" aria-hidden="true">
+      <iframe
+      src="https://www.youtube.com/embed/F3zw1Gvn4Mk?autoplay=1&mute=1&loop=1&playlist=F3zw1Gvn4Mk&controls=0&modestbranding=1&rel=0&playsinline=1"
+      title="BORCELLE giriş videosu"
+        frameborder="0"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <div class="hero-overlay" aria-hidden="true"></div>
+
+    <div class="hero-inner">
+      <h1>Borcelle Fine Dining</h1>
+      <p>
+        Zamansız zarafet, titiz servis ve şefin imzasını taşıyan tabaklar…
+        BORCELLE’de her detay fine-dining sofralarına yakışır bir ritüele dönüşür.
+      </p>
+
+      <div class="hero-badges">
+        <div class="pill">Tadım Menüsü</div>
+        <div class="pill">Şefin Seçkisi</div>
+        <div class="pill">Rezervasyon Önerilir</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MISSION / VISION -->
+  <section id="hakkimizda">
+    <div class="section-title">
+      <h2>Misyon & Vizyon</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="label">Misyonumuz</div>
+        <p class="text">
+          En iyi hammaddeleri rafine tekniklerle ve sade ama etkileyici sunumla buluşturarak;
+          misafirlerimize her ziyarette tutarlı lezzet ve servis standardı sunmak.
+          BORCELLE’de “az ama öz” yaklaşımı, şefin imzası ve ritüel tadında bir deneyimin temelidir.
+        </p>
+        <div style="height:14px;"></div>
+        <div class="label">Vizyonumuz</div>
+        <p class="text">
+          Modern fine-dining anlayışını zamansız bir atmosferle birleştirerek,
+          şehrin en seçkin gastronomi duraklarından biri olmak.
+        </p>
+      </div>
+
+      <div class="card soft">
+        <div class="label">Deneyim</div>
+        <p class="text">
+          Sakin bir lüks, titiz servis akışı ve mevsime duyarlı tabaklar.
+          Tadım menümüz, şefin güncel yaklaşımını kurs kurs yansıtır.
+        </p>
+        <div style="height:14px;"></div>
+        <div class="label">Kalori Bilgisi</div>
+        <p class="text">
+          Kalori değerleri bilgilendirme amaçlı yaklaşık değerlerdir (porsiyon/ürüne göre değişebilir).
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENU -->
+  <section id="menu">
+    <div class="section-title">
+      <h2>Tadım Menüsü</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="card">
+      <div class="menu-head">
+        <div class="menu-title">
+          <h3>TADIM MENÜSÜ (Şefin Seçkisi)</h3>
+          <span>Fine-dining sofralarına yakışır seçki</span>
+        </div>
+        <div class="menu-note">
+          Kaloriler yaklaşık değer olarak verilmiştir. Menü içeriği mevsime göre güncellenebilir.
+        </div>
+      </div>
+
+      <div class="menu-grid">
+        <!-- BAŞLANGIÇLAR -->
+        <div class="cat">
+          <div class="cat-title">Başlangıçlar</div>
+
+          <div class="item">
+            <div class="row">
+              <div class="title">Amuse-Bouche: Şefin günlük sürprizi</div>
+              <div class="dots"></div>
+              <div class="meta"><span class="kcal">~120 kcal</span></div>
+            </div>
+            <div class="desc">Sezonun en iyi malzemeleriyle hazırlanan mini lokma.</div>
+          </div>
+
+          <div class="item">
+            <div class="row">
+              <div class="title">Dana Tartar</div>
+              <div class="dots"></div>
+              <div class="meta"><span class="kcal">~380 kcal</span></div>
+            </div>
+            <div class="desc">Trüf yağı, bıldırcın yumurtası ve ev yapımı brioche kıtırı.</div>
+          </div>
+
+          <div class="item" style="margin-bottom:0;">
+            <div class="row">
+              <div class="title">Deniz Tarağı</div>
+              <div class="dots"></div>
+              <div class="meta"><span class="kcal">~290 kcal</span></div>
+            </div>
+            <div class="desc">Karnabahar püresi, yanık tereyağı ve limon emülsiyonu.</div>
+          </div>
+        </div>
+
+        <!-- ARA SICAKLAR -->
+        <div class="cat">
+          <div class="cat-title">Ara Sıcaklar</div>
+
+          <div class="item">
+            <div class="row">
+              <div class="title">Kuşkonmazlı Risotto</div>
+              <div class="dots"></div>
+              <div class="meta"><span class="kcal">~540 kcal</span></div>
+            </div>
+            <div class="desc">24 ay dinlendirilmiş parmesan ve yenilebilir çiçekler.</div>
+          </div>
+
+          <div class="item" style="margin-bottom:0;">
+            <div class="row">
+              <div class="title">Ördek Confit Gyoza</div>
+              <div class="dots"></div>
+              <div class="meta"><span class="kcal">~410 kcal</span></div>
+            </div>
+            <div class="desc">Zencefilli ponzu sos ve taze soğan yağı.</div>
+          </div>
+        </div>
+
+        <!-- ANA YEMEKLER -->
+        <div class="cat">
+          <div class="cat-title">Ana Yemekler</div>
+
+          <div class="item">
+            <div class="row">
+              <div class="title">Kalkan Balığı</div>
+              <div class="dots"></div>
+              <div class="meta"><span class="kcal">~620 kcal</span></div>
+            </div>
+            <div class="desc">Deniz börülcesi, safranlı beurre blanc ve rezene salatası.</div>
+          </div>
+
+          <div class="item">
+            <div class="row">
+              <div class="title">Kuzu Sırtı</div>
+              <div class="dots"></div>
+              <div class="meta"><span class="kcal">~780 kcal</span></div>
+            </div>
+            <div class="desc">İsli patlıcan mousseline, mürdüm eriği sosu ve taze kekik.</div>
+          </div>
+
+          <div class="item" style="margin-bottom:0;">
+            <div class="row">
+              <div class="title">Dana Yanak</div>
+              <div class="dots"></div>
+              <div class="meta"><span class="kcal">~860 kcal</span></div>
+            </div>
+            <div class="desc">12 saat ağır ateş, kök sebze glazürü ve yer elması püresi.</div>
+          </div>
+        </div>
+
+        <!-- TATLILAR & PEYNİR -->
+        <div class="cat">
+          <div class="cat-title">Tatlılar & Peynir</div>
+
+          <div class="item">
+            <div class="row">
+              <div class="title">Zanaatkar Peynir Tabağı</div>
+              <div class="dots"></div>
+              <div class="meta"><span class="kcal">~520 kcal</span></div>
+            </div>
+            <div class="desc">Yerel ve ithal peynirler, incir marmeladı.</div>
+          </div>
+
+          <div class="item">
+            <div class="row">
+              <div class="title">Bitter Çikolata Ganaj</div>
+              <div class="dots"></div>
+              <div class="meta"><span class="kcal">~610 kcal</span></div>
+            </div>
+            <div class="desc">%70 kakao, orman meyveleri sorbesi ve altın yaprak.</div>
+          </div>
+
+          <div class="item" style="margin-bottom:0;">
+            <div class="row">
+              <div class="title">Petit Fours</div>
+              <div class="dots"></div>
+              <div class="meta"><span class="kcal">~330 kcal</span></div>
+            </div>
+            <div class="desc">Kahve eşliğinde minik makaronlar ve pralinler.</div>
+          </div>
+        </div>
+
+        <!-- İÇECEK MENÜSÜ -->
+        <div class="cat" style="grid-column: 1 / -1;">
+          <div class="cat-title">İçecek Menüsü</div>
+
+          <div class="drink-block">
+            <b>Şaraplar</b><br>
+            <b>Beyaz:</b> Sauvignon Blanc, Chardonnay (Yerel ve İthal Seçkiler)<br>
+            <b>Kırmızı:</b> Cabernet Sauvignon, Merlot, Öküzgözü–Boğazkere Kupajı<br>
+            <b>Roze & Şampanya:</b> Provence usulü rozeler ve Brut şampanyalar
+            <div style="height:10px;"></div>
+            <b>İmza Kokteyller</b><br>
+            <b>Botanical Mist:</b> Gin, mürver çiçeği, salatalık ve taze fesleğen <span style="color:var(--muted);">(~180 kcal)</span><br>
+            <b>Smoked Negroni:</b> İsli meşe dumanı ile aromalandırılmış klasik reçete <span style="color:var(--muted);">(~220 kcal)</span>
+            <div style="height:10px;"></div>
+            <b>Alkolsüz & Sıcak İçecekler</b><br>
+            <b>Ev Yapımı İnfüzyonlar:</b> Mevsim meyveli soğuk çaylar <span style="color:var(--muted);">(~40–90 kcal)</span><br>
+            <b>Gurme Kahve Seçkisi:</b> Ethiopia Sidamo, Colombia Supremo <span style="color:var(--muted);">(~0–60 kcal)</span><br>
+            <b>Nadir Bitki Çayları:</b> Yasemin inci, beyaz çay, dağ kekiği <span style="color:var(--muted);">(~0 kcal)</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section id="galeri">
+    <div class="section-title">
+      <h2>Galeri</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="gallery-grid">
+      <!-- Dosyalar: fined1.webp, fined2.jpeg, fined3.webp, fined4.webp (HTML ile aynı klasörde) -->
+      <img src="fined1.webp" alt="BORCELLE Fine Dining 1">
+      <img src="fined2.jpeg" alt="BORCELLE Fine Dining 2">
+      <img src="fined3.webp" alt="BORCELLE Fine Dining 3">
+      <img src="fined4.webp" alt="BORCELLE Fine Dining 4">
+    </div>
+  </section>
+
+  <footer>
+    © <b>BORCELLE</b> • Fine Dining • ESTD 2004
+  </footer>
+
+</body>
+</html>

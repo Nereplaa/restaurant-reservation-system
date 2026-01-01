@@ -12,8 +12,6 @@ export default function OrdersPage() {
 
   useEffect(() => {
     fetchOrders();
-    
-    // Poll for new orders every 30 seconds
     const interval = setInterval(fetchOrders, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -42,52 +40,64 @@ export default function OrdersPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      preparing: 'bg-blue-100 text-blue-800',
-      ready: 'bg-green-100 text-green-800',
-      served: 'bg-gray-100 text-gray-800',
-      cancelled: 'bg-red-100 text-red-800',
+  const getStatusBadge = (status: string) => {
+    const badges: Record<string, string> = {
+      pending: 'badge badge-warn',
+      preparing: 'badge badge-info',
+      ready: 'badge badge-ok',
+      served: 'badge',
+      cancelled: 'badge badge-danger',
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return badges[status] || 'badge';
   };
 
-  const filteredOrders = filterStatus === 'ALL' 
-    ? orders 
+  const filteredOrders = filterStatus === 'ALL'
+    ? orders
     : orders.filter(order => order.status === filterStatus);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center h-[80vh]">
+        <div className="text-center">
+          <div className="w-12 h-12 border-2 border-white/20 border-t-white/80 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white/60 text-sm">Loading orders...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Orders</h1>
-        <p className="text-gray-600 mt-1">View and manage all orders</p>
+    <div className="p-6">
+      {/* Topbar */}
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div>
+          <h1 className="font-playfair text-3xl font-medium tracking-wide text-white m-0">
+            Orders
+          </h1>
+          <p className="text-white/[0.78] text-[13px] mt-1.5 font-light">
+            View and manage all orders
+          </p>
+        </div>
+        <span className="pill">
+          <span className="dot"></span>
+          Live Updates
+        </span>
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-          {error}
+        <div className="glass-panel rounded-2xl p-4 mb-4 border-red-500/30 bg-red-500/10">
+          ⚠️ {error}
         </div>
       )}
 
-      {/* Status Filter */}
-      <div className="mb-6 flex items-center gap-2 overflow-x-auto">
+      {/* Status Filter Tabs */}
+      <div className="flex items-center gap-2 flex-wrap mb-6">
         <button
           onClick={() => setFilterStatus('ALL')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            filterStatus === 'ALL' 
-              ? 'bg-blue-600 text-white' 
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
+          className={`px-3 py-2 rounded-full text-[12px] tracking-wider uppercase transition-all ${filterStatus === 'ALL'
+              ? 'btn-primary'
+              : 'btn-secondary'
+            }`}
         >
           All
         </button>
@@ -95,57 +105,50 @@ export default function OrdersPage() {
           <button
             key={status}
             onClick={() => setFilterStatus(status)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              filterStatus === status 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+            className={`px-3 py-2 rounded-full text-[12px] tracking-wider uppercase transition-all ${filterStatus === status
+                ? 'btn-primary'
+                : 'btn-secondary'
+              }`}
           >
-            {status.charAt(0).toUpperCase() + status.slice(1)}
+            {status}
           </button>
         ))}
       </div>
 
       {/* Orders Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {filteredOrders.map((order) => (
-          <div key={order.id} className="bg-white rounded-xl shadow-lg p-6 border-2 border-gray-100 hover:border-blue-300 transition-colors">
-            <div className="flex items-start justify-between mb-4">
+          <div key={order.id} className="glass-card rounded-2xl p-4 hover:border-[#cfd4dc]/30 transition-all">
+            <div className="flex items-start justify-between mb-3">
               <div>
-                <h3 className="text-lg font-bold text-gray-800">
+                <h3 className="text-base font-medium text-white">
                   Order #{order.id.slice(0, 8)}
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-xs text-white/60">
                   Table {order.table?.tableNumber || 'N/A'}
                 </p>
               </div>
-              <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
+              <span className={getStatusBadge(order.status)}>
                 {order.status}
               </span>
             </div>
 
-            <div className="mb-4">
-              <div className="text-sm text-gray-600 mb-2">
-                <span className="font-medium">Created:</span>{' '}
-                {new Date(order.createdAt).toLocaleString()}
-              </div>
+            <div className="mb-3 text-xs text-white/60 space-y-1">
+              <p>Created: {new Date(order.createdAt).toLocaleString()}</p>
               {order.user && (
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium">Customer:</span>{' '}
-                  {order.user.firstName} {order.user.lastName}
-                </div>
+                <p>Customer: {order.user.firstName} {order.user.lastName}</p>
               )}
             </div>
 
-            <div className="mb-4">
-              <div className="text-2xl font-bold text-blue-600">
+            <div className="mb-3">
+              <div className="text-xl font-medium text-[#cfd4dc]">
                 ${order.totalAmount.toFixed(2)}
               </div>
             </div>
 
             {order.notes && (
-              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-gray-700">
+              <div className="mb-3 p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                <p className="text-xs text-white/80">
                   <span className="font-medium">Notes:</span> {order.notes}
                 </p>
               </div>
@@ -157,7 +160,7 @@ export default function OrdersPage() {
                   setSelectedOrder(order);
                   setShowModal(true);
                 }}
-                className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium py-2 rounded-lg transition-colors"
+                className="flex-1 btn-secondary px-3 py-2 rounded-[12px] text-[12px]"
               >
                 View Details
               </button>
@@ -165,7 +168,7 @@ export default function OrdersPage() {
                 <select
                   value={order.status}
                   onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="flex-1 input-premium text-[12px] py-2"
                 >
                   <option value="pending">Pending</option>
                   <option value="preparing">Preparing</option>
@@ -180,57 +183,70 @@ export default function OrdersPage() {
       </div>
 
       {filteredOrders.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-xl">
-          <p className="text-gray-500">No orders found</p>
+        <div className="text-center py-10 glass-panel rounded-2xl text-white/60">
+          <div className="w-10 h-10 rounded-2xl border border-white/[0.14] bg-white/[0.06] flex items-center justify-center mx-auto mb-3">
+            🧾
+          </div>
+          <p className="text-[13px]">No orders found</p>
         </div>
       )}
 
+      {/* Stats */}
+      <div className="grid grid-cols-12 gap-3.5">
+        {['pending', 'preparing', 'ready', 'served', 'cancelled'].map(status => (
+          <div key={status} className="col-span-2 kpi-card text-center">
+            <div className="kpi-value">{orders.filter(o => o.status === status).length}</div>
+            <div className="kpi-label mt-1">{status}</div>
+          </div>
+        ))}
+      </div>
+
       {/* Order Details Modal */}
       {showModal && selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-2xl font-bold mb-6">Order Details</h3>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="glass-card rounded-2xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-fade-in-up">
+            <h3 className="font-playfair text-xl font-medium text-white mb-6">
+              Order Details
+            </h3>
 
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-sm text-gray-600">Order ID:</span>
-                  <p className="font-medium">{selectedOrder.id}</p>
+                  <span className="text-[11px] text-white/60 uppercase tracking-wider">Order ID</span>
+                  <p className="text-white font-medium">{selectedOrder.id}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600">Status:</span>
-                  <p className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedOrder.status)}`}>
-                    {selectedOrder.status}
-                  </p>
+                  <span className="text-[11px] text-white/60 uppercase tracking-wider">Status</span>
+                  <p><span className={getStatusBadge(selectedOrder.status)}>{selectedOrder.status}</span></p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600">Table:</span>
-                  <p className="font-medium">{selectedOrder.table?.tableNumber || 'N/A'}</p>
+                  <span className="text-[11px] text-white/60 uppercase tracking-wider">Table</span>
+                  <p className="text-white font-medium">{selectedOrder.table?.tableNumber || 'N/A'}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-600">Total Amount:</span>
-                  <p className="font-medium text-blue-600 text-lg">${selectedOrder.totalAmount.toFixed(2)}</p>
+                  <span className="text-[11px] text-white/60 uppercase tracking-wider">Total Amount</span>
+                  <p className="text-[#cfd4dc] font-medium text-lg">${selectedOrder.totalAmount.toFixed(2)}</p>
                 </div>
                 <div className="col-span-2">
-                  <span className="text-sm text-gray-600">Created At:</span>
-                  <p className="font-medium">{new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                  <span className="text-[11px] text-white/60 uppercase tracking-wider">Created At</span>
+                  <p className="text-white font-medium">{new Date(selectedOrder.createdAt).toLocaleString()}</p>
                 </div>
               </div>
 
               {selectedOrder.orderItems && selectedOrder.orderItems.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-3">Order Items:</h4>
+                  <h4 className="text-[11px] text-white/60 uppercase tracking-wider mb-3">Order Items</h4>
                   <div className="space-y-2">
                     {selectedOrder.orderItems.map((item) => (
-                      <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                      <div key={item.id} className="flex justify-between items-center p-3 rounded-lg bg-white/5 border border-white/10">
                         <div>
-                          <p className="font-medium">{item.menuItem?.name || 'Unknown Item'}</p>
-                          <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                          <p className="text-white font-medium">{item.menuItem?.name || 'Unknown Item'}</p>
+                          <p className="text-xs text-white/60">Quantity: {item.quantity}</p>
                           {item.specialInstructions && (
-                            <p className="text-xs text-gray-500 mt-1">{item.specialInstructions}</p>
+                            <p className="text-xs text-white/50 mt-1">{item.specialInstructions}</p>
                           )}
                         </div>
-                        <p className="font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="text-[#cfd4dc] font-medium">${(item.price * item.quantity).toFixed(2)}</p>
                       </div>
                     ))}
                   </div>
@@ -238,9 +254,9 @@ export default function OrdersPage() {
               )}
 
               {selectedOrder.notes && (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <span className="text-sm font-medium text-gray-700">Notes:</span>
-                  <p className="text-gray-700 mt-1">{selectedOrder.notes}</p>
+                <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                  <span className="text-[11px] text-white/60 uppercase tracking-wider">Notes</span>
+                  <p className="text-white/90 mt-1">{selectedOrder.notes}</p>
                 </div>
               )}
             </div>
@@ -250,26 +266,13 @@ export default function OrdersPage() {
                 setShowModal(false);
                 setSelectedOrder(null);
               }}
-              className="w-full mt-6 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-4 rounded-lg"
+              className="w-full mt-6 btn-secondary py-3 rounded-[14px] font-medium"
             >
               Close
             </button>
           </div>
         </div>
       )}
-
-      {/* Stats */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-5 gap-6">
-        {['pending', 'preparing', 'ready', 'served', 'cancelled'].map(status => (
-          <div key={status} className="bg-white rounded-xl shadow-lg p-6">
-            <p className="text-sm text-gray-600 mb-2">{status.charAt(0).toUpperCase() + status.slice(1)}</p>
-            <p className="text-3xl font-bold text-gray-800">
-              {orders.filter(o => o.status === status).length}
-            </p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
-

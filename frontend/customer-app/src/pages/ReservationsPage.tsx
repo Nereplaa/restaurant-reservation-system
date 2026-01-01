@@ -5,17 +5,13 @@ import api from '../services/api';
 
 interface Reservation {
   id: string;
-  date: string;
-  time: string;
-  partySize: number;
+  reservationDate: string;
+  reservationTime: string;
+  guestCount: number;
   status: string;
-  specialRequest: string | null;
+  specialRequests: string | null;
   confirmationNumber: string;
-  table: {
-    tableNumber: string;
-    capacity: number;
-    location: string | null;
-  } | null;
+  tableId: string | null;
   createdAt: string;
 }
 
@@ -42,7 +38,7 @@ const ReservationsPage = () => {
         setReservations(response.data.data.reservations);
       }
     } catch (err: any) {
-      setError('Failed to load reservations');
+      setError('Rezervasyonlar yüklenemedi');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -50,58 +46,71 @@ const ReservationsPage = () => {
   };
 
   const handleCancelReservation = async (id: string) => {
-    if (!confirm('Are you sure you want to cancel this reservation?')) {
+    if (!confirm('Bu rezervasyonu iptal etmek istediğinizden emin misiniz?')) {
       return;
     }
 
     try {
       const response = await api.delete(`/reservations/${id}`);
       if (response.data.success) {
-        alert('Reservation cancelled successfully');
+        alert('Rezervasyon başarıyla iptal edildi');
         fetchReservations();
       }
     } catch (err: any) {
-      alert(err.response?.data?.error?.message || 'Failed to cancel reservation');
+      alert(err.response?.data?.error?.message || 'Rezervasyon iptal edilemedi');
     }
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      confirmed: 'bg-green-100 text-green-800',
-      completed: 'bg-blue-100 text-blue-800',
-      cancelled: 'bg-red-100 text-red-800',
-      no_show: 'bg-gray-100 text-gray-800',
+  const getStatusBadge = (status: string) => {
+    const badges: Record<string, string> = {
+      confirmed: 'bg-emerald-500/20 border-emerald-500/30 text-emerald-300',
+      completed: 'bg-blue-500/20 border-blue-500/30 text-blue-300',
+      cancelled: 'bg-red-500/20 border-red-500/30 text-red-300',
+      no_show: 'bg-white/10 border-white/20 text-white/60',
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return badges[status] || 'bg-white/10 border-white/20 text-white/60';
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Tarih yok';
+    try {
+      // Handle YYYY-MM-DD format
+      const parts = dateString.split('-');
+      if (parts.length === 3) {
+        const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        return date.toLocaleDateString('tr-TR', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+      }
+      return new Date(dateString).toLocaleDateString('tr-TR');
+    } catch {
+      return dateString;
+    }
   };
 
-  const formatTime = (timeString: string) => {
-    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
+  const formatTime = (timeString: string | null) => {
+    if (!timeString) return '--:--';
+    // Handle HH:MM format directly
+    return timeString.substring(0, 5);
   };
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Please log in to view reservations</h2>
+      <div className="min-h-screen bg-premium flex items-center justify-center">
+        <div className="text-center glass-dark rounded-2xl border border-white/10 p-8">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl">
+            🔒
+          </div>
+          <h2 className="font-playfair text-2xl font-medium text-white mb-4">Giriş Yapın</h2>
+          <p className="text-white/60 mb-6">Rezervasyonlarınızı görmek için giriş yapın</p>
           <button
             onClick={() => navigate('/login')}
-            className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition"
+            className="btn-primary px-6 py-3 rounded-xl"
           >
-            Go to Login
+            Giriş Yap
           </button>
         </div>
       </div>
@@ -109,70 +118,69 @@ const ReservationsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-primary text-white py-12">
+    <div className="min-h-screen bg-premium">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-[#0f1a2b] to-[#16233a] text-white py-12 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-4">My Reservations</h1>
-          <p className="text-xl text-gray-100">
-            View and manage your restaurant reservations
-          </p>
+          <h1 className="font-playfair text-4xl font-medium mb-2">Rezervasyonlarım</h1>
+          <p className="text-white/60">Restoran rezervasyonlarınızı görüntüleyin ve yönetin</p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-6">
-          <div className="flex space-x-4">
+          <div className="flex gap-2">
             <button
               onClick={() => setFilter('upcoming')}
-              className={`px-6 py-2 rounded-lg font-medium transition ${
-                filter === 'upcoming'
-                  ? 'bg-primary text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
+              className={`px-5 py-2.5 rounded-full text-sm font-medium transition ${filter === 'upcoming'
+                ? 'bg-[#cfd4dc]/20 border border-[#cfd4dc]/30 text-white'
+                : 'bg-white/5 border border-white/10 text-white/70 hover:bg-white/10'
+                }`}
             >
-              Upcoming
+              Yaklaşan
             </button>
             <button
               onClick={() => setFilter('all')}
-              className={`px-6 py-2 rounded-lg font-medium transition ${
-                filter === 'all'
-                  ? 'bg-primary text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
+              className={`px-5 py-2.5 rounded-full text-sm font-medium transition ${filter === 'all'
+                ? 'bg-[#cfd4dc]/20 border border-[#cfd4dc]/30 text-white'
+                : 'bg-white/5 border border-white/10 text-white/70 hover:bg-white/10'
+                }`}
             >
-              All
+              Tümü
             </button>
           </div>
 
           <button
             onClick={() => navigate('/booking')}
-            className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-medium transition"
+            className="px-5 py-2.5 rounded-xl text-sm font-medium bg-white text-[#0f1a2b] hover:bg-white/90 transition shadow-lg"
           >
-            + New Reservation
+            + Yeni Rezervasyon
           </button>
         </div>
 
         {isLoading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading reservations...</p>
+            <div className="w-12 h-12 border-2 border-white/20 border-t-white/80 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-white/60">Rezervasyonlar yükleniyor...</p>
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-lg">
-            {error}
+          <div className="glass-dark border border-red-500/30 text-red-200 px-6 py-4 rounded-xl">
+            ⚠️ {error}
           </div>
         ) : reservations.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <div className="text-6xl mb-4">📅</div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">No Reservations Found</h3>
-            <p className="text-gray-600 mb-6">
-              You don't have any {filter === 'upcoming' ? 'upcoming' : ''} reservations yet.
+          <div className="glass-dark rounded-2xl border border-white/10 p-12 text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl">
+              📅
+            </div>
+            <h3 className="font-playfair text-2xl font-medium text-white mb-2">Rezervasyon Bulunamadı</h3>
+            <p className="text-white/60 mb-6">
+              {filter === 'upcoming' ? 'Yaklaşan' : ''} rezervasyonunuz bulunmuyor.
             </p>
             <button
               onClick={() => navigate('/booking')}
-              className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition"
+              className="btn-primary px-6 py-3 rounded-xl"
             >
-              Make Your First Reservation
+              İlk Rezervasyonunuzu Yapın
             </button>
           </div>
         ) : (
@@ -180,83 +188,80 @@ const ReservationsPage = () => {
             {reservations.map((reservation) => (
               <div
                 key={reservation.id}
-                className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition"
+                className="glass-dark rounded-2xl border border-white/10 p-6 hover:border-white/20 transition"
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center mb-3">
+                    <div className="flex items-center gap-3 mb-3">
                       <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(
-                          reservation.status
-                        )}`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusBadge(reservation.status)}`}
                       >
                         {reservation.status.toUpperCase()}
                       </span>
-                      <span className="ml-3 text-sm text-gray-500">
+                      <span className="text-xs text-white/40">
                         #{reservation.confirmationNumber}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <div className="text-sm text-gray-500 mb-1">Date</div>
-                        <div className="font-semibold text-gray-900">
-                          {formatDate(reservation.date)}
+                        <div className="text-xs text-white/40 mb-1 uppercase tracking-wider">Tarih</div>
+                        <div className="font-medium text-white">
+                          {formatDate(reservation.reservationDate)}
                         </div>
                       </div>
 
                       <div>
-                        <div className="text-sm text-gray-500 mb-1">Time</div>
-                        <div className="font-semibold text-gray-900">
-                          {formatTime(reservation.time)}
+                        <div className="text-xs text-white/40 mb-1 uppercase tracking-wider">Saat</div>
+                        <div className="font-medium text-white">
+                          {formatTime(reservation.reservationTime)}
                         </div>
                       </div>
 
                       <div>
-                        <div className="text-sm text-gray-500 mb-1">Party Size</div>
-                        <div className="font-semibold text-gray-900">
-                          {reservation.partySize} Guest{reservation.partySize > 1 ? 's' : ''}
+                        <div className="text-xs text-white/40 mb-1 uppercase tracking-wider">Kişi Sayısı</div>
+                        <div className="font-medium text-white">
+                          {reservation.guestCount} Kişi
                         </div>
                       </div>
                     </div>
 
-                    {reservation.table && (
-                      <div className="mt-3 text-sm text-gray-600">
-                        <span className="font-medium">Table:</span> {reservation.table.tableNumber}
-                        {reservation.table.location && ` (${reservation.table.location})`}
+                    {reservation.tableId && (
+                      <div className="mt-3 text-sm text-white/60">
+                        <span className="font-medium text-white/80">Masa atandı</span>
                       </div>
                     )}
 
-                    {reservation.specialRequest && (
-                      <div className="mt-3 text-sm text-gray-600">
-                        <span className="font-medium">Special Request:</span>{' '}
-                        {reservation.specialRequest}
+                    {reservation.specialRequests && (
+                      <div className="mt-3 text-sm text-white/60">
+                        <span className="font-medium text-white/80">Özel İstek:</span>{' '}
+                        {reservation.specialRequests}
                       </div>
                     )}
                   </div>
 
-                  <div className="mt-4 md:mt-0 md:ml-6 flex flex-col space-y-2">
+                  <div className="mt-4 md:mt-0 md:ml-6 flex flex-col gap-2">
                     {reservation.status === 'confirmed' && (
                       <>
                         <button
                           onClick={() => navigate(`/reservations/${reservation.id}/edit`)}
-                          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+                          className="btn-secondary px-4 py-2 rounded-xl text-sm"
                         >
-                          Modify
+                          Düzenle
                         </button>
                         <button
                           onClick={() => handleCancelReservation(reservation.id)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+                          className="btn-danger px-4 py-2 rounded-xl text-sm"
                         >
-                          Cancel
+                          İptal Et
                         </button>
                       </>
                     )}
                     {reservation.status === 'completed' && (
-                      <div className="text-green-600 font-medium text-sm">✓ Completed</div>
+                      <div className="text-emerald-400 font-medium text-sm">✓ Tamamlandı</div>
                     )}
                     {reservation.status === 'cancelled' && (
-                      <div className="text-red-600 font-medium text-sm">✕ Cancelled</div>
+                      <div className="text-red-400 font-medium text-sm">✕ İptal Edildi</div>
                     )}
                   </div>
                 </div>
@@ -270,4 +275,3 @@ const ReservationsPage = () => {
 };
 
 export default ReservationsPage;
-

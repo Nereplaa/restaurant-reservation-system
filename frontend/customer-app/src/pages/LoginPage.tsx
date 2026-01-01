@@ -7,7 +7,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -20,35 +20,55 @@ const LoginPage = () => {
       await login(email, password);
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err.message || 'Giriş başarısız');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const fillDemo = () => {
+    setEmail('john.doe@example.com');
+    setPassword('customer123');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-4xl font-bold text-gray-900">
-            Welcome Back
+    <div className="min-h-screen bg-premium flex items-center justify-center px-6 py-12">
+      <div className="max-w-md w-full">
+        {/* Logo & Header */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center gap-3 mb-6">
+            <div className="w-14 h-14 rounded-xl border border-white/20 overflow-hidden bg-white/10 flex items-center justify-center">
+              <img src="/images/logo.png" alt="BORCELLE" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="font-playfair font-semibold text-white tracking-[0.14em] uppercase text-lg">
+                BORCELLE
+              </span>
+              <span className="text-[10px] tracking-[0.10em] uppercase text-[#9aa3b2]">
+                Fine Dining • 2004
+              </span>
+            </div>
+          </Link>
+          <h2 className="font-playfair text-3xl font-medium text-white mb-2">
+            Hoş Geldiniz
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to your account to make reservations
+          <p className="text-[#cfd4dc]">
+            Hesabınıza giriş yaparak devam edin
           </p>
         </div>
-        
-        <div className="bg-white py-8 px-6 shadow-xl rounded-lg">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+
+        {/* Form Card - Dark Theme */}
+        <div className="glass-dark rounded-2xl p-8 border border-white/10">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-                {error}
+              <div className="bg-red-500/20 border border-red-500/30 text-red-200 px-4 py-3 rounded-xl text-sm">
+                ⚠️ {error}
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
+              <label htmlFor="email" className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                E-posta Adresi
               </label>
               <input
                 id="email"
@@ -57,14 +77,14 @@ const LoginPage = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="john.doe@example.com"
+                className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 transition-all outline-none"
+                placeholder="ornek@email.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
+              <label htmlFor="password" className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                Şifre
               </label>
               <input
                 id="password"
@@ -73,54 +93,59 @@ const LoginPage = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 transition-all outline-none"
                 placeholder="••••••••"
               />
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition"
-              >
-                {isLoading ? 'Signing in...' : 'Sign In'}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-[#cfd4dc]/20 border border-[#cfd4dc]/30 hover:bg-[#cfd4dc]/30 text-white font-medium py-3.5 px-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  Giriş yapılıyor...
+                </span>
+              ) : 'Giriş Yap'}
+            </button>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Don't have an account?</span>
-              </div>
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/10"></div>
             </div>
-
-            <div className="mt-6 text-center">
-              <Link
-                to="/register"
-                className="font-medium text-primary hover:text-primary-dark transition"
-              >
-                Create a new account
-              </Link>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-3 bg-[#0f1a2b] text-white/50">Hesabınız yok mu?</span>
             </div>
           </div>
 
-          <div className="mt-4 text-center">
-            <Link to="/" className="text-sm text-gray-600 hover:text-gray-800 transition">
-              ← Back to Home
-            </Link>
-          </div>
+          <Link
+            to="/register"
+            className="block w-full text-center py-3 border border-white/20 text-white/80 font-medium rounded-xl hover:bg-white/5 hover:border-white/30 transition-all"
+          >
+            Yeni hesap oluşturun
+          </Link>
         </div>
 
-        {/* Demo Credentials */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
-          <p className="font-semibold text-blue-900 mb-2">Demo Accounts:</p>
-          <p className="text-blue-800">📧 john.doe@example.com</p>
-          <p className="text-blue-800">🔑 customer123</p>
+        {/* Demo Account Card */}
+        <div className="mt-6 glass-dark border border-white/10 rounded-xl p-5">
+          <p className="text-white/70 text-sm mb-3 text-center font-medium">Demo Hesabı</p>
+          <button
+            onClick={fillDemo}
+            className="w-full px-4 py-3 bg-white/10 border border-white/20 text-white rounded-xl text-sm font-medium transition-all hover:bg-white/15"
+          >
+            🔑 Demo bilgilerini doldur
+          </button>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-6 text-center">
+          <Link to="/" className="text-white/60 text-sm hover:text-white transition">
+            ← Anasayfaya Dön
+          </Link>
         </div>
       </div>
     </div>
@@ -128,4 +153,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-

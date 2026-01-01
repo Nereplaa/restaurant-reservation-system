@@ -24,9 +24,9 @@ function App() {
             path="/*"
             element={
               <ProtectedRoute>
-                <div className="flex min-h-screen bg-gray-100">
+                <div className="flex min-h-screen">
                   <Sidebar />
-                  <div className="flex-1 overflow-x-hidden">
+                  <main className="flex-1 min-w-0 overflow-x-hidden">
                     <Routes>
                       <Route path="/" element={<Navigate to="/dashboard" replace />} />
                       <Route path="/dashboard" element={<DashboardPage />} />
@@ -37,7 +37,7 @@ function App() {
                       <Route path="/orders" element={<OrdersPage />} />
                       <Route path="/settings" element={<SettingsPage />} />
                     </Routes>
-                  </div>
+                  </main>
                 </div>
               </ProtectedRoute>
             }
@@ -49,4 +49,3 @@ function App() {
 }
 
 export default App;
-

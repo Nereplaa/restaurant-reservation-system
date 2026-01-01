@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BORCELLE — Kitchen Display</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+
+<body>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo" title="BORCELLE">
+          <img src="assets/logo.png" alt="BORCELLE Logo">
+        </div>
+        <div class="brand-text">
+          <div class="name">Restaurant Admin</div>
+          <div class="tag">Management System</div>
+        </div>
+      </div>
+
+      <div class="profile">
+        <div class="avatar"></div>
+        <div class="who">
+          <b>kitchen</b>
+          <span>display mode</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a href="dashboard.html"><span class="ico">▦</span>Dashboard</a>
+        <a href="reservations.html"><span class="ico">▤</span>Reservations</a>
+        <a href="customers.html"><span class="ico">👥</span>Customers</a>
+        <a href="tables.html"><span class="ico">⧉</span>Tables</a>
+        <a href="menu.html"><span class="ico">🍽</span>Menu</a>
+        <a href="orders.html"><span class="ico">🧾</span>Orders</a>
+        <a href="settings.html"><span class="ico">⚙</span>Settings</a>
+        <a href="kds.html"><span class="ico">⟡</span>Kitchen Display</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" type="button">Logout</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <div class="topbar">
+        <div class="titleblock">
+          <h1>Kitchen Display</h1>
+          <p>Real-time order management (BORCELLE palette)</p>
+        </div>
+
+        <div class="actions">
+          <span class="pill"><span class="dot"></span> Connected</span>
+          <select class="input" style="max-width: 220px;">
+            <option>Active Orders</option>
+            <option>Completed</option>
+            <option>All</option>
+          </select>
+          <button class="btn primary" type="button">Refresh</button>
+        </div>
+      </div>
+
+      <div class="kds-wrap">
+        <div class="kds-top">
+          <div class="kds-title">
+            <div class="empty spark" style="margin:0; width:44px; height:44px; padding:0;">🍳</div>
+            <div>
+              <h2>Kitchen Display System</h2>
+              <p>Orders will stream here. Status boxes stay in navy/silver tone.</p>
+            </div>
+          </div>
+
+          <div class="pill" title="Time">
+            <span class="dot"></span>
+            <span id="clock">00:00:00</span>
+          </div>
+        </div>
+
+        <div class="kds-kpis">
+          <div class="kds-k"><b>0</b><span>Pending</span></div>
+          <div class="kds-k"><b>0</b><span>Preparing</span></div>
+          <div class="kds-k"><b>0</b><span>Ready</span></div>
+          <div class="kds-k"><b>0</b><span>Completed</span></div>
+        </div>
+
+        <!-- İstersen bunu kaldır: hata kutusu -->
+        <div class="alert">Failed to load orders</div>
+
+        <!-- boş state -->
+        <div class="empty" style="padding: 40px 10px;">
+          <div class="spark">🎉</div>
+          <div>
+            <b style="color:#fff; font-weight:500;">No active orders</b><br/>
+            New orders will appear here automatically.
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

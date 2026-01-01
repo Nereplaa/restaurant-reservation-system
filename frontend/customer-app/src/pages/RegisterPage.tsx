@@ -13,7 +13,7 @@ const RegisterPage = () => {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -28,14 +28,13 @@ const RegisterPage = () => {
     e.preventDefault();
     setError('');
 
-    // Validation
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError('Şifreler eşleşmiyor');
       return;
     }
 
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters long');
+      setError('Şifre en az 8 karakter olmalıdır');
       return;
     }
 
@@ -51,36 +50,51 @@ const RegisterPage = () => {
       });
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Registration failed');
+      setError(err.message || 'Kayıt başarısız oldu');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-4xl font-bold text-gray-900">
-            Create Account
+    <div className="min-h-screen bg-premium flex items-center justify-center px-6 py-12">
+      <div className="max-w-md w-full">
+        {/* Logo & Header */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center gap-3 mb-6">
+            <div className="w-14 h-14 rounded-xl border border-white/20 overflow-hidden bg-white/10 flex items-center justify-center">
+              <img src="/images/logo.png" alt="BORCELLE" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="font-playfair font-semibold text-white tracking-[0.14em] uppercase text-lg">
+                BORCELLE
+              </span>
+              <span className="text-[10px] tracking-[0.10em] uppercase text-[#9aa3b2]">
+                Fine Dining • 2004
+              </span>
+            </div>
+          </Link>
+          <h2 className="font-playfair text-3xl font-medium text-white mb-2">
+            Hesap Oluşturun
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Join us and start making reservations
+          <p className="text-[#cfd4dc]">
+            Aramıza katılın ve özel deneyimlerden yararlanın
           </p>
         </div>
-        
-        <div className="bg-white py-8 px-6 shadow-xl rounded-lg">
+
+        {/* Form Card - Dark Theme */}
+        <div className="glass-dark rounded-2xl p-8 border border-white/10">
           <form className="space-y-5" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                {error}
+              <div className="bg-red-500/20 border border-red-500/30 text-red-200 px-4 py-3 rounded-xl text-sm">
+                ⚠️ {error}
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
-                  First Name *
+                <label htmlFor="firstName" className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                  Ad *
                 </label>
                 <input
                   id="firstName"
@@ -89,14 +103,14 @@ const RegisterPage = () => {
                   required
                   value={formData.firstName}
                   onChange={handleChange}
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="John"
+                  className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 transition-all outline-none"
+                  placeholder="Adınız"
                 />
               </div>
 
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Name *
+                <label htmlFor="lastName" className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                  Soyad *
                 </label>
                 <input
                   id="lastName"
@@ -105,15 +119,15 @@ const RegisterPage = () => {
                   required
                   value={formData.lastName}
                   onChange={handleChange}
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="Doe"
+                  className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 transition-all outline-none"
+                  placeholder="Soyadınız"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address *
+              <label htmlFor="email" className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                E-posta Adresi *
               </label>
               <input
                 id="email"
@@ -122,14 +136,14 @@ const RegisterPage = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="john.doe@example.com"
+                className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 transition-all outline-none"
+                placeholder="ornek@email.com"
               />
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number (Optional)
+              <label htmlFor="phone" className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                Telefon Numarası <span className="text-white/40">(Opsiyonel)</span>
               </label>
               <input
                 id="phone"
@@ -137,14 +151,14 @@ const RegisterPage = () => {
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="+1 (234) 567-8900"
+                className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 transition-all outline-none"
+                placeholder="+90 (5XX) XXX XX XX"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password *
+              <label htmlFor="password" className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                Şifre *
               </label>
               <input
                 id="password"
@@ -153,15 +167,15 @@ const RegisterPage = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 transition-all outline-none"
                 placeholder="••••••••"
               />
-              <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
+              <p className="mt-1.5 text-xs text-white/40">En az 8 karakter olmalıdır</p>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password *
+              <label htmlFor="confirmPassword" className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                Şifre Tekrar *
               </label>
               <input
                 id="confirmPassword"
@@ -170,47 +184,48 @@ const RegisterPage = () => {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/5 text-white placeholder-white/40 focus:border-white/40 focus:bg-white/10 transition-all outline-none"
                 placeholder="••••••••"
               />
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition"
-              >
-                {isLoading ? 'Creating Account...' : 'Create Account'}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-[#cfd4dc]/20 border border-[#cfd4dc]/30 hover:bg-[#cfd4dc]/30 text-white font-medium py-3.5 px-4 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  Hesap oluşturuluyor...
+                </span>
+              ) : 'Hesap Oluştur'}
+            </button>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Already have an account?</span>
-              </div>
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/10"></div>
             </div>
-
-            <div className="mt-6 text-center">
-              <Link
-                to="/login"
-                className="font-medium text-primary hover:text-primary-dark transition"
-              >
-                Sign in instead
-              </Link>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-3 bg-[#0f1a2b] text-white/50">Zaten hesabınız var mı?</span>
             </div>
           </div>
 
-          <div className="mt-4 text-center">
-            <Link to="/" className="text-sm text-gray-600 hover:text-gray-800 transition">
-              ← Back to Home
-            </Link>
-          </div>
+          <Link
+            to="/login"
+            className="block w-full text-center py-3 border border-white/20 text-white/80 font-medium rounded-xl hover:bg-white/5 hover:border-white/30 transition-all"
+          >
+            Giriş yapın
+          </Link>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-6 text-center">
+          <Link to="/" className="text-white/60 text-sm hover:text-white transition">
+            ← Anasayfaya Dön
+          </Link>
         </div>
       </div>
     </div>
@@ -218,4 +233,3 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
-

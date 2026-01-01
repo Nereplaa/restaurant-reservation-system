@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { DashboardStats, Reservation } from '../types';
 
@@ -35,155 +36,139 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center h-[80vh]">
+        <div className="text-center">
+          <div className="w-12 h-12 border-2 border-white/20 border-t-white/80 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white/60 text-sm">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-8">
-        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
-          {error}
+      <div className="p-6">
+        <div className="glass-panel rounded-2xl p-4 border-red-500/30 bg-red-500/10">
+          ⚠️ {error}
         </div>
       </div>
     );
   }
 
-  const StatCard = ({ title, value, icon, color }: { title: string; value: number; icon: string; color: string }) => (
-    <div className={`${color} rounded-xl p-6 shadow-lg`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm opacity-80 mb-1">{title}</p>
-          <p className="text-3xl font-bold">{value}</p>
-        </div>
-        <div className="text-4xl opacity-80">{icon}</div>
-      </div>
-    </div>
-  );
-
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      PENDING: 'bg-yellow-100 text-yellow-800',
-      CONFIRMED: 'bg-blue-100 text-blue-800',
-      SEATED: 'bg-green-100 text-green-800',
-      COMPLETED: 'bg-gray-100 text-gray-800',
-      CANCELLED: 'bg-red-100 text-red-800',
-      NO_SHOW: 'bg-purple-100 text-purple-800',
+  const getStatusBadge = (status: string) => {
+    const badges: Record<string, string> = {
+      PENDING: 'badge badge-warn',
+      CONFIRMED: 'badge badge-ok',
+      SEATED: 'badge badge-info',
+      COMPLETED: 'badge',
+      CANCELLED: 'badge badge-danger',
+      NO_SHOW: 'badge badge-danger',
     };
-    return colors[status] || 'bg-gray-100 text-gray-800';
+    return badges[status] || 'badge';
   };
 
   return (
-    <div className="p-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Welcome back! Here's what's happening today.</p>
+    <div className="p-6">
+      {/* Topbar */}
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div>
+          <h1 className="font-playfair text-3xl font-medium tracking-wide text-white m-0">
+            Dashboard
+          </h1>
+          <p className="text-white/[0.78] text-[13px] mt-1.5 font-light">
+            Welcome back! Here's what's happening today.
+          </p>
+        </div>
+        <div className="flex items-center gap-2.5 flex-wrap justify-end">
+          <span className="pill">
+            <span className="dot"></span>
+            Live
+          </span>
+          <Link to="/reservations" className="btn-secondary px-3 py-2.5 rounded-[14px] text-[13px] inline-flex items-center gap-2">
+            View Reservations
+          </Link>
+          <Link to="/orders" className="btn-primary px-3 py-2.5 rounded-[14px] text-[13px] inline-flex items-center gap-2">
+            View Orders
+          </Link>
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <StatCard
-          title="Today's Reservations"
-          value={stats?.todayReservations || 0}
-          icon="📅"
-          color="bg-gradient-to-br from-blue-500 to-blue-600 text-white"
-        />
-        <StatCard
-          title="Today's Revenue"
-          value={stats?.todayRevenue || 0}
-          icon="💰"
-          color="bg-gradient-to-br from-green-500 to-green-600 text-white"
-        />
-        <StatCard
-          title="Total Customers"
-          value={stats?.totalCustomers || 0}
-          icon="👥"
-          color="bg-gradient-to-br from-purple-500 to-purple-600 text-white"
-        />
-        <StatCard
-          title="Active Orders"
-          value={stats?.activeOrders || 0}
-          icon="📝"
-          color="bg-gradient-to-br from-orange-500 to-orange-600 text-white"
-        />
-        <StatCard
-          title="Available Tables"
-          value={stats?.availableTables || 0}
-          icon="🪑"
-          color="bg-gradient-to-br from-teal-500 to-teal-600 text-white"
-        />
-        <StatCard
-          title="Occupied Tables"
-          value={stats?.occupiedTables || 0}
-          icon="✅"
-          color="bg-gradient-to-br from-red-500 to-red-600 text-white"
-        />
+      {/* KPI Grid */}
+      <div className="grid grid-cols-12 gap-3.5 mb-6">
+        <div className="col-span-3 kpi-card animate-fade-in-up">
+          <div className="kpi-label">Today's Reservations</div>
+          <div className="kpi-value">{stats?.todayReservations || 0}</div>
+          <div className="kpi-hint">
+            {stats?.todayReservations === 0 ? 'No reservations scheduled for today.' : 'Reservations scheduled for today.'}
+          </div>
+        </div>
+        <div className="col-span-3 kpi-card animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
+          <div className="kpi-label">Today's Revenue</div>
+          <div className="kpi-value">{stats?.todayRevenue || 0}</div>
+          <div className="kpi-hint">Revenue will update as orders are served.</div>
+        </div>
+        <div className="col-span-3 kpi-card animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <div className="kpi-label">Total Customers</div>
+          <div className="kpi-value">{stats?.totalCustomers || 0}</div>
+          <div className="kpi-hint">Customer base is growing steadily.</div>
+        </div>
+        <div className="col-span-3 kpi-card animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
+          <div className="kpi-label">Active Orders</div>
+          <div className="kpi-value">{stats?.activeOrders || 0}</div>
+          <div className="kpi-hint">{stats?.activeOrders === 0 ? 'Kitchen is currently idle.' : 'Orders being prepared.'}</div>
+        </div>
       </div>
 
-      {/* Recent Reservations */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-800">Recent Reservations</h2>
-          <a href="/reservations" className="text-blue-600 hover:text-blue-700 font-medium">
+      {/* Recent Reservations Panel */}
+      <div className="glass-panel rounded-2xl p-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+        <div className="section-title">
+          <span>Recent Reservations</span>
+          <div className="line"></div>
+          <Link to="/reservations" className="btn-secondary px-3 py-2 rounded-[14px] text-[13px] ml-auto">
             View All →
-          </a>
+          </Link>
         </div>
 
         {recentReservations.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No recent reservations</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Confirmation #
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date & Time
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Guests
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {recentReservations.map((reservation) => (
-                  <tr key={reservation.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {reservation.confirmationNumber}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {reservation.user ? `${reservation.user.firstName} ${reservation.user.lastName}` : 'N/A'}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(reservation.reservationDate).toLocaleDateString()} {reservation.reservationTime}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {reservation.guestCount}
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(reservation.status)}`}>
-                        {reservation.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="text-center py-10 text-white/60">
+            <div className="w-10 h-10 rounded-2xl border border-white/[0.14] bg-white/[0.06] flex items-center justify-center mx-auto mb-3 shadow-lg">
+              ✨
+            </div>
+            <p className="text-[13px]">No recent reservations</p>
           </div>
+        ) : (
+          <table className="table-premium">
+            <thead>
+              <tr>
+                <th>Confirmation #</th>
+                <th>Customer</th>
+                <th>Date & Time</th>
+                <th>Guests</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentReservations.map((reservation) => (
+                <tr key={reservation.id}>
+                  <td className="font-medium">{reservation.confirmationNumber}</td>
+                  <td>
+                    {reservation.user ? `${reservation.user.firstName} ${reservation.user.lastName}` : 'N/A'}
+                  </td>
+                  <td className="text-white/70">
+                    {new Date(reservation.reservationDate).toLocaleDateString('tr-TR')} — {reservation.reservationTime}
+                  </td>
+                  <td>{reservation.guestCount}</td>
+                  <td>
+                    <span className={getStatusBadge(reservation.status)}>
+                      {reservation.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>
   );
 }
-

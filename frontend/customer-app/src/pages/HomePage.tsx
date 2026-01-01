@@ -1,127 +1,312 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useState, useEffect } from 'react';
 
 const HomePage = () => {
   const { user } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      {/* Hero Section */}
-      <div className="relative bg-primary text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
-            <h1 className="text-5xl font-bold mb-6">
-              Welcome to The Restaurant
-            </h1>
-            <p className="text-xl mb-8 text-gray-100">
-              Experience fine dining with exceptional service and delicious cuisine
-            </p>
-            <div className="flex justify-center space-x-4">
-              {user ? (
-                <Link
-                  to="/booking"
-                  className="bg-white text-primary hover:bg-gray-100 px-8 py-3 rounded-lg text-lg font-semibold transition shadow-lg"
-                >
-                  Book a Table
+    <div className="min-h-screen bg-premium">
+      {/* Fixed Navbar */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'glass-dark shadow-lg' : 'bg-transparent'
+        }`}>
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl border border-white/20 overflow-hidden bg-white/10 flex items-center justify-center">
+              <img src="/images/logo.png" alt="BORCELLE" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-playfair font-semibold text-white tracking-[0.14em] uppercase text-sm">
+                BORCELLE
+              </span>
+              <span className="text-[10px] tracking-[0.10em] uppercase text-[#9aa3b2]">
+                Fine Dining • 2004
+              </span>
+            </div>
+          </Link>
+
+          {/* Nav Links */}
+          <div className="flex items-center gap-1">
+            <Link to="/" className="text-white/80 text-xs tracking-[0.12em] uppercase px-4 py-2 rounded-full hover:text-white hover:bg-white/10 transition-all">
+              Anasayfa
+            </Link>
+            <Link to="/menu" className="text-white/80 text-xs tracking-[0.12em] uppercase px-4 py-2 rounded-full hover:text-white hover:bg-white/10 transition-all">
+              Menü
+            </Link>
+            {user ? (
+              <>
+                <Link to="/reservations" className="text-white/80 text-xs tracking-[0.12em] uppercase px-4 py-2 rounded-full hover:text-white hover:bg-white/10 transition-all">
+                  Rezervasyonlarım
                 </Link>
-              ) : (
-                <>
-                  <Link
-                    to="/register"
-                    className="bg-white text-primary hover:bg-gray-100 px-8 py-3 rounded-lg text-lg font-semibold transition shadow-lg"
-                  >
-                    Get Started
-                  </Link>
-                  <Link
-                    to="/login"
-                    className="bg-transparent border-2 border-white hover:bg-white hover:text-primary px-8 py-3 rounded-lg text-lg font-semibold transition"
-                  >
-                    Sign In
-                  </Link>
-                </>
-              )}
+                <Link to="/booking" className="ml-2 bg-[#cfd4dc]/20 border border-[#cfd4dc]/30 text-white text-xs tracking-[0.12em] uppercase px-5 py-2.5 rounded-full font-medium hover:bg-[#cfd4dc]/30 transition-all">
+                  Rezervasyon Yap
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="text-white/80 text-xs tracking-[0.12em] uppercase px-4 py-2 rounded-full hover:text-white hover:bg-white/10 transition-all">
+                  Giriş
+                </Link>
+                <Link to="/register" className="ml-2 bg-[#cfd4dc]/20 border border-[#cfd4dc]/30 text-white text-xs tracking-[0.12em] uppercase px-5 py-2.5 rounded-full font-medium hover:bg-[#cfd4dc]/30 transition-all">
+                  Kayıt Ol
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section with Video */}
+      <header className="relative h-[85vh] min-h-[600px] flex items-center justify-center overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0 z-0 overflow-hidden bg-[#0a0f18]">
+          <iframe
+            src="https://www.youtube.com/embed/F3zw1Gvn4Mk?autoplay=1&mute=1&loop=1&playlist=F3zw1Gvn4Mk&controls=0&modestbranding=1&rel=0&playsinline=1&showinfo=0"
+            title="BORCELLE video"
+            frameBorder="0"
+            allow="autoplay; encrypted-media"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[180vw] h-[180vh] pointer-events-none"
+            style={{ filter: 'saturate(1.2) contrast(1.1) brightness(0.9)' }}
+          />
+        </div>
+
+        {/* Overlay */}
+        <div className="absolute inset-0 z-10 bg-gradient-to-b from-[#0f1a2b]/60 via-[#0f1a2b]/40 to-[#0f1a2b]" />
+
+        {/* Hero Content */}
+        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto pt-16">
+          <h1 className="font-playfair font-medium text-white text-5xl md:text-7xl mb-6 leading-tight" style={{ textShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
+            Borcelle Fine Dining
+          </h1>
+          <p className="text-white/85 text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto mb-8" style={{ textShadow: '0 10px 40px rgba(0,0,0,0.5)' }}>
+            Zamansız zarafet, titiz servis ve şefin imzasını taşıyan tabaklar…
+            <br />Her detay fine-dining sofralarına yakışır bir ritüele dönüşür.
+          </p>
+
+          {/* Badges */}
+          <div className="flex gap-3 justify-center flex-wrap mb-10">
+            <span className="border border-white/25 bg-white/5 text-white/90 px-5 py-2.5 rounded-full text-xs tracking-[0.10em] uppercase backdrop-blur-md">
+              Tadım Menüsü
+            </span>
+            <span className="border border-white/25 bg-white/5 text-white/90 px-5 py-2.5 rounded-full text-xs tracking-[0.10em] uppercase backdrop-blur-md">
+              Şefin Seçkisi
+            </span>
+            <span className="border border-white/25 bg-white/5 text-white/90 px-5 py-2.5 rounded-full text-xs tracking-[0.10em] uppercase backdrop-blur-md">
+              Rezervasyon Önerilir
+            </span>
+          </div>
+
+          {/* CTA Button */}
+          <Link to={user ? '/booking' : '/register'} className="inline-block bg-[#cfd4dc]/20 border border-[#cfd4dc]/30 text-white text-sm tracking-[0.10em] uppercase px-8 py-4 rounded-full font-medium hover:bg-[#cfd4dc]/30 transition-all shadow-2xl">
+            Masanızı Ayırtın
+          </Link>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
+            <div className="w-1 h-2 bg-white/50 rounded-full" />
+          </div>
+        </div>
+      </header>
+
+      {/* Mission & Vision Section - Dark Theme */}
+      <section className="max-w-6xl mx-auto px-6 py-20">
+        <div className="flex items-center gap-4 mb-8">
+          <h2 className="font-playfair font-medium text-white text-sm tracking-[0.14em] uppercase whitespace-nowrap">
+            Misyon & Vizyon
+          </h2>
+          <div className="flex-1 h-px bg-gradient-to-r from-[#cfd4dc]/80 to-transparent" />
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="glass-dark rounded-2xl p-8 border border-white/10">
+            <p className="text-xs tracking-[0.14em] uppercase text-[#7b8698] mb-3">Misyonumuz</p>
+            <p className="text-white/80 leading-relaxed font-light">
+              En nadide hammaddeleri rafine tekniklerle buluşturarak, her tabakta sanat eseri yaratmak.
+              Misafirlerimize tutarlı lezzet ve kusursuz servis standardı sunmak.
+            </p>
+            <div className="h-6" />
+            <p className="text-xs tracking-[0.14em] uppercase text-[#7b8698] mb-3">Vizyonumuz</p>
+            <p className="text-white/80 leading-relaxed font-light">
+              Modern gastronomi anlayışını zamansız bir atmosferle birleştirerek,
+              Türkiye'nin en prestijli fine-dining deneyimini sunmak.
+            </p>
+          </div>
+
+          <div className="glass-dark rounded-2xl p-8 border border-white/10">
+            <p className="text-xs tracking-[0.14em] uppercase text-[#7b8698] mb-3">Deneyim</p>
+            <p className="text-white/80 leading-relaxed font-light">
+              Sakin bir lüks atmosferi, özenle tasarlanmış ambiyans ve mevsimin en taze ürünleriyle
+              hazırlanan tadım menüsü. Her kurs, şefin yaratıcılığının bir yansıması.
+            </p>
+            <div className="h-6" />
+            <p className="text-xs tracking-[0.14em] uppercase text-[#7b8698] mb-3">Felsefemiz</p>
+            <p className="text-white/80 leading-relaxed font-light">
+              "Az ama öz" yaklaşımıyla, her detayda mükemmellik arayışı.
+              Yemeğin ötesinde, unutulmaz anılar biriktirdiğiniz bir mekan.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section - NEDEN BIZ - Dark Theme */}
+      <section className="max-w-6xl mx-auto px-6 py-20">
+        <div className="flex items-center gap-4 mb-8">
+          <h2 className="font-playfair font-medium text-white text-sm tracking-[0.14em] uppercase whitespace-nowrap">
+            Neden Biz
+          </h2>
+          <div className="flex-1 h-px bg-gradient-to-r from-[#cfd4dc]/80 to-transparent" />
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Fine Dining */}
+          <div className="glass-dark rounded-2xl p-8 text-center border border-white/10 hover:border-white/20 transition-all hover:-translate-y-1">
+            <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#cfd4dc]/20 to-[#cfd4dc]/5 border border-white/10 flex items-center justify-center">
+              <span className="text-3xl">🍽️</span>
+            </div>
+            <h3 className="font-playfair font-semibold text-white text-xl mb-4">Ustalık & Lezzet</h3>
+            <p className="text-white/60 text-sm leading-relaxed">
+              Michelin yıldızlı mutfaklardan ilham alan şefimiz, en seçkin malzemelerle
+              damağınızda iz bırakan tatlar yaratıyor. Her tabak, bir sanat eseri.
+            </p>
+          </div>
+
+          {/* Elegant Atmosphere */}
+          <div className="glass-dark rounded-2xl p-8 text-center border border-white/10 hover:border-white/20 transition-all hover:-translate-y-1">
+            <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20 flex items-center justify-center">
+              <span className="text-3xl">✨</span>
+            </div>
+            <h3 className="font-playfair font-semibold text-white text-xl mb-4">Zarif Atmosfer</h3>
+            <p className="text-white/60 text-sm leading-relaxed">
+              Özenle tasarlanmış iç mekan, yumuşak aydınlatma ve klasik müzik eşliğinde
+              romantik akşam yemeklerinden iş görüşmelerine ideal ortam.
+            </p>
+          </div>
+
+          {/* Premium Service */}
+          <div className="glass-dark rounded-2xl p-8 text-center border border-white/10 hover:border-white/20 transition-all hover:-translate-y-1">
+            <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/20 flex items-center justify-center">
+              <span className="text-3xl">⭐</span>
+            </div>
+            <h3 className="font-playfair font-semibold text-white text-xl mb-4">Kusursuz Hizmet</h3>
+            <p className="text-white/60 text-sm leading-relaxed">
+              Deneyimli ekibimiz, her misafirimize özel ilgi göstererek
+              beklentilerin ötesinde bir deneyim sunmak için titizlikle çalışıyor.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Actions - Dark Theme */}
+      <section className="max-w-6xl mx-auto px-6 py-20">
+        <div className="flex items-center gap-4 mb-8">
+          <h2 className="font-playfair font-medium text-white text-sm tracking-[0.14em] uppercase whitespace-nowrap">
+            Keşfedin
+          </h2>
+          <div className="flex-1 h-px bg-gradient-to-r from-[#cfd4dc]/80 to-transparent" />
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <Link to="/menu" className="glass-dark rounded-2xl p-10 border border-white/10 transition-all hover:border-white/20 hover:scale-[1.02] group">
+            <div className="w-14 h-14 mb-5 rounded-xl bg-gradient-to-br from-[#cfd4dc]/20 to-[#cfd4dc]/5 border border-white/10 flex items-center justify-center">
+              <span className="text-2xl">📖</span>
+            </div>
+            <h3 className="font-playfair font-semibold text-white text-2xl mb-3">
+              Menümüzü Keşfedin
+            </h3>
+            <p className="text-white/60 leading-relaxed">
+              Başlangıçlardan tatlılara, özenle seçilmiş şarap koleksiyonumuzdan
+              imza kokteyillerimize kadar tüm lezzetlerimizi inceleyin.
+            </p>
+          </Link>
+
+          <Link to={user ? '/booking' : '/register'} className="glass-dark rounded-2xl p-10 border border-white/10 transition-all hover:border-white/20 hover:scale-[1.02] group">
+            <div className="w-14 h-14 mb-5 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20 flex items-center justify-center">
+              <span className="text-2xl">📅</span>
+            </div>
+            <h3 className="font-playfair font-semibold text-white text-2xl mb-3">
+              Rezervasyon Yapın
+            </h3>
+            <p className="text-white/60 leading-relaxed">
+              Özel günleriniz için masanızı şimdiden ayırtın.
+              Romantik akşam yemekleri, kutlamalar veya iş toplantıları için idealiz.
+            </p>
+          </Link>
+        </div>
+      </section>
+
+      {/* Gallery Section */}
+      <section className="max-w-6xl mx-auto px-6 py-20">
+        <div className="flex items-center gap-4 mb-8">
+          <h2 className="font-playfair font-medium text-white text-sm tracking-[0.14em] uppercase whitespace-nowrap">
+            Galeri
+          </h2>
+          <div className="flex-1 h-px bg-gradient-to-r from-[#cfd4dc]/80 to-transparent" />
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {['fined1.webp', 'fined2.jpeg', 'fined3.webp', 'fined4.webp'].map((img, i) => (
+            <div key={i} className="relative overflow-hidden rounded-2xl group border border-white/10">
+              <img
+                src={`/images/${img}`}
+                alt={`BORCELLE ${i + 1}`}
+                className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                style={{ filter: 'contrast(1.05) saturate(1.1)' }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0f1a2b]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Contact Info - Dark Theme */}
+      <section className="max-w-6xl mx-auto px-6 py-20">
+        <div className="glass-dark rounded-2xl p-12 text-center border border-white/10">
+          <h2 className="font-playfair font-semibold text-white text-3xl mb-6">
+            Sizi Bekliyoruz
+          </h2>
+          <div className="flex flex-col md:flex-row justify-center items-center gap-8 text-white/60 mb-8">
+            <div className="text-center">
+              <p className="text-xs tracking-[0.12em] uppercase text-[#7b8698] mb-2">Çalışma Saatleri</p>
+              <p className="font-playfair font-medium text-white text-lg">Her Gün 11:00 - 23:00</p>
+            </div>
+            <div className="hidden md:block w-px h-12 bg-white/20" />
+            <div className="text-center">
+              <p className="text-xs tracking-[0.12em] uppercase text-[#7b8698] mb-2">Adres</p>
+              <p className="font-medium text-white/80">Merkez Mah. Lüks Sokak No:1, İstanbul</p>
+            </div>
+            <div className="hidden md:block w-px h-12 bg-white/20" />
+            <div className="text-center">
+              <p className="text-xs tracking-[0.12em] uppercase text-[#7b8698] mb-2">İletişim</p>
+              <p className="font-medium text-white/80">+90 (212) 555 01 23</p>
             </div>
           </div>
+          <Link to={user ? '/booking' : '/register'} className="inline-block bg-[#cfd4dc]/20 border border-[#cfd4dc]/30 text-white text-sm tracking-[0.10em] uppercase px-8 py-4 rounded-full font-medium hover:bg-[#cfd4dc]/30 transition-all">
+            Rezervasyon Yapın
+          </Link>
         </div>
-      </div>
+      </section>
 
-      {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-          Why Choose Us
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-            <div className="text-5xl mb-4">🍽️</div>
-            <h3 className="text-xl font-bold mb-3">Fine Dining</h3>
-            <p className="text-gray-600">
-              Expertly crafted dishes using the finest ingredients from local suppliers
-            </p>
-          </div>
-          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-            <div className="text-5xl mb-4">🤖</div>
-            <h3 className="text-xl font-bold mb-3">AI Booking Assistant</h3>
-            <p className="text-gray-600">
-              Book your table naturally with our intelligent chatbot - quick and easy
-            </p>
-          </div>
-          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-            <div className="text-5xl mb-4">⭐</div>
-            <h3 className="text-xl font-bold mb-3">Exceptional Service</h3>
-            <p className="text-gray-600">
-              Our dedicated staff ensures every visit is memorable and special
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Links Section */}
-      <div className="bg-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Link
-              to="/menu"
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white p-8 rounded-lg shadow-lg transition transform hover:scale-105"
-            >
-              <div className="text-4xl mb-3">📖</div>
-              <h3 className="text-2xl font-bold mb-2">View Our Menu</h3>
-              <p className="text-blue-100">
-                Browse our delicious selection of appetizers, mains, desserts, and drinks
-              </p>
-            </Link>
-            <Link
-              to={user ? '/booking' : '/register'}
-              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white p-8 rounded-lg shadow-lg transition transform hover:scale-105"
-            >
-              <div className="text-4xl mb-3">📅</div>
-              <h3 className="text-2xl font-bold mb-2">Make a Reservation</h3>
-              <p className="text-green-100">
-                Book your table online in seconds with our easy booking system
-              </p>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Info Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-gray-800 text-white rounded-lg p-12 text-center">
-          <h2 className="text-3xl font-bold mb-4">Opening Hours</h2>
-          <p className="text-xl mb-6">Monday - Sunday</p>
-          <p className="text-2xl font-semibold">11:00 AM - 10:00 PM</p>
-          <div className="mt-8">
-            <p className="text-lg">📍 123 Main Street, City, State 12345</p>
-            <p className="text-lg">📞 +1 (234) 567-8900</p>
-            <p className="text-lg">✉️ info@restaurant.com</p>
-          </div>
-        </div>
-      </div>
+      {/* Footer */}
+      <footer className="border-t border-white/10 py-8 text-center bg-[#0a0f18]">
+        <p className="text-[#7b8698] text-xs tracking-[0.12em]">
+          © 2004 - {new Date().getFullYear()} <span className="text-white font-medium">BORCELLE</span> Fine Dining
+        </p>
+        <p className="text-[#556070] text-xs mt-2">Tüm hakları saklıdır.</p>
+      </footer>
     </div>
   );
 };
 
 export default HomePage;
-

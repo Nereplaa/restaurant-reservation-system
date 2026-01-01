@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BORCELLE — Menu</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+
+<body>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo" title="BORCELLE">
+          <img src="assets/logo.png" alt="BORCELLE Logo">
+        </div>
+        <div class="brand-text">
+          <div class="name">Restaurant Admin</div>
+          <div class="tag">Management System</div>
+        </div>
+      </div>
+
+      <div class="profile">
+        <div class="avatar"></div>
+        <div class="who">
+          <b>admin</b>
+          <span>signed in</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a href="dashboard.html"><span class="ico">▦</span>Dashboard</a>
+        <a href="reservations.html"><span class="ico">▤</span>Reservations</a>
+        <a href="customers.html"><span class="ico">👥</span>Customers</a>
+        <a href="tables.html"><span class="ico">⧉</span>Tables</a>
+        <a href="menu.html"><span class="ico">🍽</span>Menu</a>
+        <a href="orders.html"><span class="ico">🧾</span>Orders</a>
+        <a href="settings.html"><span class="ico">⚙</span>Settings</a>
+        <a href="kds.html"><span class="ico">⟡</span>Kitchen Display</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" type="button">Logout</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <div class="topbar">
+        <div class="titleblock">
+          <h1>Menu</h1>
+          <p>Manage menu items</p>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" type="button">+ Add Menu Item</button>
+        </div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Menu Categories">
+        <button class="tab active" type="button">All</button>
+        <button class="tab" type="button">Appetizer</button>
+        <button class="tab" type="button">Main Course</button>
+        <button class="tab" type="button">Dessert</button>
+        <button class="tab" type="button">Beverage</button>
+        <button class="tab" type="button">Special</button>
+      </div>
+
+      <div class="panel">
+        <div class="empty">
+          <div class="spark">🍽</div>
+          <div>
+            <b style="color:#fff; font-weight:500;">No menu items found</b><br/>
+            New items will appear here once added.
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

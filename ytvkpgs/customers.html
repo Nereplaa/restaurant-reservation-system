@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BORCELLE — Customers</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+
+<body>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo" title="BORCELLE">
+          <img src="assets/logo.png" alt="BORCELLE Logo">
+        </div>
+        <div class="brand-text">
+          <div class="name">Restaurant Admin</div>
+          <div class="tag">Management System</div>
+        </div>
+      </div>
+
+      <div class="profile">
+        <div class="avatar"></div>
+        <div class="who">
+          <b>admin</b>
+          <span>signed in</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a href="dashboard.html"><span class="ico">▦</span>Dashboard</a>
+        <a href="reservations.html"><span class="ico">▤</span>Reservations</a>
+        <a href="customers.html"><span class="ico">👥</span>Customers</a>
+        <a href="tables.html"><span class="ico">⧉</span>Tables</a>
+        <a href="menu.html"><span class="ico">🍽</span>Menu</a>
+        <a href="orders.html"><span class="ico">🧾</span>Orders</a>
+        <a href="settings.html"><span class="ico">⚙</span>Settings</a>
+        <a href="kds.html"><span class="ico">⟡</span>Kitchen Display</a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" type="button">Logout</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <div class="topbar">
+        <div class="titleblock">
+          <h1>Customers</h1>
+          <p>View and manage all customers</p>
+        </div>
+
+        <div class="actions">
+          <input class="input" placeholder="Search by name or email..." style="max-width: 360px;" />
+          <button class="btn" type="button">Search</button>
+          <button class="btn primary" type="button">+ Add User</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <table class="table" aria-label="Customers Table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Joined Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge info">AU</span> Admin User</td>
+              <td>admin@restaurant.com</td>
+              <td>+1234567890</td>
+              <td><span class="badge info">admin</span></td>
+              <td>18.12.2025</td>
+            </tr>
+            <tr>
+              <td><span class="badge warn">MU</span> Manager User</td>
+              <td>manager@restaurant.com</td>
+              <td>+1234567891</td>
+              <td><span class="badge warn">manager</span></td>
+              <td>18.12.2025</td>
+            </tr>
+            <tr>
+              <td><span class="badge ok">SU</span> Server User</td>
+              <td>server@restaurant.com</td>
+              <td>+1234567892</td>
+              <td><span class="badge ok">server</span></td>
+              <td>18.12.2025</td>
+            </tr>
+            <tr>
+              <td><span class="badge ok">KU</span> Kitchen User</td>
+              <td>kitchen@restaurant.com</td>
+              <td>+1234567893</td>
+              <td><span class="badge ok">kitchen</span></td>
+              <td>18.12.2025</td>
+            </tr>
+            <tr>
+              <td><span class="badge">JD</span> John Doe</td>
+              <td>john.doe@example.com</td>
+              <td>+1234567894</td>
+              <td><span class="badge">customer</span></td>
+              <td>18.12.2025</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="grid" style="margin-top: 14px;">
+          <div class="card kpi">
+            <div class="k">Total Customers</div>
+            <div class="v">5</div>
+            <div class="mini">All registered accounts.</div>
+          </div>
+
+          <div class="card kpi">
+            <div class="k">This Month</div>
+            <div class="v">0</div>
+            <div class="mini">New sign-ups this month.</div>
+          </div>
+
+          <div class="card kpi">
+            <div class="k">Staff Users</div>
+            <div class="v">4</div>
+            <div class="mini">Admin / Manager / Server / Kitchen.</div>
+          </div>
+
+          <div class="card kpi">
+            <div class="k">Customer Users</div>
+            <div class="v">1</div>
+            <div class="mini">Guests with customer role.</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

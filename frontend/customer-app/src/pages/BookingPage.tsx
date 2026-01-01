@@ -1,9 +1,18 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import { CustomSelect, CustomDatePicker, CustomTimePicker } from '../components/FormComponents';
 
-const BookingPage = () => {
+interface AvailableTable {
+  id: string;
+  tableNumber: string;
+  capacity: number;
+  location: string | null;
+  status: string;
+}
+
+const BookingPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -12,16 +21,65 @@ const BookingPage = () => {
     time: '',
     partySize: 2,
     specialRequest: '',
+    tableId: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  // Table selection state
+  const [availableTables, setAvailableTables] = useState<AvailableTable[]>([]);
+  const [loadingTables, setLoadingTables] = useState(false);
+  const [tablesError, setTablesError] = useState('');
+
+  // Generate party size options
+  const partySizeOptions = Array.from({ length: 20 }, (_, i) => ({
+    value: i + 1,
+    label: `${i + 1} Kişi`,
+  }));
+
+  // Fetch available tables when date, time, or partySize changes
+  useEffect(() => {
+    if (formData.date && formData.time && formData.partySize) {
+      fetchAvailableTables();
+    } else {
+      setAvailableTables([]);
+      setFormData((prev) => ({ ...prev, tableId: '' }));
+    }
+  }, [formData.date, formData.time, formData.partySize]);
+
+  const fetchAvailableTables = async () => {
+    setLoadingTables(true);
+    setTablesError('');
+    try {
+      const response = await api.get('/tables/available', {
+        params: {
+          date: formData.date,
+          time: formData.time,
+          party_size: formData.partySize,
+        },
+      });
+      if (response.data.success) {
+        setAvailableTables(response.data.data);
+        // Reset table selection if previous selection is no longer available
+        const tableIds = response.data.data.map((t: AvailableTable) => t.id);
+        if (formData.tableId && !tableIds.includes(formData.tableId)) {
+          setFormData((prev) => ({ ...prev, tableId: '' }));
+        }
+      }
+    } catch (err: unknown) {
+      setTablesError('Masalar yüklenemedi');
+      setAvailableTables([]);
+    } finally {
+      setLoadingTables(false);
+    }
+  };
+
+  const handleTableSelect = (tableId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      tableId: prev.tableId === tableId ? '' : tableId,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,15 +89,22 @@ const BookingPage = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post('/reservations', formData);
-      if (response.data.success) {
-        setSuccess('Reservation created successfully!');
+      const response = await api.post('/reservations', {
+        date: formData.date,
+        time: formData.time,
+        party_size: formData.partySize,
+        special_request: formData.specialRequest,
+        table_id: formData.tableId || null,
+      });
+      if (response.data) {
+        setSuccess('Rezervasyon başarıyla oluşturuldu!');
         setTimeout(() => {
           navigate('/reservations');
         }, 2000);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to create reservation');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: { message?: string } } } };
+      setError(error.response?.data?.error?.message || 'Rezervasyon oluşturulamadı');
     } finally {
       setIsLoading(false);
     }
@@ -47,154 +112,257 @@ const BookingPage = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Please log in to make a reservation</h2>
+      <div className="min-h-screen bg-premium flex items-center justify-center">
+        <div className="text-center glass-dark rounded-2xl border border-white/10 p-8">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl">
+            🔒
+          </div>
+          <h2 className="font-playfair text-2xl font-medium text-white mb-4">Giriş Yapın</h2>
+          <p className="text-white/60 mb-6">Rezervasyon yapmak için giriş yapın</p>
           <button
             onClick={() => navigate('/login')}
-            className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition"
+            className="btn-primary px-6 py-3 rounded-xl"
           >
-            Go to Login
+            Giriş Yap
           </button>
         </div>
       </div>
     );
   }
 
-  // Get today's date for min attribute
-  const today = new Date().toISOString().split('T')[0];
+  const canShowTables = formData.date && formData.time && formData.partySize;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      <div className="bg-primary text-white py-12">
+    <div className="min-h-screen bg-premium">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-[#0f1a2b] to-[#16233a] text-white py-12 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-4">Make a Reservation</h1>
-          <p className="text-xl text-gray-100">
-            Book your table and enjoy a wonderful dining experience
-          </p>
+          <h1 className="font-playfair text-4xl font-medium mb-2">Rezervasyon Yap</h1>
+          <p className="text-white/60">Masanızı ayırtın ve unutulmaz bir yemek deneyimi yaşayın</p>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-                {error}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Form Section */}
+          <div className="glass-dark rounded-2xl border border-white/10 p-8 relative z-10">
+            <h2 className="font-playfair text-xl text-white mb-6">Rezervasyon Bilgileri</h2>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="bg-red-500/20 border border-red-500/30 text-red-200 px-4 py-3 rounded-xl text-sm animate-fade-in-up">
+                  ⚠️ {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 px-4 py-3 rounded-xl text-sm animate-fade-in-up">
+                  ✓ {success}
+                </div>
+              )}
+
+              {/* Date & Time Row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                    Tarih *
+                  </label>
+                  <CustomDatePicker
+                    value={formData.date}
+                    onChange={(val) => setFormData({ ...formData, date: val })}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                    Saat *
+                  </label>
+                  <CustomTimePicker
+                    value={formData.time}
+                    onChange={(val) => setFormData({ ...formData, time: val })}
+                    minHour={11}
+                    maxHour={21}
+                  />
+                </div>
               </div>
-            )}
 
-            {success && (
-              <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg">
-                {success}
+              {/* Party Size */}
+              <div>
+                <label className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                  Kişi Sayısı *
+                </label>
+                <CustomSelect
+                  options={partySizeOptions}
+                  value={formData.partySize}
+                  onChange={(val) => setFormData({ ...formData, partySize: Number(val) })}
+                  placeholder="Kişi sayısı seçin"
+                  icon={
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  }
+                />
               </div>
-            )}
 
-            <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                Date *
-              </label>
-              <input
-                type="date"
-                id="date"
-                name="date"
-                required
-                min={today}
-                value={formData.date}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
+              {/* Special Request */}
+              <div>
+                <label className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                  Özel İstekler <span className="text-white/40">(Opsiyonel)</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={formData.specialRequest}
+                  onChange={(e) => setFormData({ ...formData, specialRequest: e.target.value })}
+                  placeholder="Örn: Cam kenarı masa, doğum günü kutlaması..."
+                  className="w-full px-4 py-3 border border-white/20 rounded-xl bg-white/5 text-white placeholder-white/30 focus:border-[#cfd4dc]/50 focus:bg-white/8 transition-all outline-none resize-none"
+                />
+              </div>
 
-            <div>
-              <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                Time *
-              </label>
-              <input
-                type="time"
-                id="time"
-                name="time"
-                required
-                min="11:00"
-                max="21:00"
-                value={formData.time}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-              <p className="mt-1 text-sm text-gray-500">Available hours: 11:00 AM - 9:00 PM</p>
-            </div>
+              {/* Selected Table Info */}
+              {formData.tableId && (
+                <div className="bg-[#cfd4dc]/10 border border-[#cfd4dc]/20 rounded-xl p-3 animate-fade-in-up">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-[#cfd4dc]">✓</span>
+                    <span className="text-white">Seçilen Masa:</span>
+                    <span className="text-[#cfd4dc] font-medium">
+                      {availableTables.find((t) => t.id === formData.tableId)?.tableNumber}
+                    </span>
+                  </div>
+                </div>
+              )}
 
-            <div>
-              <label htmlFor="partySize" className="block text-sm font-medium text-gray-700 mb-2">
-                Party Size *
-              </label>
-              <select
-                id="partySize"
-                name="partySize"
-                required
-                value={formData.partySize}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              >
-                {[...Array(20)].map((_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    {i + 1} {i === 0 ? 'Guest' : 'Guests'}
-                  </option>
+              {/* Buttons */}
+              <div className="flex gap-4 pt-2">
+                <button
+                  type="submit"
+                  disabled={isLoading || !formData.date || !formData.time}
+                  className="flex-1 py-3.5 px-6 rounded-xl font-medium bg-gradient-to-r from-[#cfd4dc] to-[#9aa3b2] text-[#0f1a2b] hover:shadow-lg hover:shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                >
+                  {isLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Oluşturuluyor...
+                    </span>
+                  ) : 'Rezervasyonu Onayla'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/')}
+                  className="px-6 py-3.5 rounded-xl font-medium bg-white/5 border border-white/20 text-white/80 hover:bg-white/10 hover:text-white transition-all duration-200"
+                >
+                  İptal
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Table Selection Section */}
+          <div className="glass-dark rounded-2xl border border-white/10 p-8">
+            <h2 className="font-playfair text-xl text-white mb-2">Masa Seçimi</h2>
+            <p className="text-white/50 text-sm mb-6">
+              {canShowTables
+                ? `${formData.partySize} kişi için uygun masalar`
+                : 'Tarih, saat ve kişi sayısı seçin'
+              }
+            </p>
+
+            {!canShowTables ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl">
+                  🪑
+                </div>
+                <p className="text-white/40 text-sm">
+                  Uygun masaları görmek için önce<br />tarih, saat ve kişi sayısı seçin
+                </p>
+              </div>
+            ) : loadingTables ? (
+              <div className="text-center py-12">
+                <div className="w-8 h-8 border-2 border-white/20 border-t-white/80 rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-white/50 text-sm">Masalar yükleniyor...</p>
+              </div>
+            ) : tablesError ? (
+              <div className="text-center py-12">
+                <p className="text-red-300 text-sm">⚠️ {tablesError}</p>
+              </div>
+            ) : availableTables.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl">
+                  😔
+                </div>
+                <p className="text-white/50 text-sm">
+                  Bu tarih ve saatte {formData.partySize} kişilik<br />uygun masa bulunmuyor
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {availableTables.map((table) => (
+                  <button
+                    key={table.id}
+                    type="button"
+                    onClick={() => handleTableSelect(table.id)}
+                    className={`relative p-4 rounded-xl border transition-all duration-200 text-left group ${formData.tableId === table.id
+                      ? 'bg-[#cfd4dc]/20 border-[#cfd4dc]/50 shadow-lg scale-[1.02]'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 hover:scale-[1.01]'
+                      }`}
+                  >
+                    {/* Selection indicator */}
+                    {formData.tableId === table.id && (
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-[#cfd4dc] flex items-center justify-center animate-fade-in-up">
+                        <svg className="w-3 h-3 text-[#0f1a2b]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+
+                    {/* Table icon */}
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-2 transition-colors ${formData.tableId === table.id
+                      ? 'bg-[#cfd4dc]/30'
+                      : 'bg-white/10 group-hover:bg-white/15'
+                      }`}>
+                      <span className="text-lg">🪑</span>
+                    </div>
+
+                    {/* Table info */}
+                    <div className={`font-medium text-sm ${formData.tableId === table.id ? 'text-white' : 'text-white/80'}`}>
+                      Masa {table.tableNumber}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-white/50 mt-1">
+                      <span>{table.capacity} Kişilik</span>
+                      {table.location && (
+                        <>
+                          <span>•</span>
+                          <span>{table.location}</span>
+                        </>
+                      )}
+                    </div>
+                  </button>
                 ))}
-              </select>
-            </div>
+              </div>
+            )}
 
-            <div>
-              <label htmlFor="specialRequest" className="block text-sm font-medium text-gray-700 mb-2">
-                Special Requests (Optional)
-              </label>
-              <textarea
-                id="specialRequest"
-                name="specialRequest"
-                rows={4}
-                value={formData.specialRequest}
-                onChange={handleChange}
-                placeholder="E.g., Window seat, birthday celebration, dietary restrictions..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-              />
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
-              <h4 className="font-semibold text-blue-900 mb-2">Important Information:</h4>
-              <ul className="list-disc list-inside text-blue-800 space-y-1">
-                <li>Reservations must be made at least 2 hours in advance</li>
-                <li>You can book up to 30 days in advance</li>
-                <li>Each reservation is for approximately 2 hours</li>
-                <li>Cancellations must be made at least 2 hours before your reservation</li>
-              </ul>
-            </div>
-
-            <div className="flex space-x-4">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 bg-primary hover:bg-primary-dark text-white py-3 px-6 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Creating Reservation...' : 'Confirm Reservation'}
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/')}
-                className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
+            {/* Info box */}
+            {canShowTables && availableTables.length > 0 && (
+              <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
+                <p className="text-white/50 text-xs">
+                  💡 Masa seçimi opsiyoneldir. Seçim yapmazsanız, restoran size en uygun masayı atayacaktır.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* AI Booking Alternative */}
-        <div className="mt-8 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg p-6 text-center">
-          <h3 className="text-2xl font-bold mb-2">🤖 Try Our AI Booking Assistant</h3>
-          <p className="mb-4">Book your table naturally with our intelligent chatbot</p>
-          <button className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
-            Chat with AI (Coming Soon)
-          </button>
+        {/* Important Info */}
+        <div className="mt-8 glass-dark rounded-xl p-6 border border-white/10">
+          <h4 className="font-medium text-[#cfd4dc] mb-3">📋 Önemli Bilgiler</h4>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-white/60 text-sm">
+            <li>• Rezervasyonlar en az 2 saat önceden yapılmalıdır</li>
+            <li>• 30 güne kadar önceden rezervasyon yapabilirsiniz</li>
+            <li>• Her rezervasyon yaklaşık 2 saat içindir</li>
+            <li>• İptaller en az 2 saat önce yapılmalıdır</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -202,4 +370,3 @@ const BookingPage = () => {
 };
 
 export default BookingPage;
-

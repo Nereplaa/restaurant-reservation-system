@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Borcelle Gourmet Menü</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root{
+      --bg:#f7f1e8;         /* krem zemin */
+      --panel:#fdf8f1;      /* açık krem panel */
+      --gold:#d4af37;       /* klasik gold */
+      --gold-soft:#e2c873;
+      --text:#3b3228;
+      --muted:#8b7c68;
+      --border:#e3d5c3;
+      --shadow:0 20px 40px rgba(0,0,0,.12);
+      --radius:22px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family: "Cormorant Garamond","Georgia",serif;
+      background: radial-gradient(circle at top, #fffaf3 0, var(--bg) 45%, #eee1d0 100%);
+      color:var(--text);
+      padding:40px 12px;
+    }
+    .menu-wrapper{
+      max-width:1000px;
+      margin:0 auto;
+      background:var(--panel);
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      padding:42px 52px 36px;
+      position:relative;
+      overflow:hidden;
+    }
+    /* decorative border */
+    .menu-wrapper::before,
+    .menu-wrapper::after{
+      content:"";
+      position:absolute;
+      inset:16px;
+      border-radius:calc(var(--radius) - 10px);
+      border:1px solid rgba(212,175,55,.25);
+      pointer-events:none;
+    }
+    .menu-wrapper::after{
+      inset:22px;
+      border-style:dashed;
+      opacity:.6;
+    }
+
+    header{
+      text-align:center;
+      margin-bottom:36px;
+      position:relative;
+      z-index:1;
+    }
+    .brand{
+      letter-spacing:0.45em;
+      text-transform:uppercase;
+      font-size:14px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+    h1{
+      font-size:38px;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      color:var(--gold);
+      margin-bottom:4px;
+    }
+    .subtitle{
+      font-size:15px;
+      color:var(--muted);
+      font-style:italic;
+    }
+    .divider{
+      margin:22px auto 0;
+      width:140px;
+      height:1px;
+      background:linear-gradient(90deg,transparent, var(--gold), transparent);
+      position:relative;
+    }
+    .divider::before{
+      content:"✶";
+      position:absolute;
+      inset:0;
+      margin:auto;
+      width:28px;
+      height:28px;
+      border-radius:50%;
+      border:1px solid var(--gold-soft);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:11px;
+      color:var(--gold);
+      background:var(--panel);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:34px 48px;
+      margin-top:28px;
+      position:relative;
+      z-index:1;
+    }
+    @media(max-width:860px){
+      .menu-wrapper{
+        padding:28px 20px 26px;
+      }
+      .grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    .section{
+      padding-bottom:8px;
+      border-bottom:1px dashed rgba(139,124,104,.22);
+    }
+    .section-title{
+      font-size:20px;
+      text-transform:uppercase;
+      letter-spacing:0.16em;
+      color:var(--gold);
+      margin-bottom:8px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .section-title::before{
+      content:"";
+      flex:1;
+      height:1px;
+      background:linear-gradient(90deg,var(--gold-soft),transparent);
+    }
+    .section-title::after{
+      content:"";
+      flex:1;
+      height:1px;
+      background:linear-gradient(90deg,transparent,var(--gold-soft));
+    }
+    .section-note{
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:10px;
+      font-style:italic;
+    }
+
+    .item{
+      margin-bottom:12px;
+    }
+    .item-header{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-end;
+      font-size:15px;
+    }
+    .item-name{
+      font-weight:600;
+      text-transform:uppercase;
+      letter-spacing:0.08em;
+    }
+    .item-meta{
+      display:flex;
+      gap:14px;
+      font-size:12px;
+      font-family:"Didot","Times New Roman",serif;
+    }
+    .pill{
+      padding:2px 8px;
+      border-radius:999px;
+      border:1px solid rgba(212,175,55,.4);
+      color:var(--gold);
+    }
+    .price{
+      min-width:72px;
+      text-align:right;
+      font-weight:600;
+      color:#6b5a3c;
+    }
+    .item-desc{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:2px;
+      line-height:1.4;
+    }
+
+    footer{
+      margin-top:30px;
+      text-align:center;
+      font-size:11px;
+      color:var(--muted);
+      letter-spacing:0.16em;
+      text-transform:uppercase;
+    }
+  </style>
+</head>
+<body>
+<div class="menu-wrapper">
+  <header>
+    <div class="brand">BORCELLE</div>
+    <h1>Gourmet Menu</h1>
+    <div class="subtitle">Fine Dining · Seasonal Selection · Chef’s Signature</div>
+    <div class="divider"></div>
+  </header>
+
+  <div class="grid">
+    <!-- BAŞLANGIÇLAR -->
+    <section class="section">
+      <h2 class="section-title">Başlangıçlar</h2>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Zeytin & Kekikli Artizan Ekmek Trio</div>
+            <div class="item-meta">
+              <span class="pill">220 kcal</span>
+            </div>
+          </div>
+          <div class="price">220₺</div>
+        </div>
+        <div class="item-desc">Sıcak taş fırın ekmekleri, zeytinyağı–balsamik dip sos ve deniz tuzu ile.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Izgara Halloumi & Nar Roka</div>
+            <div class="item-meta">
+              <span class="pill">310 kcal</span>
+            </div>
+          </div>
+          <div class="price">260₺</div>
+        </div>
+        <div class="item-desc">Nar ekşili roka yatağında ızgara hellim, kavrulmuş fındık parçaları ile.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Trüf Aromalı Mantarlı Bruschetta</div>
+            <div class="item-meta">
+              <span class="pill">270 kcal</span>
+            </div>
+          </div>
+          <div class="price">240₺</div>
+        </div>
+        <div class="item-desc">Karamelize soğan, sote mantar ve hafif trüf yağı ile kızarmış ekmek üstü lezzet.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Somon Tartar Lime Breeze</div>
+            <div class="item-meta">
+              <span class="pill">260 kcal</span>
+            </div>
+          </div>
+          <div class="price">320₺</div>
+        </div>
+        <div class="item-desc">Taze somon, avokado, lime sos ve susam ile rafine bir soğuk başlangıç.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Kabak Çiçeği Dolması Serisi (4 adet)</div>
+            <div class="item-meta">
+              <span class="pill">190 kcal</span>
+              <span class="pill">Vejetaryen</span>
+            </div>
+          </div>
+          <div class="price">230₺</div>
+        </div>
+        <div class="item-desc">Otlu pirinç iç harcı ile doldurulmuş hafif Ege klasiği.</div>
+      </div>
+    </section>
+
+    <!-- ANA YEMEKLER -->
+    <section class="section">
+      <h2 class="section-title">Ana Yemekler</h2>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Borcelle Signature Steak</div>
+            <div class="item-meta">
+              <span class="pill">720 kcal</span>
+            </div>
+          </div>
+          <div class="price">780₺</div>
+        </div>
+        <div class="item-desc">250 gr dry-aged dana antrikot, demi-glace sos, ızgara sebzeler ve patates püresi ile.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Kremalı Porçini Risotto</div>
+            <div class="item-meta">
+              <span class="pill">580 kcal</span>
+              <span class="pill">Vejetaryen</span>
+            </div>
+          </div>
+          <div class="price">520₺</div>
+        </div>
+        <div class="item-desc">Parmesan ve tereyağı ile bağlanmış, yoğun aromalı porçini mantarlı risotto.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Deniz Mahsullü Linguine</div>
+            <div class="item-meta">
+              <span class="pill">650 kcal</span>
+            </div>
+          </div>
+          <div class="price">560₺</div>
+        </div>
+        <div class="item-desc">Karides, midye ve kalamarla zenginleştirilmiş, beyaz şarap soslu ince makarna.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Ballı Hardallı Fırın Somon</div>
+            <div class="item-meta">
+              <span class="pill">520 kcal</span>
+            </div>
+          </div>
+          <div class="price">590₺</div>
+        </div>
+        <div class="item-desc">Kinoa yatağında narenciye dokunuşlu ballı hardal sos ile fırınlanmış somon.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Osmanlı Usulü Kuzu İncik</div>
+            <div class="item-meta">
+              <span class="pill">780 kcal</span>
+            </div>
+          </div>
+          <div class="price">640₺</div>
+        </div>
+        <div class="item-desc">8 saat düşük ısıda pişirilmiş kuzu incik, patlıcan püresi ve kendi sosu ile.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Vegan Izgara Köz Tabağı</div>
+            <div class="item-meta">
+              <span class="pill">470 kcal</span>
+              <span class="pill">Vegan</span>
+            </div>
+          </div>
+          <div class="price">450₺</div>
+        </div>
+        <div class="item-desc">Köz patlıcan, kabak, kapya biber ve humus ile dengeli bir bitkisel ana yemek.</div>
+      </div>
+    </section>
+
+    <!-- GURME PİZZALAR -->
+    <section class="section">
+      <h2 class="section-title">Gurme Pizzalar</h2>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Truffle Mushroom Pizza</div>
+            <div class="item-meta">
+              <span class="pill">690 kcal</span>
+            </div>
+          </div>
+          <div class="price">430₺</div>
+        </div>
+        <div class="item-desc">Mozzarella, mantar ve trüf yağı ile yoğun aromalı gurme pizza.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Napoli Margherita Deluxe</div>
+            <div class="item-meta">
+              <span class="pill">610 kcal</span>
+              <span class="pill">Vejetaryen</span>
+            </div>
+          </div>
+          <div class="price">390₺</div>
+        </div>
+        <div class="item-desc">San Marzano domates sosu, buffalo mozzarella ve taze fesleğen.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Prosciutto & Roka</div>
+            <div class="item-meta">
+              <span class="pill">720 kcal</span>
+            </div>
+          </div>
+          <div class="price">460₺</div>
+        </div>
+        <div class="item-desc">İnce dilim prosciutto, roka ve parmesan ile dengeli tuzlulukta.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Quattro Formaggi</div>
+            <div class="item-meta">
+              <span class="pill">780 kcal</span>
+            </div>
+          </div>
+          <div class="price">440₺</div>
+        </div>
+        <div class="item-desc">Gorgonzola, mozzarella, parmesan ve kaşar karışımı peynir şöleni.</div>
+      </div>
+    </section>
+
+    <!-- ŞEF ÖZEL -->
+    <section class="section">
+      <h2 class="section-title">Şef Özel</h2>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Karamelize Soğanlı T-Bone</div>
+            <div class="item-meta">
+              <span class="pill">950 kcal</span>
+            </div>
+          </div>
+          <div class="price">890₺</div>
+        </div>
+        <div class="item-desc">350 gr premium T-Bone, karamelize soğan ve rosmarinli patatesler ile.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Borcelle Fileto Sufle</div>
+            <div class="item-meta">
+              <span class="pill">860 kcal</span>
+            </div>
+          </div>
+          <div class="price">840₺</div>
+        </div>
+        <div class="item-desc">Şarap indirgemeli sos ile tereyağında mühürlenmiş dana fileto.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Kestane Püreli Ördek Göğsü</div>
+            <div class="item-meta">
+              <span class="pill">740 kcal</span>
+            </div>
+          </div>
+          <div class="price">820₺</div>
+        </div>
+        <div class="item-desc">Portakal glaze ve kestane püresi ile dengelenmiş gurme ördek tabağı.</div>
+      </div>
+    </section>
+
+    <!-- TATLILAR -->
+    <section class="section">
+      <h2 class="section-title">Tatlılar</h2>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Çikolatalı Volkan Sufle</div>
+            <div class="item-meta">
+              <span class="pill">480 kcal</span>
+            </div>
+          </div>
+          <div class="price">260₺</div>
+        </div>
+        <div class="item-desc">Akışkan bitter çekirdek, yanında dondurma ile servis edilir.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">San Sebastian Cheesecake</div>
+            <div class="item-meta">
+              <span class="pill">510 kcal</span>
+            </div>
+          </div>
+          <div class="price">270₺</div>
+        </div>
+        <div class="item-desc">Orta şekerli, kremamsı dokuda klasik yanık cheesecake.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Limonlu Mascarpone Cup</div>
+            <div class="item-meta">
+              <span class="pill">390 kcal</span>
+            </div>
+          </div>
+          <div class="price">240₺</div>
+        </div>
+        <div class="item-desc">Limon kreması, mascarpone ve bisküvi katmanlı ferahlatıcı tatlı.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Fıstıklı Kadayıf Parfe</div>
+            <div class="item-meta">
+              <span class="pill">520 kcal</span>
+            </div>
+          </div>
+          <div class="price">280₺</div>
+        </div>
+        <div class="item-desc">Antep fıstığı, kıtır kadayıf ve parfe katmanlarıyla modernleştirilmiş yerel tat.</div>
+      </div>
+    </section>
+
+    <!-- İÇECEKLER -->
+    <section class="section">
+      <h2 class="section-title">İçecekler</h2>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Taze Portakal Suyu</div>
+            <div class="item-meta">
+              <span class="pill">120 kcal</span>
+            </div>
+          </div>
+          <div class="price">120₺</div>
+        </div>
+        <div class="item-desc">Sıkma günlük portakal suyu.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Ev Yapımı Limonata</div>
+            <div class="item-meta">
+              <span class="pill">140 kcal</span>
+            </div>
+          </div>
+          <div class="price">110₺</div>
+        </div>
+        <div class="item-desc">Buzlu, naneli seçenekleriyle hafif ekşi-dengeli lezzet.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Şeftalili Soğuk Çay</div>
+            <div class="item-meta">
+              <span class="pill">110 kcal</span>
+            </div>
+          </div>
+          <div class="price">105₺</div>
+        </div>
+        <div class="item-desc">Demlenmiş çay bazlı, şeftali aromalı ferah içecek.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Türk Kahvesi</div>
+            <div class="item-meta">
+              <span class="pill">5 kcal</span>
+            </div>
+          </div>
+          <div class="price">80₺</div>
+        </div>
+        <div class="item-desc">Klasik, orta kavrum Türk kahvesi.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Cappuccino</div>
+            <div class="item-meta">
+              <span class="pill">80 kcal</span>
+            </div>
+          </div>
+          <div class="price">95₺</div>
+        </div>
+        <div class="item-desc">Yoğun espresso ve süt köpüğü ile.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Latte</div>
+            <div class="item-meta">
+              <span class="pill">120 kcal</span>
+            </div>
+          </div>
+          <div class="price">105₺</div>
+        </div>
+        <div class="item-desc">Yumuşak içimli, süt oranı yüksek kahve.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Sade Soda</div>
+            <div class="item-meta">
+              <span class="pill">0 kcal</span>
+            </div>
+          </div>
+          <div class="price">60₺</div>
+        </div>
+        <div class="item-desc">Gazlı mineral içecek.</div>
+      </div>
+    </section>
+
+    <!-- ŞARAP KOLLEKSİYONU -->
+    <section class="section">
+      <h2 class="section-title">Şarap Koleksiyonu</h2>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Château Elegante Reserva</div>
+            <div class="item-meta">
+              <span class="pill">Kırmızı</span>
+              <span class="pill">125 kcal / kadeh</span>
+            </div>
+          </div>
+          <div class="price">Şişe 1700₺</div>
+        </div>
+        <div class="item-desc">Yoğun tanenli, karadut ve siyah erik notalarına sahip gövdeli kırmızı.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Borcelle Cabernet Special</div>
+            <div class="item-meta">
+              <span class="pill">Kırmızı</span>
+              <span class="pill">130 kcal / kadeh</span>
+            </div>
+          </div>
+          <div class="price">Kadeh 210₺ · Şişe 950₺</div>
+        </div>
+        <div class="item-desc">Meşe fıçıda dinlendirilmiş, baharat ve siyah meyve notaları taşıyan özel harman.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Pinot Noir Rosé Serenade</div>
+            <div class="item-meta">
+              <span class="pill">Roze</span>
+              <span class="pill">115 kcal / kadeh</span>
+            </div>
+          </div>
+          <div class="price">Kadeh 190₺ · Şişe 850₺</div>
+        </div>
+        <div class="item-desc">Çilek ve narenciye profiline sahip, hafif gövdeli taze roze.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Sauvignon Blanc Crystal</div>
+            <div class="item-meta">
+              <span class="pill">Beyaz</span>
+              <span class="pill">105 kcal / kadeh</span>
+            </div>
+          </div>
+          <div class="price">Kadeh 190₺ · Şişe 900₺</div>
+        </div>
+        <div class="item-desc">Tropik meyve ve bitkisel notalara sahip, yüksek asiditeli ferah beyaz şarap.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Chardonnay Gold Barrel</div>
+            <div class="item-meta">
+              <span class="pill">Beyaz</span>
+              <span class="pill">120 kcal / kadeh</span>
+            </div>
+          </div>
+          <div class="price">Kadeh 230₺ · Şişe 1100₺</div>
+        </div>
+        <div class="item-desc">Vanilya ve tereyağı hissi barındıran, tam gövdeli fıçı Chardonnay.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Prosecco Stella</div>
+            <div class="item-meta">
+              <span class="pill">Köpüklü</span>
+              <span class="pill">98 kcal / kadeh</span>
+            </div>
+          </div>
+          <div class="price">Kadeh 180₺ · Şişe 820₺</div>
+        </div>
+        <div class="item-desc">İnce kabarcıklı, hafif tatlı bitişli İtalyan prosecco.</div>
+      </div>
+
+      <div class="item">
+        <div class="item-header">
+          <div>
+            <div class="item-name">Champagne Maison Royale</div>
+            <div class="item-meta">
+              <span class="pill">Köpüklü</span>
+              <span class="pill">95 kcal / kadeh</span>
+            </div>
+          </div>
+          <div class="price">Şişe 4800₺</div>
+        </div>
+        <div class="item-desc">Özel anlar için önerilen, dengeli asiditeye sahip prestijli Champagne.</div>
+      </div>
+    </section>
+  </div>
+
+</div>
+</body>
+</html>

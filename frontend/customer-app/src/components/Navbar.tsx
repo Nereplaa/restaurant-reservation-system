@@ -1,83 +1,102 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
+  const isActive = (path: string) => location.pathname === path;
+
   return (
-    <nav className="bg-white shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center">
-              <span className="text-2xl font-bold text-primary">🍽️ Restaurant</span>
-            </Link>
-            <div className="hidden md:flex ml-10 space-x-8">
-              <Link
-                to="/"
-                className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition"
-              >
-                Home
-              </Link>
-              <Link
-                to="/menu"
-                className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition"
-              >
-                Menu
-              </Link>
-              {user && (
-                <>
-                  <Link
-                    to="/booking"
-                    className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition"
-                  >
-                    Book Table
-                  </Link>
-                  <Link
-                    to="/reservations"
-                    className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition"
-                  >
-                    My Reservations
-                  </Link>
-                </>
-              )}
+    <nav className="bg-[#0f1a2b] border-b border-white/10 sticky top-0 z-50">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="flex justify-between h-16 items-center">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl border border-white/20 overflow-hidden bg-white/10 flex items-center justify-center">
+              <img src="/images/logo.png" alt="BORCELLE" className="w-full h-full object-cover" />
             </div>
+            <div className="flex flex-col">
+              <span className="font-playfair font-semibold text-white tracking-[0.12em] uppercase text-sm">
+                BORCELLE
+              </span>
+              <span className="text-[9px] tracking-[0.08em] uppercase text-[#9aa3b2]">
+                Fine Dining
+              </span>
+            </div>
+          </Link>
+
+          {/* Nav Links */}
+          <div className="hidden md:flex items-center gap-1">
+            <Link
+              to="/"
+              className={`text-xs tracking-[0.10em] uppercase px-4 py-2 rounded-full transition-all ${isActive('/') ? 'text-white bg-white/10' : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+            >
+              Anasayfa
+            </Link>
+            <Link
+              to="/menu"
+              className={`text-xs tracking-[0.10em] uppercase px-4 py-2 rounded-full transition-all ${isActive('/menu') ? 'text-white bg-white/10' : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
+            >
+              Menü
+            </Link>
+            {user && (
+              <>
+                <Link
+                  to="/booking"
+                  className={`text-xs tracking-[0.10em] uppercase px-4 py-2 rounded-full transition-all ${isActive('/booking') ? 'text-white bg-white/10' : 'text-white/70 hover:text-white hover:bg-white/5'
+                    }`}
+                >
+                  Rezervasyon
+                </Link>
+                <Link
+                  to="/reservations"
+                  className={`text-xs tracking-[0.10em] uppercase px-4 py-2 rounded-full transition-all ${isActive('/reservations') ? 'text-white bg-white/10' : 'text-white/70 hover:text-white hover:bg-white/5'
+                    }`}
+                >
+                  Rezervasyonlarım
+                </Link>
+              </>
+            )}
           </div>
-          
-          <div className="flex items-center">
+
+          {/* Right Side */}
+          <div className="flex items-center gap-3">
             {user ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-700 text-sm">
-                  Hello, <span className="font-semibold">{user.firstName}</span>
+              <>
+                <span className="text-white/70 text-sm hidden md:block">
+                  Hoş geldin, <span className="text-white font-medium">{user.firstName}</span>
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition"
+                  className="text-xs tracking-[0.10em] uppercase px-4 py-2 rounded-full text-red-400 hover:bg-red-500/10 transition-all"
                 >
-                  Logout
+                  Çıkış
                 </button>
-              </div>
+              </>
             ) : (
-              <div className="flex space-x-4">
+              <>
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition"
+                  className="text-xs tracking-[0.10em] uppercase px-4 py-2 rounded-full text-white/70 hover:text-white hover:bg-white/5 transition-all"
                 >
-                  Login
+                  Giriş
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md text-sm font-medium transition"
+                  className="text-xs tracking-[0.10em] uppercase px-5 py-2 rounded-full bg-white text-[#0f1a2b] font-medium hover:bg-white/90 transition-all"
                 >
-                  Sign Up
+                  Kayıt Ol
                 </Link>
-              </div>
+              </>
             )}
           </div>
         </div>
@@ -87,4 +106,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
