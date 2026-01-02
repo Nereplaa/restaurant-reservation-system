@@ -1,69 +1,67 @@
 import { useState, useEffect } from 'react';
-import api from '../services/api';
-import { MenuItem } from '../types';
+import CustomSelect from '../components/CustomSelect';
+import { MenuItem, getMenuData, saveMenuData, categoryList } from '../data/menuData';
+
+const categoryOptions = categoryList.map(c => ({ value: c.key, label: c.label }));
+const availabilityOptions = [
+  { value: 'true', label: 'Evet' },
+  { value: 'false', label: 'Hayır' },
+];
 
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [filterCategory, setFilterCategory] = useState('ALL');
   const [currentItem, setCurrentItem] = useState<Partial<MenuItem>>({
     name: '',
     description: '',
-    category: 'APPETIZER',
     price: 0,
-    imageUrl: '',
+    calories: 0,
+    image: '',
+    category: 'starters',
+    tags: [],
+    priceNote: '',
     available: true,
-    preparationTime: 15,
-    dietaryTags: [],
   });
 
+  // Load menu data on mount
   useEffect(() => {
-    fetchMenuItems();
+    setMenuItems(getMenuData());
   }, []);
 
-  const fetchMenuItems = async () => {
-    try {
-      const response = await api.get('/menu');
-      // Backend returns array directly or wrapped in data
-      const items = Array.isArray(response.data) ? response.data : (response.data.data || response.data);
-      setMenuItems(items);
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to load menu items');
-    } finally {
-      setIsLoading(false);
+  // Save to localStorage whenever menuItems changes
+  useEffect(() => {
+    if (menuItems.length > 0) {
+      saveMenuData(menuItems);
     }
+  }, [menuItems]);
+
+  const getFilteredItems = () => {
+    if (selectedCategory === 'all') {
+      return menuItems;
+    }
+    return menuItems.filter(item => item.category === selectedCategory);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      if (isEditing && currentItem.id) {
-        await api.patch(`/menu/${currentItem.id}`, currentItem);
-        fetchMenuItems();
-        closeModal();
-      } else {
-        await api.post('/menu', currentItem);
-        fetchMenuItems();
-        closeModal();
+  const getGroupedItems = () => {
+    const groups: Record<string, MenuItem[]> = {};
+    const items = getFilteredItems();
+    items.forEach(item => {
+      if (!groups[item.category]) {
+        groups[item.category] = [];
       }
-    } catch (err: any) {
-      alert(err.response?.data?.detail || 'Failed to save menu item');
-    }
+      groups[item.category].push(item);
+    });
+    return groups;
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this menu item?')) return;
+  const getCategoryLabel = (key: string) => {
+    return categoryList.find(c => c.key === key)?.label || key;
+  };
 
-    try {
-      await api.delete(`/menu/${id}`);
-      fetchMenuItems();
-    } catch (err: any) {
-      alert(err.response?.data?.detail || 'Failed to delete menu item');
-    }
+  const getCategoryEmoji = (key: string) => {
+    return categoryList.find(c => c.key === key)?.emoji || '🍽️';
   };
 
   const openCreateModal = () => {
@@ -71,19 +69,20 @@ export default function MenuPage() {
     setCurrentItem({
       name: '',
       description: '',
-      category: 'APPETIZER',
       price: 0,
-      imageUrl: '',
+      calories: 0,
+      image: '',
+      category: 'starters',
+      tags: [],
+      priceNote: '',
       available: true,
-      preparationTime: 15,
-      dietaryTags: [],
     });
     setShowModal(true);
   };
 
   const openEditModal = (item: MenuItem) => {
     setIsEditing(true);
-    setCurrentItem(item);
+    setCurrentItem({ ...item });
     setShowModal(true);
   };
 
@@ -91,250 +90,289 @@ export default function MenuPage() {
     setShowModal(false);
   };
 
-  const filteredItems = filterCategory === 'ALL'
-    ? menuItems
-    : menuItems.filter(item => item.category === filterCategory);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const categories = ['APPETIZER', 'MAIN_COURSE', 'DESSERT', 'BEVERAGE', 'SPECIAL'];
+    if (isEditing && currentItem.id) {
+      setMenuItems(prev => prev.map(item =>
+        item.id === currentItem.id ? { ...item, ...currentItem } as MenuItem : item
+      ));
+    } else {
+      const newId = Math.max(...menuItems.map(i => i.id), 0) + 1;
+      setMenuItems(prev => [...prev, { ...currentItem, id: newId } as MenuItem]);
+    }
+    closeModal();
+  };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-[80vh]">
-        <div className="text-center">
-          <div className="w-12 h-12 border-2 border-white/20 border-t-white/80 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white/60 text-sm">Loading menu...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleDelete = (id: number) => {
+    if (!confirm('Bu menü öğesini silmek istediğinize emin misiniz?')) return;
+    setMenuItems(prev => prev.filter(item => item.id !== id));
+  };
+
+  const groupedItems = getGroupedItems();
 
   return (
-    <div className="p-6">
-      {/* Topbar */}
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <div>
-          <h1 className="font-playfair text-3xl font-medium tracking-wide text-white m-0">
-            Menu
-          </h1>
-          <p className="text-white/[0.78] text-[13px] mt-1.5 font-light">
-            Manage menu items
-          </p>
+    <div className="min-h-screen bg-premium">
+      {/* Header */}
+      <div className="border-b border-white/10 py-6 px-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="text-xs uppercase tracking-[0.3em] text-white/40 mb-1">Admin Panel</div>
+            <h1 className="font-playfair text-3xl font-medium tracking-wide text-[#cfd4dc] m-0">
+              Menü Yönetimi
+            </h1>
+            <p className="text-white/50 text-sm mt-1">
+              Menü öğelerini düzenleyin, ekleyin veya silin • Değişiklikler müşteri menüsüne anında yansır
+            </p>
+          </div>
+          <button
+            onClick={openCreateModal}
+            className="btn-primary px-5 py-2.5 rounded-[14px] text-[13px] flex items-center gap-2"
+          >
+            <span className="text-lg">+</span> Yeni Öğe Ekle
+          </button>
         </div>
-        <button
-          onClick={openCreateModal}
-          className="btn-primary px-4 py-2.5 rounded-[14px] text-[13px]"
-        >
-          + Add Menu Item
-        </button>
       </div>
-
-      {error && (
-        <div className="glass-panel rounded-2xl p-4 mb-4 border-red-500/30 bg-red-500/10">
-          ⚠️ {error}
-        </div>
-      )}
 
       {/* Category Filter */}
-      <div className="flex items-center gap-2 flex-wrap mb-6">
-        <button
-          onClick={() => setFilterCategory('ALL')}
-          className={`px-3 py-2 rounded-full text-[12px] tracking-wider uppercase transition-all ${filterCategory === 'ALL' ? 'btn-primary' : 'btn-secondary'
-            }`}
-        >
-          All
-        </button>
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setFilterCategory(cat)}
-            className={`px-3 py-2 rounded-full text-[12px] tracking-wider uppercase transition-all ${filterCategory === cat ? 'btn-primary' : 'btn-secondary'
-              }`}
-          >
-            {cat.replace('_', ' ')}
-          </button>
-        ))}
-      </div>
-
-      {/* Menu Items Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredItems.map((item) => (
-          <div key={item.id} className="glass-card rounded-2xl overflow-hidden hover:border-[#cfd4dc]/30 transition-all">
-            {item.imageUrl ? (
-              <img src={item.imageUrl} alt={item.name} className="w-full h-40 object-cover" />
-            ) : (
-              <div className="w-full h-40 bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center text-5xl">
-                🍽️
-              </div>
-            )}
-
-            <div className="p-4">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-base font-medium text-white">{item.name}</h3>
-                <span className={`badge text-[10px] ${item.available ? 'badge-ok' : 'badge-danger'}`}>
-                  {item.available ? 'Available' : 'Unavailable'}
-                </span>
-              </div>
-
-              <p className="text-xs text-white/60 mb-3 line-clamp-2">{item.description}</p>
-
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-lg font-medium text-[#cfd4dc]">${item.price.toFixed(2)}</span>
-                <span className="text-xs text-white/50">⏱️ {item.preparationTime} min</span>
-              </div>
-
-              <div className="mb-3">
-                <span className="badge text-[10px]">
-                  {item.category.replace('_', ' ')}
-                </span>
-              </div>
-
-              {item.dietaryTags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {item.dietaryTags.map((tag, idx) => (
-                    <span key={idx} className="badge badge-ok text-[9px]">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex gap-2">
+      <div className="sticky top-0 z-20 bg-[#0f1a2b]/95 backdrop-blur-lg border-b border-white/10">
+        <div className="px-6 py-4">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === 'all'
+                ? 'bg-[#cfd4dc]/20 border border-[#cfd4dc]/40 text-white shadow-lg'
+                : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80'
+                }`}
+            >
+              🍽️ Tümü ({menuItems.length})
+            </button>
+            {categoryList.map((cat) => {
+              const count = menuItems.filter(i => i.category === cat.key).length;
+              return (
                 <button
-                  onClick={() => openEditModal(item)}
-                  className="flex-1 btn-secondary px-3 py-2 rounded-[12px] text-[12px]"
+                  key={cat.key}
+                  onClick={() => setSelectedCategory(cat.key)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === cat.key
+                    ? 'bg-[#cfd4dc]/20 border border-[#cfd4dc]/40 text-white shadow-lg'
+                    : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white/80'
+                    }`}
                 >
-                  Edit
+                  {cat.emoji} {cat.label} ({count})
                 </button>
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  className="flex-1 btn-danger px-3 py-2 rounded-[12px] text-[12px]"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
-
-      {filteredItems.length === 0 && (
-        <div className="text-center py-10 glass-panel rounded-2xl text-white/60">
-          <div className="w-10 h-10 rounded-2xl border border-white/[0.14] bg-white/[0.06] flex items-center justify-center mx-auto mb-3">
-            🍽️
-          </div>
-          <p className="text-[13px]">No menu items found</p>
         </div>
-      )}
+      </div>
 
-      {/* Create/Edit Modal */}
+      {/* Menu Content */}
+      <div className="p-6">
+        {Object.entries(groupedItems).map(([category, items]) => (
+          <section key={category} className="mb-12">
+            {/* Section Title */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className="h-px flex-1 bg-gradient-to-r from-[#cfd4dc]/40 to-transparent"></div>
+              <h2 className="font-playfair text-xl text-[#cfd4dc] tracking-wider uppercase">
+                {getCategoryLabel(category)}
+              </h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-[#cfd4dc]/40 to-transparent"></div>
+            </div>
+
+            {/* Menu Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className={`group relative glass-card rounded-xl border p-4 transition-all duration-300 
+                    hover:scale-[1.02] hover:shadow-2xl hover:shadow-[#cfd4dc]/10 
+                    hover:border-[#cfd4dc]/40 hover:bg-gradient-to-br hover:from-white/10 hover:to-white/5
+                    ${!item.available ? 'opacity-50 border-red-500/30' : 'border-white/10'}`}
+                >
+                  {/* Image */}
+                  <div className="h-32 rounded-lg overflow-hidden mb-3 bg-gradient-to-br from-[#1a2a40] to-[#0d1520] relative">
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <div className={`absolute inset-0 flex items-center justify-center ${item.image ? 'hidden' : ''}`}>
+                      <span className="text-5xl opacity-60 group-hover:scale-110 transition-transform duration-300">
+                        {getCategoryEmoji(item.category)}
+                      </span>
+                    </div>
+                    {/* Hover glow overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex justify-between items-start gap-2 mb-2">
+                    <h3 className="font-medium text-white text-sm leading-tight flex-1 group-hover:text-[#cfd4dc] transition-colors duration-300">
+                      {item.name}
+                    </h3>
+                    <div className="text-[#cfd4dc] font-medium whitespace-nowrap group-hover:text-white transition-colors duration-300">₺{item.price}</div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs text-white/40 mb-2">
+                    <span className="px-2 py-0.5 rounded-full border border-white/10 group-hover:border-[#cfd4dc]/30 transition-colors duration-300">
+                      {item.calories} kcal
+                    </span>
+                    {!item.available && (
+                      <span className="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">Stokta Yok</span>
+                    )}
+                  </div>
+
+                  {item.tags && item.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {item.tags.map((tag) => (
+                        <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full border border-[#cfd4dc]/30 text-[#cfd4dc]/80 group-hover:bg-[#cfd4dc]/10 transition-colors duration-300">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <p className="text-white/40 text-xs line-clamp-2 mb-3 group-hover:text-white/60 transition-colors duration-300">
+                    {item.description}
+                  </p>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openEditModal(item)}
+                      className="flex-1 btn-secondary px-3 py-1.5 rounded-lg text-[11px] group-hover:bg-white/10 transition-colors duration-300"
+                    >
+                      ✏️ Düzenle
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="px-3 py-1.5 rounded-lg text-[11px] bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
+
+        {getFilteredItems().length === 0 && (
+          <div className="text-center py-16 glass-panel rounded-2xl text-white/60">
+            <div className="w-14 h-14 rounded-2xl border border-white/10 bg-white/5 flex items-center justify-center mx-auto mb-4 text-3xl">
+              🍽️
+            </div>
+            <p className="text-[15px]">Bu kategoride menü öğesi bulunamadı</p>
+            <button onClick={openCreateModal} className="mt-4 btn-primary px-4 py-2 rounded-lg text-sm">
+              + Yeni Öğe Ekle
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Edit/Create Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 overflow-y-auto py-8">
-          <div className="glass-card rounded-2xl p-6 max-w-2xl w-full mx-4 animate-fade-in-up">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="glass-card rounded-2xl p-6 max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto animate-fade-in-up">
             <h3 className="font-playfair text-xl font-medium text-white mb-6">
-              {isEditing ? 'Edit Menu Item' : 'Add New Menu Item'}
+              {isEditing ? '✏️ Menü Öğesini Düzenle' : '➕ Yeni Menü Öğesi'}
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="text-[11px] text-white/60 uppercase tracking-wider mb-1.5 block">İsim</label>
+                <input
+                  type="text"
+                  value={currentItem.name || ''}
+                  onChange={(e) => setCurrentItem({ ...currentItem, name: e.target.value })}
+                  className="input-premium w-full"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] text-white/60 uppercase tracking-wider mb-1.5 block">Açıklama</label>
+                <textarea
+                  value={currentItem.description || ''}
+                  onChange={(e) => setCurrentItem({ ...currentItem, description: e.target.value })}
+                  className="input-premium w-full h-20 resize-none"
+                  required
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={currentItem.name}
-                    onChange={(e) => setCurrentItem({ ...currentItem, name: e.target.value })}
-                    className="input-premium w-full"
-                  />
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">Description</label>
-                  <textarea
-                    required
-                    rows={3}
-                    value={currentItem.description}
-                    onChange={(e) => setCurrentItem({ ...currentItem, description: e.target.value })}
-                    className="input-premium w-full resize-none"
-                  />
-                </div>
-
                 <div>
-                  <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">Category</label>
-                  <select
-                    value={currentItem.category}
-                    onChange={(e) => setCurrentItem({ ...currentItem, category: e.target.value })}
-                    className="input-premium w-full"
-                  >
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat.replace('_', ' ')}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">Price ($)</label>
+                  <label className="text-[11px] text-white/60 uppercase tracking-wider mb-1.5 block">Fiyat (₺)</label>
                   <input
                     type="number"
-                    required
+                    value={currentItem.price || 0}
+                    onChange={(e) => setCurrentItem({ ...currentItem, price: Number(e.target.value) })}
+                    className="input-premium w-full"
                     min="0"
-                    step="0.01"
-                    value={currentItem.price}
-                    onChange={(e) => setCurrentItem({ ...currentItem, price: parseFloat(e.target.value) })}
-                    className="input-premium w-full"
+                    required
                   />
                 </div>
-
                 <div>
-                  <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">Prep Time (min)</label>
+                  <label className="text-[11px] text-white/60 uppercase tracking-wider mb-1.5 block">Kalori</label>
                   <input
                     type="number"
-                    required
-                    min="1"
-                    value={currentItem.preparationTime}
-                    onChange={(e) => setCurrentItem({ ...currentItem, preparationTime: parseInt(e.target.value) })}
+                    value={currentItem.calories || 0}
+                    onChange={(e) => setCurrentItem({ ...currentItem, calories: Number(e.target.value) })}
                     className="input-premium w-full"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">Available</label>
-                  <select
-                    value={currentItem.available ? 'true' : 'false'}
-                    onChange={(e) => setCurrentItem({ ...currentItem, available: e.target.value === 'true' })}
-                    className="input-premium w-full"
-                  >
-                    <option value="true">Yes</option>
-                    <option value="false">No</option>
-                  </select>
-                </div>
-
-                <div className="col-span-2">
-                  <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">
-                    Image URL (optional)
-                  </label>
-                  <input
-                    type="url"
-                    value={currentItem.imageUrl || ''}
-                    onChange={(e) => setCurrentItem({ ...currentItem, imageUrl: e.target.value })}
-                    className="input-premium w-full"
-                    placeholder="https://example.com/image.jpg"
+                    min="0"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-6">
-                <button
-                  type="submit"
-                  className="flex-1 btn-primary px-4 py-3 rounded-[14px] font-medium"
-                >
-                  {isEditing ? 'Update' : 'Create'}
-                </button>
+              <div>
+                <label className="text-[11px] text-white/60 uppercase tracking-wider mb-1.5 block">Kategori</label>
+                <CustomSelect
+                  options={categoryOptions}
+                  value={currentItem.category || 'starters'}
+                  onChange={(value) => setCurrentItem({ ...currentItem, category: value })}
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] text-white/60 uppercase tracking-wider mb-1.5 block">Fiyat Notu (opsiyonel)</label>
+                <input
+                  type="text"
+                  value={currentItem.priceNote || ''}
+                  onChange={(e) => setCurrentItem({ ...currentItem, priceNote: e.target.value })}
+                  className="input-premium w-full"
+                  placeholder="örn: Kadeh 200₺"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] text-white/60 uppercase tracking-wider mb-1.5 block">Stokta Mevcut</label>
+                <CustomSelect
+                  options={availabilityOptions}
+                  value={String(currentItem.available ?? true)}
+                  onChange={(value) => setCurrentItem({ ...currentItem, available: value === 'true' })}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="flex-1 btn-secondary px-4 py-3 rounded-[14px] font-medium"
+                  className="flex-1 btn-secondary py-2.5 rounded-[14px] font-medium"
                 >
-                  Cancel
+                  İptal
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 btn-primary py-2.5 rounded-[14px] font-medium"
+                >
+                  {isEditing ? 'Güncelle' : 'Ekle'}
                 </button>
               </div>
             </form>

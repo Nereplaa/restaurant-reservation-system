@@ -1,6 +1,23 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Reservation, Table } from '../types';
+import CustomSelect from '../components/CustomSelect';
+
+const reservationStatusOptions = [
+  { value: 'CONFIRMED', label: 'Confirmed' },
+  { value: 'COMPLETED', label: 'Completed' },
+  { value: 'CANCELLED', label: 'Cancelled' },
+  { value: 'NO_SHOW', label: 'No Show' },
+];
+
+const filterStatusOptions = [
+  { value: 'ALL', label: 'All' },
+  { value: 'CONFIRMED', label: 'Confirmed' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'COMPLETED', label: 'Completed' },
+  { value: 'CANCELLED', label: 'Cancelled' },
+  { value: 'NO_SHOW', label: 'No Show' },
+];
 
 export default function ReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -128,19 +145,13 @@ export default function ReservationsPage() {
       <div className="glass-panel rounded-2xl p-4">
         {/* Search Row */}
         <div className="flex items-center gap-2.5 flex-wrap mb-4">
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="input-premium max-w-[280px]"
-            aria-label="Filter by status"
-          >
-            <option value="ALL">All</option>
-            <option value="CONFIRMED">Confirmed</option>
-            <option value="PENDING">Pending</option>
-            <option value="COMPLETED">Completed</option>
-            <option value="CANCELLED">Cancelled</option>
-            <option value="NO_SHOW">No Show</option>
-          </select>
+          <div className="w-[180px]">
+            <CustomSelect
+              options={filterStatusOptions}
+              value={filterStatus}
+              onChange={setFilterStatus}
+            />
+          </div>
           <input
             type="text"
             placeholder="Search by name / confirmation..."
@@ -220,36 +231,30 @@ export default function ReservationsPage() {
                 <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">
                   Status
                 </label>
-                <select
+                <CustomSelect
+                  options={reservationStatusOptions}
                   value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="input-premium w-full"
-                >
-                  <option value="CONFIRMED">Confirmed</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="CANCELLED">Cancelled</option>
-                  <option value="NO_SHOW">No Show</option>
-                </select>
+                  onChange={setSelectedStatus}
+                />
               </div>
 
               <div>
                 <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">
                   Assign Table
                 </label>
-                <select
+                <CustomSelect
+                  options={[
+                    { value: '', label: 'No table assigned' },
+                    ...tables
+                      .filter(t => t.status === 'available' || t.id === selectedReservation.tableId)
+                      .map(table => ({
+                        value: table.id,
+                        label: `Table ${table.tableNumber} - Capacity: ${table.capacity} (${table.location})`
+                      }))
+                  ]}
                   value={selectedTable}
-                  onChange={(e) => setSelectedTable(e.target.value)}
-                  className="input-premium w-full"
-                >
-                  <option value="">No table assigned</option>
-                  {tables
-                    .filter(t => t.status === 'available' || t.id === selectedReservation.tableId)
-                    .map(table => (
-                      <option key={table.id} value={table.id}>
-                        Table {table.tableNumber} - Capacity: {table.capacity} ({table.location})
-                      </option>
-                    ))}
-                </select>
+                  onChange={setSelectedTable}
+                />
               </div>
             </div>
 

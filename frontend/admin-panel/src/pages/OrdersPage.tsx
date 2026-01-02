@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Order } from '../types';
+import CustomSelect from '../components/CustomSelect';
+
+const orderStatusOptions = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'preparing', label: 'Preparing' },
+  { value: 'ready', label: 'Ready' },
+  { value: 'served', label: 'Served' },
+  { value: 'cancelled', label: 'Cancelled' },
+];
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -95,8 +104,8 @@ export default function OrdersPage() {
         <button
           onClick={() => setFilterStatus('ALL')}
           className={`px-3 py-2 rounded-full text-[12px] tracking-wider uppercase transition-all ${filterStatus === 'ALL'
-              ? 'btn-primary'
-              : 'btn-secondary'
+            ? 'btn-primary'
+            : 'btn-secondary'
             }`}
         >
           All
@@ -106,8 +115,8 @@ export default function OrdersPage() {
             key={status}
             onClick={() => setFilterStatus(status)}
             className={`px-3 py-2 rounded-full text-[12px] tracking-wider uppercase transition-all ${filterStatus === status
-                ? 'btn-primary'
-                : 'btn-secondary'
+              ? 'btn-primary'
+              : 'btn-secondary'
               }`}
           >
             {status}
@@ -165,17 +174,13 @@ export default function OrdersPage() {
                 View Details
               </button>
               {order.status !== 'served' && order.status !== 'cancelled' && (
-                <select
-                  value={order.status}
-                  onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
-                  className="flex-1 input-premium text-[12px] py-2"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="preparing">Preparing</option>
-                  <option value="ready">Ready</option>
-                  <option value="served">Served</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
+                <div className="flex-1">
+                  <CustomSelect
+                    options={orderStatusOptions}
+                    value={order.status}
+                    onChange={(value) => handleUpdateStatus(order.id, value)}
+                  />
+                </div>
               )}
             </div>
           </div>

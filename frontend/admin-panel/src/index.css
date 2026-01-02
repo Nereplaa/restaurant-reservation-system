@@ -57,6 +57,19 @@ body {
   background: var(--accent);
 }
 
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
 /* Glassmorphism utilities */
 .glass {
   background: rgba(15, 26, 43, 0.65);
@@ -171,6 +184,37 @@ body {
 .input-premium:focus {
   border-color: rgba(207, 212, 220, 0.35);
   background: rgba(255, 255, 255, 0.08);
+}
+
+/* Premium select dropdown styling */
+select.input-premium {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.6)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+select.input-premium option {
+  background: #16233a;
+  color: rgba(255, 255, 255, 0.92);
+  padding: 10px 12px;
+}
+
+select.input-premium option:hover,
+select.input-premium option:checked {
+  background: rgba(207, 212, 220, 0.25);
+}
+
+/* Time input styling for dark theme */
+input[type="time"].input-premium::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.8);
+  cursor: pointer;
+}
+
+input[type="time"].input-premium::-webkit-datetime-edit {
+  color: rgba(255, 255, 255, 0.92);
 }
 
 /* Table styles */

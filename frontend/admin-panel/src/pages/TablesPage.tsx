@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Table } from '../types';
+import CustomSelect from '../components/CustomSelect';
+
+const statusOptions = [
+  { value: 'available', label: 'Available' },
+  { value: 'occupied', label: 'Occupied' },
+  { value: 'reserved', label: 'Reserved' },
+  { value: 'maintenance', label: 'Maintenance' },
+];
 
 export default function TablesPage() {
   const [tables, setTables] = useState<Table[]>([]);
@@ -272,17 +280,13 @@ export default function TablesPage() {
                 <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">
                   Status
                 </label>
-                <select
-                  value={currentTable.status}
-                  onChange={(e) => setCurrentTable({ ...currentTable, status: e.target.value as any })}
-                  className="input-premium w-full"
-                >
-                  <option value="available">Available</option>
-                  <option value="occupied">Occupied</option>
-                  <option value="reserved">Reserved</option>
-                  <option value="maintenance">Maintenance</option>
-                </select>
+                <CustomSelect
+                  options={statusOptions}
+                  value={currentTable.status || 'available'}
+                  onChange={(value) => setCurrentTable({ ...currentTable, status: value as any })}
+                />
               </div>
+
 
               <div className="flex gap-3 mt-6">
                 <button
