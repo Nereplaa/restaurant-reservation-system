@@ -102,3 +102,63 @@ async def get_all_users(
         "data": users_data
     }
 
+
+from pydantic import BaseModel
+from typing import Optional
+
+class UserUpdateRequest(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None  
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    role: Optional[str] = None
+
+@router.patch("/users/{user_id}")
+async def update_user(
+    user_id: str,
+    update_data: UserUpdateRequest,
+    current_user: User = Depends(require_roles(UserRole.admin)),
+    db: Session = Depends(get_db),
+):
+    """
+    Update user details (admin only)
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Update fields if provided
+    if update_data.first_name:
+        user.first_name = update_data.first_name
+    if update_data.last_name:
+        user.last_name = update_data.last_name
+    if update_data.email:
+        # Check if email already exists for another user
+        existing = db.query(User).filter(User.email == update_data.email, User.id != user_id).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already in use")
+        user.email = update_data.email
+    if update_data.phone is not None:
+        user.phone = update_data.phone
+    if update_data.role:
+        try:
+            user.role = UserRole(update_data.role)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Invalid role: {update_data.role}")
+    
+    db.commit()
+    db.refresh(user)
+    
+    logger.info(f"User {user_id} updated by admin {current_user.email}")
+    
+    return {
+        "success": True,
+        "data": {
+            "id": str(user.id),
+            "email": user.email,
+            "firstName": user.first_name,
+            "lastName": user.last_name,
+            "phone": user.phone,
+            "role": user.role.value if user.role else None,
+        }
+    }

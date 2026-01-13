@@ -158,17 +158,31 @@ export interface LegacyMenuItem {
 }
 
 export function toLegacyFormat(items: MenuItem[]): LegacyMenuItem[] {
-    return items.map((item, index) => ({
-        id: index + 1,
-        name: item.name,
-        description: item.description,
-        price: item.price,
-        calories: item.calories,
-        image: item.imageUrl || `/images/menu/${getCategoryFolder(item.category)}/${item.name}.png`,
-        category: item.category,
-        tags: item.dietaryTags?.map(t => t.charAt(0).toUpperCase() + t.slice(1)),
-        available: item.available,
-    }));
+    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:7001';
+
+    return items.map((item, index) => {
+        let imageUrl = item.imageUrl;
+
+        // If imageUrl starts with /static/, prepend backend URL
+        if (imageUrl && imageUrl.startsWith('/static/')) {
+            imageUrl = `${backendUrl}${imageUrl}`;
+        } else if (!imageUrl) {
+            // Fallback to local images
+            imageUrl = `/images/menu/${getCategoryFolder(item.category)}/${item.name}.png`;
+        }
+
+        return {
+            id: index + 1,
+            name: item.name,
+            description: item.description,
+            price: item.price,
+            calories: item.calories,
+            image: imageUrl,
+            category: item.category,
+            tags: item.dietaryTags?.map(t => t.charAt(0).toUpperCase() + t.slice(1)),
+            available: item.available,
+        };
+    });
 }
 
 function getCategoryFolder(category: string): string {

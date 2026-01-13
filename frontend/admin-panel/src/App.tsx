@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import ReservationsPage from './pages/ReservationsPage';
+import CalendarPage from './pages/CalendarPage';
 import CustomersPage from './pages/CustomersPage';
 import TablesPage from './pages/TablesPage';
 import MenuPage from './pages/MenuPage';
@@ -31,6 +32,7 @@ function App() {
                       <Route path="/" element={<Navigate to="/dashboard" replace />} />
                       <Route path="/dashboard" element={<DashboardPage />} />
                       <Route path="/reservations" element={<ReservationsPage />} />
+                      <Route path="/calendar" element={<CalendarPage />} />
                       <Route path="/customers" element={<CustomersPage />} />
                       <Route path="/tables" element={<TablesPage />} />
                       <Route path="/menu" element={<MenuPage />} />

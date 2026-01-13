@@ -27,6 +27,7 @@ class ReservationUpdate(BaseModel):
     party_size: Optional[int] = None
     special_request: Optional[str] = None
     status: Optional[ReservationStatus] = None
+    table_id: Optional[str] = None
 
 
 class ReservationResponse(ReservationBase):

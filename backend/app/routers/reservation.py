@@ -101,7 +101,13 @@ async def get_reservations(
             "user": {
                 "firstName": r.user.first_name if r.user else None,
                 "lastName": r.user.last_name if r.user else None
-            } if r.user else None
+            } if r.user else None,
+            "table": {
+                "id": str(r.table.id) if r.table else None,
+                "tableNumber": r.table.table_number if r.table else None,
+                "capacity": r.table.capacity if r.table else None,
+                "area": r.table.area if r.table else None
+            } if r.table else None
         }
         reservation_list.append(reservation_dict)
     
@@ -109,6 +115,76 @@ async def get_reservations(
         "success": True,
         "data": {
             "reservations": reservation_list
+        }
+    }
+
+
+@router.get("/calendar/by-date")
+async def get_reservations_by_date(
+    date: str,
+    current_user: User = Depends(require_roles(UserRole.admin, UserRole.manager, UserRole.server)),
+    db: Session = Depends(get_db)
+):
+    """
+    Get all reservations for a specific date with table assignments.
+    Used for the reservation calendar view.
+    """
+    from datetime import datetime as dt
+    from app.models.table import Table
+    
+    try:
+        target_date = dt.strptime(date, "%Y-%m-%d").date()
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid date format. Use YYYY-MM-DD"
+        )
+    
+    # Get all reservations for the date
+    reservations = db.query(Reservation).filter(
+        Reservation.date == target_date
+    ).order_by(Reservation.time).all()
+    
+    # Get all tables
+    tables = db.query(Table).order_by(Table.table_number).all()
+    
+    # Format reservations by table
+    reservation_list = []
+    for r in reservations:
+        reservation_list.append({
+            "id": str(r.id),
+            "tableId": str(r.table_id) if r.table_id else None,
+            "tableNumber": r.table.table_number if r.table else None,
+            "time": r.time.strftime("%H:%M") if r.time else None,
+            "endTime": (dt.combine(target_date, r.time) + __import__('datetime').timedelta(hours=2)).strftime("%H:%M") if r.time else None,
+            "guestCount": r.party_size,
+            "status": r.status.value if r.status else None,
+            "confirmationNumber": r.confirmation_number,
+            "specialRequests": r.special_request,
+            "customer": {
+                "firstName": r.user.first_name if r.user else "Misafir",
+                "lastName": r.user.last_name if r.user else "",
+                "phone": r.user.phone if r.user else None
+            } if r.user else None
+        })
+    
+    # Format tables list
+    table_list = []
+    for t in tables:
+        table_list.append({
+            "id": str(t.id),
+            "tableNumber": t.table_number,
+            "capacity": t.capacity,
+            "area": t.area.value if t.area else None,
+            "status": t.status.value if t.status else None
+        })
+    
+    return {
+        "success": True,
+        "data": {
+            "date": date,
+            "reservations": reservation_list,
+            "tables": table_list
         }
     }
 
@@ -169,13 +245,17 @@ async def update_reservation(
     
     # Update fields
     update_data = reservation_update.model_dump(exclude_unset=True)
+    logger.info(f"Update data received: {update_data}")
+    logger.info(f"Current table_id: {reservation.table_id}")
+    
     for field, value in update_data.items():
+        logger.info(f"Setting {field} = {value}")
         setattr(reservation, field, value)
     
     db.commit()
     db.refresh(reservation)
     
-    logger.info(f"Reservation updated: {reservation.confirmation_number}")
+    logger.info(f"Reservation updated: {reservation.confirmation_number}, new table_id: {reservation.table_id}")
     
     return ReservationResponse.model_validate(reservation)
 

@@ -299,10 +299,9 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
     }, []);
 
     const hours = Array.from({ length: maxHour - minHour + 1 }, (_, i) => minHour + i);
-    const minutes = ['00', '15', '30', '45'];
 
-    const handleSelectTime = (hour: number, minute: string) => {
-        const timeStr = `${String(hour).padStart(2, '0')}:${minute}`;
+    const handleSelectTime = (hour: number) => {
+        const timeStr = `${String(hour).padStart(2, '0')}:00`;
         onChange(timeStr);
         setIsOpen(false);
     };
@@ -334,7 +333,7 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
 
             {/* Time Grid Dropdown */}
             <div
-                className={`absolute z-[9999] w-72 mt-2 rounded-2xl bg-[#1a2744] border border-white/20 shadow-2xl backdrop-blur-xl transition-all duration-200 origin-top ${isOpen
+                className={`absolute z-[9999] w-56 mt-2 rounded-2xl bg-[#1a2744] border border-white/20 shadow-2xl backdrop-blur-xl transition-all duration-200 origin-top ${isOpen
                     ? 'opacity-100 scale-y-100 pointer-events-auto'
                     : 'opacity-0 scale-y-95 pointer-events-none'
                     }`}
@@ -344,26 +343,24 @@ export const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
                     <div className="text-xs text-white/40 uppercase tracking-wider">Saat Seçin</div>
                 </div>
                 <div className="p-3 max-h-64 overflow-y-auto">
-                    <div className="grid grid-cols-4 gap-2">
-                        {hours.map((hour) => (
-                            minutes.map((minute) => {
-                                const timeStr = `${String(hour).padStart(2, '0')}:${minute}`;
-                                const isSelected = value === timeStr;
-                                return (
-                                    <button
-                                        key={timeStr}
-                                        type="button"
-                                        onClick={() => handleSelectTime(hour, minute)}
-                                        className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${isSelected
-                                            ? 'bg-[#cfd4dc] text-[#0f1a2b] shadow-lg'
-                                            : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
-                                            }`}
-                                    >
-                                        {timeStr}
-                                    </button>
-                                );
-                            })
-                        ))}
+                    <div className="grid grid-cols-3 gap-2">
+                        {hours.map((hour) => {
+                            const timeStr = `${String(hour).padStart(2, '0')}:00`;
+                            const isSelected = value === timeStr;
+                            return (
+                                <button
+                                    key={timeStr}
+                                    type="button"
+                                    onClick={() => handleSelectTime(hour)}
+                                    className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${isSelected
+                                        ? 'bg-[#cfd4dc] text-[#0f1a2b] shadow-lg'
+                                        : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                                        }`}
+                                >
+                                    {timeStr}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             </div>

@@ -1,0 +1,93 @@
+Database already seeded. Skipping...
+INFO     2026-01-13 16:20:31 - ≡ƒÜÇ Starting server on 0.0.0.0:7001
+INFO:     172.18.0.5:41968 - "GET /api/v1/auth/me HTTP/1.1" 200 OK
+INFO:     172.18.0.5:41984 - "GET /api/v1/reservations/ HTTP/1.1" 200 OK
+INFO:     172.18.0.5:41992 - "GET /api/v1/tables/ HTTP/1.1" 200 OK
+INFO:     172.18.0.1:34282 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:34282 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.5:41996 - "PATCH /api/v1/reservations/38824b50-9b15-400c-9404-eb86a3833351 HTTP/1.1" 200 OK
+INFO:     172.18.0.5:42004 - "GET /api/v1/reservations/ HTTP/1.1" 200 OK
+INFO:     172.18.0.5:42006 - "GET /api/v1/tables/ HTTP/1.1" 200 OK
+INFO:     172.18.0.5:42020 - "GET /api/v1/auth/me HTTP/1.1" 200 OK
+INFO:     172.18.0.5:42036 - "GET /api/v1/tables/ HTTP/1.1" 200 OK
+INFO:     172.18.0.5:42026 - "GET /api/v1/reservations/ HTTP/1.1" 200 OK
+INFO     2026-01-13 16:20:31 - ≡ƒôè Environment: production
+INFO     2026-01-13 16:20:31 - ≡ƒöù API Docs: http://0.0.0.0:7001/api/docs
+INFO     2026-01-13 16:20:31 - ≡ƒöù Health check: http://0.0.0.0:7001/health
+INFO:     172.18.0.1:46488 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:46488 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     Started server process [8]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:7001 (Press CTRL+C to quit)
+INFO:     ('172.18.0.1', 36706) - "WebSocket /socket.io/?EIO=4&transport=websocket" [accepted]
+INFO:     connection open
+INFO     2026-01-13 16:20:31 - Socket connected: 6_vo4bC52mhS_0DsAAAB
+INFO     2026-01-13 16:20:57 - Update data received: {'status': <ReservationStatus.confirmed: 'confirmed'>, 'table_id': 'cae7822d-7047-420a-9e96-03f879b90ef7'}
+INFO     2026-01-13 16:20:57 - Current table_id: None
+INFO     2026-01-13 16:20:57 - Setting status = ReservationStatus.confirmed
+INFO     2026-01-13 16:20:57 - Setting table_id = cae7822d-7047-420a-9e96-03f879b90ef7
+INFO     2026-01-13 16:20:57 - Reservation updated: RES-C1DC7E25, new table_id: cae7822d-7047-420a-9e96-03f879b90ef7
+INFO     2026-01-13 16:23:30 - User logged in: admin@restaurant.com
+INFO:     172.18.0.5:37428 - "GET /api/v1/auth/me HTTP/1.1" 401 Unauthorized
+INFO:     172.18.0.5:50516 - "POST /api/v1/auth/login HTTP/1.1" 401 Unauthorized
+INFO:     172.18.0.1:39668 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:39668 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.5:35748 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     172.18.0.5:35752 - "GET /api/v1/admin/stats HTTP/1.1" 200 OK
+INFO     2026-01-13 16:23:30 - Admin stats requested by admin@restaurant.com
+INFO:     172.18.0.5:35756 - "GET /api/v1/reservations/?limit=5 HTTP/1.1" 200 OK
+INFO:     172.18.0.1:43954 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:43954 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.5:32936 - "GET /api/v1/reservations/ HTTP/1.1" 200 OK
+INFO:     172.18.0.5:32950 - "GET /api/v1/tables/ HTTP/1.1" 200 OK
+INFO:     172.18.0.1:57852 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:57852 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO     2026-01-13 16:25:50 - Update data received: {'status': <ReservationStatus.confirmed: 'confirmed'>, 'table_id': '67f2d851-5784-4df1-9532-5e0d52a9e909'}
+INFO     2026-01-13 16:25:50 - Current table_id: cae7822d-7047-420a-9e96-03f879b90ef7
+INFO     2026-01-13 16:25:50 - Setting status = ReservationStatus.confirmed
+INFO     2026-01-13 16:25:50 - Setting table_id = 67f2d851-5784-4df1-9532-5e0d52a9e909
+INFO:     172.18.0.5:47902 - "PATCH /api/v1/reservations/38824b50-9b15-400c-9404-eb86a3833351 HTTP/1.1" 200 OK
+INFO:     172.18.0.5:47916 - "GET /api/v1/reservations/ HTTP/1.1" 200 OK
+INFO:     172.18.0.5:47926 - "GET /api/v1/tables/ HTTP/1.1" 200 OK
+INFO:     172.18.0.1:37300 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:37300 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.1:46242 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:46242 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO     2026-01-13 16:25:50 - Reservation updated: RES-C1DC7E25, new table_id: 67f2d851-5784-4df1-9532-5e0d52a9e909
+INFO:     172.18.0.1:53024 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:53024 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.5:40918 - "GET /api/v1/menu/ HTTP/1.1" 200 OK
+INFO:     172.18.0.5:40928 - "GET /api/v1/categories/ HTTP/1.1" 200 OK
+INFO:     172.18.0.5:54102 - "GET /api/v1/tables/ HTTP/1.1" 200 OK
+INFO:     172.18.0.5:54098 - "GET /api/v1/reservations/ HTTP/1.1" 200 OK
+INFO:     172.18.0.1:40012 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:40012 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.1:47516 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:47516 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.5:57560 - "PATCH /api/v1/reservations/a1c658f7-bda5-48a5-b72c-9d1ccb91d516 HTTP/1.1" 200 OK
+INFO:     172.18.0.5:57566 - "GET /api/v1/reservations/ HTTP/1.1" 200 OK
+INFO:     172.18.0.5:57568 - "GET /api/v1/tables/ HTTP/1.1" 200 OK
+INFO:     172.18.0.1:46540 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:46540 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.1:34754 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:34754 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.1:54048 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:54048 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.1:46462 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO     2026-01-13 16:30:48 - Update data received: {'status': <ReservationStatus.confirmed: 'confirmed'>, 'table_id': '0149aeb6-c0f4-4c30-87cd-994196bff58f'}
+INFO     2026-01-13 16:30:48 - Current table_id: None
+INFO     2026-01-13 16:30:48 - Setting status = ReservationStatus.confirmed
+INFO     2026-01-13 16:30:48 - Setting table_id = 0149aeb6-c0f4-4c30-87cd-994196bff58f
+INFO     2026-01-13 16:30:48 - Reservation updated: RES-4D210D02, new table_id: 0149aeb6-c0f4-4c30-87cd-994196bff58f
+INFO:     172.18.0.1:46462 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.1:37290 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:37290 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.1:60880 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:60880 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.1:38318 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:38318 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.1:46632 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:46632 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden
+INFO:     172.18.0.1:36658 - "GET /api/v1/orders HTTP/1.1" 307 Temporary Redirect
+INFO:     172.18.0.1:36658 - "GET /api/v1/orders/ HTTP/1.1" 403 Forbidden

@@ -10,6 +10,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { name: 'Dashboard', path: '/dashboard', icon: '▦' },
   { name: 'Reservations', path: '/reservations', icon: '▤' },
+  { name: 'Takvim', path: '/calendar', icon: '📅' },
   { name: 'Customers', path: '/customers', icon: '👥' },
   { name: 'Tables', path: '/tables', icon: '⧉' },
   { name: 'Menu', path: '/menu', icon: '🍽' },
@@ -70,8 +71,8 @@ export default function Sidebar() {
               key={item.path}
               to={item.path}
               className={`flex items-center gap-2.5 px-3 py-2.5 rounded-[14px] text-[13px] transition-all duration-200 border animate-slide-in ${isActive
-                  ? 'bg-white/10 border-[#cfd4dc]/25 shadow-[0_12px_40px_rgba(0,0,0,0.22)]'
-                  : 'border-transparent hover:bg-white/[0.08] hover:border-[#cfd4dc]/[0.18]'
+                ? 'bg-white/10 border-[#cfd4dc]/25 shadow-[0_12px_40px_rgba(0,0,0,0.22)]'
+                : 'border-transparent hover:bg-white/[0.08] hover:border-[#cfd4dc]/[0.18]'
                 }`}
               style={{ animationDelay: `${index * 0.03}s` }}
             >

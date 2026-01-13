@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import CustomSelect from '../components/CustomSelect';
+import ImageDropzone from '../components/ImageDropzone';
 import api from '../services/api';
 
 // Types
@@ -97,6 +98,43 @@ export default function MenuPage() {
     return categories.find(c => c.key === key)?.emoji || '🍽️';
   };
 
+  // Get full image URL with fallback to customer-app images
+  const getImageUrl = (imageUrl: string | undefined | null, itemName?: string, category?: string): string | null => {
+    // If we have a static URL from uploads, use backend
+    if (imageUrl && imageUrl.startsWith('/static/')) {
+      const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:7001';
+      return `${backendUrl}${imageUrl}`;
+    }
+
+    // If we have any other URL, use it directly
+    if (imageUrl) {
+      return imageUrl;
+    }
+
+    // Fallback to customer-app images
+    if (itemName && category) {
+      const categoryFolderMap: Record<string, string> = {
+        'starters': 'Başlangıçlar',
+        'appetizers': 'Başlangıçlar',
+        'mains': 'Ana Yemekler',
+        'main_courses': 'Ana Yemekler',
+        'pizzas': 'Gurme Pizzalar',
+        'chef': 'Şef Özel',
+        'specials': 'Şef Özel',
+        'chef_specials': 'Şef Özel',
+        'desserts': 'Tatlılar',
+        'drinks': 'İçecekler',
+        'beverages': 'İçecekler',
+        'wines': 'Şarap Koleksiyonu',
+      };
+      const folder = categoryFolderMap[category] || category;
+      // Use customer-app URL for images
+      return `http://localhost:7002/images/menu/${encodeURIComponent(folder)}/${encodeURIComponent(itemName)}.png`;
+    }
+
+    return null;
+  };
+
   const openCreateModal = () => {
     setIsEditing(false);
     setCurrentItem({
@@ -137,6 +175,7 @@ export default function MenuPage() {
           category: currentItem.category,
           available: currentItem.available,
           dietary_tags: currentItem.dietary_tags || [],
+          image_url: currentItem.image_url || null,
         });
 
         setMenuItems(prev => prev.map(item =>
@@ -152,6 +191,7 @@ export default function MenuPage() {
           category: currentItem.category,
           available: currentItem.available ?? true,
           dietary_tags: currentItem.dietary_tags || [],
+          image_url: currentItem.image_url || null,
         });
 
         setMenuItems(prev => [...prev, response.data]);
@@ -267,9 +307,9 @@ export default function MenuPage() {
                 >
                   {/* Image */}
                   <div className="h-32 rounded-lg overflow-hidden mb-3 bg-gradient-to-br from-[#1a2a40] to-[#0d1520] relative">
-                    {item.image_url ? (
+                    {getImageUrl(item.image_url, item.name, item.category) ? (
                       <img
-                        src={item.image_url}
+                        src={getImageUrl(item.image_url, item.name, item.category) || ''}
                         alt={item.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
@@ -279,7 +319,7 @@ export default function MenuPage() {
                         }}
                       />
                     ) : null}
-                    <div className={`absolute inset-0 flex items-center justify-center ${item.image_url ? 'hidden' : ''}`}>
+                    <div className={`absolute inset-0 flex items-center justify-center ${getImageUrl(item.image_url, item.name, item.category) ? 'hidden' : ''}`}>
                       <span className="text-5xl opacity-60 group-hover:scale-110 transition-transform duration-300">
                         {getCategoryEmoji(item.category)}
                       </span>
@@ -421,6 +461,15 @@ export default function MenuPage() {
                   options={availabilityOptions}
                   value={String(currentItem.available ?? true)}
                   onChange={(value) => setCurrentItem({ ...currentItem, available: value === 'true' })}
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] text-white/60 uppercase tracking-wider mb-1.5 block">Yemek Fotoğrafı</label>
+                <ImageDropzone
+                  currentImage={currentItem.image_url}
+                  category={currentItem.category}
+                  onImageUpload={(url) => setCurrentItem({ ...currentItem, image_url: url })}
                 />
               </div>
 

@@ -29,6 +29,15 @@ export default function ReservationsPage() {
   const [selectedTable, setSelectedTable] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [filterStatus, setFilterStatus] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Calculate end time (2 hours after start)
+  const calculateEndTime = (startTime: string): string => {
+    if (!startTime) return '';
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const endHour = (hours + 2) % 24;
+    return `${endHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  };
 
   useEffect(() => {
     fetchData();
@@ -66,18 +75,27 @@ export default function ReservationsPage() {
     if (!selectedReservation) return;
 
     try {
-      const response = await api.patch(`/reservations/${selectedReservation.id}`, {
-        status: selectedStatus,
+      await api.patch(`/reservations/${selectedReservation.id}`, {
+        status: selectedStatus.toLowerCase(),
         table_id: selectedTable || null,
       });
 
-      if (response.data.success) {
-        fetchData();
-        setShowModal(false);
-        setSelectedReservation(null);
-      }
+      fetchData();
+      setShowModal(false);
+      setSelectedReservation(null);
     } catch (err: any) {
-      alert(err.response?.data?.error?.message || 'Failed to update reservation');
+      alert(err.response?.data?.detail || 'Failed to update reservation');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Bu rezervasyonu silmek istediğinize emin misiniz?')) return;
+
+    try {
+      await api.delete(`/reservations/${id}`);
+      fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.detail || 'Failed to delete reservation');
     }
   };
 
@@ -97,9 +115,14 @@ export default function ReservationsPage() {
     return badges[status] || 'badge';
   };
 
-  const filteredReservations = filterStatus === 'ALL'
-    ? reservations
-    : reservations.filter(r => r.status.toUpperCase() === filterStatus.toUpperCase());
+  // Filter reservations by status and search query
+  const filteredReservations = reservations.filter(r => {
+    const matchesStatus = filterStatus === 'ALL' || r.status.toUpperCase() === filterStatus.toUpperCase();
+    const matchesSearch = searchQuery === '' ||
+      r.confirmationNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      `${r.user?.firstName} ${r.user?.lastName}`.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
 
   if (isLoading) {
     return (
@@ -129,9 +152,6 @@ export default function ReservationsPage() {
             <span className="dot"></span>
             Connected
           </span>
-          <button className="btn-primary px-3 py-2.5 rounded-[14px] text-[13px]">
-            + Add Reservation
-          </button>
         </div>
       </div>
 
@@ -156,10 +176,9 @@ export default function ReservationsPage() {
             type="text"
             placeholder="Search by name / confirmation..."
             className="input-premium flex-1 min-w-[220px]"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button className="btn-secondary px-3 py-2.5 rounded-[14px] text-[13px]">
-            Search
-          </button>
         </div>
 
         {/* Table */}
@@ -183,7 +202,7 @@ export default function ReservationsPage() {
                   {reservation.user ? `${reservation.user.firstName} ${reservation.user.lastName}` : 'N/A'}
                 </td>
                 <td className="text-white/70">
-                  {new Date(reservation.reservationDate).toLocaleDateString('tr-TR')} — {reservation.reservationTime}
+                  {new Date(reservation.reservationDate).toLocaleDateString('tr-TR')} — {reservation.reservationTime} - {calculateEndTime(reservation.reservationTime)}
                 </td>
                 <td>{reservation.guestCount}</td>
                 <td className="text-white/70">{reservation.table?.tableNumber || 'Not assigned'}</td>
@@ -193,12 +212,20 @@ export default function ReservationsPage() {
                   </span>
                 </td>
                 <td className="text-right">
-                  <button
-                    onClick={() => openUpdateModal(reservation)}
-                    className="btn-secondary px-3 py-1.5 rounded-[14px] text-[12px]"
-                  >
-                    Manage
-                  </button>
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={() => openUpdateModal(reservation)}
+                      className="btn-secondary px-3 py-1.5 rounded-[14px] text-[12px]"
+                    >
+                      Manage
+                    </button>
+                    <button
+                      onClick={() => handleDelete(reservation.id)}
+                      className="btn-danger px-3 py-1.5 rounded-[14px] text-[12px]"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -244,13 +271,11 @@ export default function ReservationsPage() {
                 </label>
                 <CustomSelect
                   options={[
-                    { value: '', label: 'No table assigned' },
-                    ...tables
-                      .filter(t => t.status === 'available' || t.id === selectedReservation.tableId)
-                      .map(table => ({
-                        value: table.id,
-                        label: `Table ${table.tableNumber} - Capacity: ${table.capacity} (${table.location})`
-                      }))
+                    { value: '', label: 'Masa atanmadı' },
+                    ...tables.map(table => ({
+                      value: table.id,
+                      label: `Masa ${table.tableNumber} - Kapasite: ${table.capacity} (${table.area || table.location || 'Ana Salon'})`
+                    }))
                   ]}
                   value={selectedTable}
                   onChange={setSelectedTable}

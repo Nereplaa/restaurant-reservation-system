@@ -16,6 +16,7 @@ export interface Reservation {
   guestCount: number;
   reservationDate: string;
   reservationTime: string;
+  reservationEndTime?: string;
   duration: number;
   status: 'confirmed' | 'completed' | 'cancelled' | 'no_show';
   specialRequests: string | null;
@@ -30,7 +31,8 @@ export interface Table {
   id: string;
   tableNumber: string;
   capacity: number;
-  location: string;
+  location?: string;
+  area?: string;
   status: 'available' | 'occupied' | 'reserved' | 'maintenance';
   createdAt: string;
   updatedAt: string;

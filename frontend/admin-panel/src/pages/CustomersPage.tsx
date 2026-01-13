@@ -2,11 +2,38 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { User } from '../types';
 
+interface UserFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  role: string;
+  password?: string;
+}
+
+const initialFormData: UserFormData = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  role: 'customer',
+  password: '',
+};
+
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Modal states
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [formData, setFormData] = useState<UserFormData>(initialFormData);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [formSuccess, setFormSuccess] = useState('');
 
   useEffect(() => {
     fetchCustomers();
@@ -22,6 +49,86 @@ export default function CustomersPage() {
       setError(err.response?.data?.error?.message || 'Failed to load customers');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAddUser = () => {
+    setFormData(initialFormData);
+    setFormError('');
+    setFormSuccess('');
+    setShowAddModal(true);
+  };
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setFormData({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone || '',
+      role: user.role,
+      password: '',
+    });
+    setFormError('');
+    setFormSuccess('');
+    setShowEditModal(true);
+  };
+
+  const handleCreateUser = async () => {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
+      setFormError('Lütfen zorunlu alanları doldurun');
+      return;
+    }
+
+    setIsSaving(true);
+    setFormError('');
+    try {
+      await api.post('/auth/register', {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        role: formData.role,
+      });
+      setFormSuccess('Kullanıcı başarıyla oluşturuldu');
+      setTimeout(() => {
+        setShowAddModal(false);
+        fetchCustomers();
+      }, 1000);
+    } catch (err: any) {
+      setFormError(err.response?.data?.error?.message || 'Kullanıcı oluşturulamadı');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleUpdateUser = async () => {
+    if (!selectedUser) return;
+    if (!formData.firstName || !formData.lastName || !formData.email) {
+      setFormError('Lütfen zorunlu alanları doldurun');
+      return;
+    }
+
+    setIsSaving(true);
+    setFormError('');
+    try {
+      await api.patch(`/admin/users/${selectedUser.id}`, {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        role: formData.role,
+      });
+      setFormSuccess('Kullanıcı başarıyla güncellendi');
+      setTimeout(() => {
+        setShowEditModal(false);
+        fetchCustomers();
+      }, 1000);
+    } catch (err: any) {
+      setFormError(err.response?.data?.error?.message || 'Kullanıcı güncellenemedi');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -43,6 +150,14 @@ export default function CustomersPage() {
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   };
+
+  const roleOptions = [
+    { value: 'customer', label: 'Müşteri' },
+    { value: 'server', label: 'Garson' },
+    { value: 'kitchen', label: 'Mutfak' },
+    { value: 'manager', label: 'Yönetici' },
+    { value: 'admin', label: 'Admin' },
+  ];
 
   if (isLoading) {
     return (
@@ -83,10 +198,10 @@ export default function CustomersPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="input-premium max-w-[360px]"
           />
-          <button className="btn-secondary px-3 py-2.5 rounded-[14px] text-[13px]">
-            Search
-          </button>
-          <button className="btn-primary px-3 py-2.5 rounded-[14px] text-[13px]">
+          <button
+            onClick={handleAddUser}
+            className="btn-primary px-3 py-2.5 rounded-[14px] text-[13px]"
+          >
             + Add User
           </button>
         </div>
@@ -108,6 +223,7 @@ export default function CustomersPage() {
               <th>Phone</th>
               <th>Role</th>
               <th>Joined Date</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -130,6 +246,14 @@ export default function CustomersPage() {
                 </td>
                 <td className="text-white/70">
                   {new Date(customer.createdAt).toLocaleDateString('tr-TR')}
+                </td>
+                <td>
+                  <button
+                    onClick={() => handleEditUser(customer)}
+                    className="px-3 py-1.5 rounded-lg bg-white/10 text-white/80 hover:bg-white/20 transition-colors text-sm"
+                  >
+                    ✏️ Düzenle
+                  </button>
                 </td>
               </tr>
             ))}
@@ -171,6 +295,205 @@ export default function CustomersPage() {
           <div className="kpi-hint">Guests with customer role.</div>
         </div>
       </div>
+
+      {/* Add User Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-panel rounded-2xl w-full max-w-md p-6 animate-fade-in-up">
+            <h2 className="font-playfair text-xl text-white mb-4">Yeni Kullanıcı Ekle</h2>
+
+            {formError && (
+              <div className="bg-red-500/20 border border-red-500/30 text-red-200 px-4 py-2 rounded-xl text-sm mb-4">
+                ⚠️ {formError}
+              </div>
+            )}
+            {formSuccess && (
+              <div className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 px-4 py-2 rounded-xl text-sm mb-4">
+                ✓ {formSuccess}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-white/60 mb-1">Ad *</label>
+                  <input
+                    type="text"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    className="input-premium w-full"
+                    placeholder="Ad"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/60 mb-1">Soyad *</label>
+                  <input
+                    type="text"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    className="input-premium w-full"
+                    placeholder="Soyad"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-white/60 mb-1">E-posta *</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="input-premium w-full"
+                  placeholder="ornek@email.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-white/60 mb-1">Telefon</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="input-premium w-full"
+                  placeholder="+90 5XX XXX XX XX"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-white/60 mb-1">Şifre *</label>
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="input-premium w-full"
+                  placeholder="Şifre"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-white/60 mb-1">Rol</label>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  className="input-premium w-full"
+                >
+                  {roleOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleCreateUser}
+                disabled={isSaving}
+                className="flex-1 btn-primary py-2.5 rounded-xl disabled:opacity-50"
+              >
+                {isSaving ? 'Oluşturuluyor...' : 'Oluştur'}
+              </button>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
+              >
+                İptal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditModal && selectedUser && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-panel rounded-2xl w-full max-w-md p-6 animate-fade-in-up">
+            <h2 className="font-playfair text-xl text-white mb-4">Kullanıcı Düzenle</h2>
+
+            {formError && (
+              <div className="bg-red-500/20 border border-red-500/30 text-red-200 px-4 py-2 rounded-xl text-sm mb-4">
+                ⚠️ {formError}
+              </div>
+            )}
+            {formSuccess && (
+              <div className="bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 px-4 py-2 rounded-xl text-sm mb-4">
+                ✓ {formSuccess}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-white/60 mb-1">Ad *</label>
+                  <input
+                    type="text"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    className="input-premium w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/60 mb-1">Soyad *</label>
+                  <input
+                    type="text"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    className="input-premium w-full"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-white/60 mb-1">E-posta *</label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="input-premium w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-white/60 mb-1">Telefon</label>
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="input-premium w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-white/60 mb-1">Rol</label>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  className="input-premium w-full"
+                >
+                  {roleOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleUpdateUser}
+                disabled={isSaving}
+                className="flex-1 btn-primary py-2.5 rounded-xl disabled:opacity-50"
+              >
+                {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
+              </button>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2.5 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
+              >
+                İptal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

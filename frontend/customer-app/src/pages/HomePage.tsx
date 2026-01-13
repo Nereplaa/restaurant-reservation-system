@@ -30,7 +30,7 @@ const defaultSettings: Partial<RestaurantSettings> = {
 const HomePage = () => {
   const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
-  const [_settings, setSettings] = useState<Partial<RestaurantSettings>>(defaultSettings);
+  const [settings, setSettings] = useState<Partial<RestaurantSettings>>(defaultSettings);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,7 +46,8 @@ const HomePage = () => {
       try {
         const data = await fetchSettings();
         if (data) {
-          setSettings(data);
+          // Merge with defaults for any missing fields
+          setSettings({ ...defaultSettings, ...data });
         }
       } catch (error) {
         console.error('Error loading settings:', error);
@@ -54,6 +55,18 @@ const HomePage = () => {
     };
     loadSettings();
   }, []);
+
+  // Helper to get setting value with fallback
+  const s = settings;
+  const galleryImages = s.galleryImages && s.galleryImages.length > 0
+    ? s.galleryImages
+    : defaultSettings.galleryImages!;
+  const features = s.features && s.features.length > 0
+    ? s.features
+    : defaultSettings.features!;
+  const heroBadges = s.heroBadges && s.heroBadges.length > 0
+    ? s.heroBadges
+    : defaultSettings.heroBadges!;
 
   return (
     <div className="min-h-screen bg-premium">
@@ -68,10 +81,10 @@ const HomePage = () => {
             </div>
             <div className="flex flex-col">
               <span className="font-playfair font-semibold text-white tracking-[0.14em] uppercase text-sm">
-                BORCELLE
+                {s.name?.split(' ')[0] || 'BORCELLE'}
               </span>
               <span className="text-[10px] tracking-[0.10em] uppercase text-[#9aa3b2]">
-                Fine Dining • 2004
+                {s.slogan || 'Fine Dining • 2004'}
               </span>
             </div>
           </Link>
@@ -112,7 +125,7 @@ const HomePage = () => {
         {/* Video Background */}
         <div className="absolute inset-0 z-0 overflow-hidden bg-[#0a0f18]">
           <iframe
-            src="https://www.youtube.com/embed/F3zw1Gvn4Mk?autoplay=1&mute=1&loop=1&playlist=F3zw1Gvn4Mk&controls=0&modestbranding=1&rel=0&playsinline=1&showinfo=0"
+            src={s.heroVideoUrl || defaultSettings.heroVideoUrl}
             title="BORCELLE video"
             frameBorder="0"
             allow="autoplay; encrypted-media"
@@ -127,24 +140,24 @@ const HomePage = () => {
         {/* Hero Content */}
         <div className="relative z-20 text-center px-6 max-w-4xl mx-auto pt-16">
           <h1 className="font-playfair font-medium text-white text-5xl md:text-7xl mb-6 leading-tight" style={{ textShadow: '0 20px 60px rgba(0,0,0,0.6)' }}>
-            Borcelle Fine Dining
+            {s.heroTitle || s.name || 'Borcelle Fine Dining'}
           </h1>
           <p className="text-white/85 text-lg md:text-xl font-light leading-relaxed max-w-2xl mx-auto mb-8" style={{ textShadow: '0 10px 40px rgba(0,0,0,0.5)' }}>
-            Zamansız zarafet, titiz servis ve şefin imzasını taşıyan tabaklar…
-            <br />Her detay fine-dining sofralarına yakışır bir ritüele dönüşür.
+            {(s.heroSubtitle || defaultSettings.heroSubtitle)?.split('\n').map((line, i) => (
+              <span key={i}>
+                {line}
+                {i === 0 && <br />}
+              </span>
+            ))}
           </p>
 
           {/* Badges */}
           <div className="flex gap-3 justify-center flex-wrap mb-10">
-            <span className="border border-white/25 bg-white/5 text-white/90 px-5 py-2.5 rounded-full text-xs tracking-[0.10em] uppercase backdrop-blur-md">
-              Tadım Menüsü
-            </span>
-            <span className="border border-white/25 bg-white/5 text-white/90 px-5 py-2.5 rounded-full text-xs tracking-[0.10em] uppercase backdrop-blur-md">
-              Şefin Seçkisi
-            </span>
-            <span className="border border-white/25 bg-white/5 text-white/90 px-5 py-2.5 rounded-full text-xs tracking-[0.10em] uppercase backdrop-blur-md">
-              Rezervasyon Önerilir
-            </span>
+            {heroBadges.map((badge, i) => (
+              <span key={i} className="border border-white/25 bg-white/5 text-white/90 px-5 py-2.5 rounded-full text-xs tracking-[0.10em] uppercase backdrop-blur-md">
+                {badge}
+              </span>
+            ))}
           </div>
 
           {/* CTA Button */}
@@ -174,28 +187,24 @@ const HomePage = () => {
           <div className="glass-dark rounded-2xl p-8 border border-white/10">
             <p className="text-xs tracking-[0.14em] uppercase text-[#7b8698] mb-3">Misyonumuz</p>
             <p className="text-white/80 leading-relaxed font-light">
-              En nadide hammaddeleri rafine tekniklerle buluşturarak, her tabakta sanat eseri yaratmak.
-              Misafirlerimize tutarlı lezzet ve kusursuz servis standardı sunmak.
+              {s.mission || defaultSettings.mission}
             </p>
             <div className="h-6" />
             <p className="text-xs tracking-[0.14em] uppercase text-[#7b8698] mb-3">Vizyonumuz</p>
             <p className="text-white/80 leading-relaxed font-light">
-              Modern gastronomi anlayışını zamansız bir atmosferle birleştirerek,
-              Türkiye'nin en prestijli fine-dining deneyimini sunmak.
+              {s.vision || defaultSettings.vision}
             </p>
           </div>
 
           <div className="glass-dark rounded-2xl p-8 border border-white/10">
             <p className="text-xs tracking-[0.14em] uppercase text-[#7b8698] mb-3">Deneyim</p>
             <p className="text-white/80 leading-relaxed font-light">
-              Sakin bir lüks atmosferi, özenle tasarlanmış ambiyans ve mevsimin en taze ürünleriyle
-              hazırlanan tadım menüsü. Her kurs, şefin yaratıcılığının bir yansıması.
+              {s.experience || defaultSettings.experience}
             </p>
             <div className="h-6" />
             <p className="text-xs tracking-[0.14em] uppercase text-[#7b8698] mb-3">Felsefemiz</p>
             <p className="text-white/80 leading-relaxed font-light">
-              "Az ama öz" yaklaşımıyla, her detayda mükemmellik arayışı.
-              Yemeğin ötesinde, unutulmaz anılar biriktirdiğiniz bir mekan.
+              {s.philosophy || defaultSettings.philosophy}
             </p>
           </div>
         </div>
@@ -211,41 +220,20 @@ const HomePage = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {/* Fine Dining */}
-          <div className="glass-dark rounded-2xl p-8 text-center border border-white/10 hover:border-white/20 transition-all hover:-translate-y-1">
-            <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#cfd4dc]/20 to-[#cfd4dc]/5 border border-white/10 flex items-center justify-center">
-              <span className="text-3xl">🍽️</span>
+          {features.map((feature, i) => (
+            <div key={i} className="glass-dark rounded-2xl p-8 text-center border border-white/10 hover:border-white/20 transition-all hover:-translate-y-1">
+              <div className={`w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br ${i === 0 ? 'from-[#cfd4dc]/20 to-[#cfd4dc]/5 border-white/10' :
+                  i === 1 ? 'from-amber-500/20 to-amber-600/10 border-amber-500/20' :
+                    'from-emerald-500/20 to-emerald-600/10 border-emerald-500/20'
+                } border flex items-center justify-center`}>
+                <span className="text-3xl">{feature.icon}</span>
+              </div>
+              <h3 className="font-playfair font-semibold text-white text-xl mb-4">{feature.title}</h3>
+              <p className="text-white/60 text-sm leading-relaxed">
+                {feature.description}
+              </p>
             </div>
-            <h3 className="font-playfair font-semibold text-white text-xl mb-4">Ustalık & Lezzet</h3>
-            <p className="text-white/60 text-sm leading-relaxed">
-              Michelin yıldızlı mutfaklardan ilham alan şefimiz, en seçkin malzemelerle
-              damağınızda iz bırakan tatlar yaratıyor. Her tabak, bir sanat eseri.
-            </p>
-          </div>
-
-          {/* Elegant Atmosphere */}
-          <div className="glass-dark rounded-2xl p-8 text-center border border-white/10 hover:border-white/20 transition-all hover:-translate-y-1">
-            <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20 flex items-center justify-center">
-              <span className="text-3xl">✨</span>
-            </div>
-            <h3 className="font-playfair font-semibold text-white text-xl mb-4">Zarif Atmosfer</h3>
-            <p className="text-white/60 text-sm leading-relaxed">
-              Özenle tasarlanmış iç mekan, yumuşak aydınlatma ve klasik müzik eşliğinde
-              romantik akşam yemeklerinden iş görüşmelerine ideal ortam.
-            </p>
-          </div>
-
-          {/* Premium Service */}
-          <div className="glass-dark rounded-2xl p-8 text-center border border-white/10 hover:border-white/20 transition-all hover:-translate-y-1">
-            <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/20 flex items-center justify-center">
-              <span className="text-3xl">⭐</span>
-            </div>
-            <h3 className="font-playfair font-semibold text-white text-xl mb-4">Kusursuz Hizmet</h3>
-            <p className="text-white/60 text-sm leading-relaxed">
-              Deneyimli ekibimiz, her misafirimize özel ilgi göstererek
-              beklentilerin ötesinde bir deneyim sunmak için titizlikle çalışıyor.
-            </p>
-          </div>
+          ))}
         </div>
       </section>
 
@@ -297,11 +285,11 @@ const HomePage = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {['fined1.webp', 'fined2.jpeg', 'fined3.webp', 'fined4.webp'].map((img, i) => (
+          {galleryImages.map((img, i) => (
             <div key={i} className="relative overflow-hidden rounded-2xl group border border-white/10">
               <img
                 src={`/images/${img}`}
-                alt={`BORCELLE ${i + 1}`}
+                alt={`${s.name || 'BORCELLE'} ${i + 1}`}
                 className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
                 style={{ filter: 'contrast(1.05) saturate(1.1)' }}
               />
@@ -320,17 +308,19 @@ const HomePage = () => {
           <div className="flex flex-col md:flex-row justify-center items-center gap-8 text-white/60 mb-8">
             <div className="text-center">
               <p className="text-xs tracking-[0.12em] uppercase text-[#7b8698] mb-2">Çalışma Saatleri</p>
-              <p className="font-playfair font-medium text-white text-lg">Her Gün 11:00 - 23:00</p>
+              <p className="font-playfair font-medium text-white text-lg">
+                Her Gün {s.openingTime || '11:00'} - {s.closingTime || '23:00'}
+              </p>
             </div>
             <div className="hidden md:block w-px h-12 bg-white/20" />
             <div className="text-center">
               <p className="text-xs tracking-[0.12em] uppercase text-[#7b8698] mb-2">Adres</p>
-              <p className="font-medium text-white/80">Merkez Mah. Lüks Sokak No:1, İstanbul</p>
+              <p className="font-medium text-white/80">{s.address || defaultSettings.address}</p>
             </div>
             <div className="hidden md:block w-px h-12 bg-white/20" />
             <div className="text-center">
               <p className="text-xs tracking-[0.12em] uppercase text-[#7b8698] mb-2">İletişim</p>
-              <p className="font-medium text-white/80">+90 (212) 555 01 23</p>
+              <p className="font-medium text-white/80">{s.phone || defaultSettings.phone}</p>
             </div>
           </div>
           <Link to={user ? '/booking' : '/register'} className="inline-block bg-[#cfd4dc]/20 border border-[#cfd4dc]/30 text-white text-sm tracking-[0.10em] uppercase px-8 py-4 rounded-full font-medium hover:bg-[#cfd4dc]/30 transition-all">
@@ -342,7 +332,7 @@ const HomePage = () => {
       {/* Footer */}
       <footer className="border-t border-white/10 py-8 text-center bg-[#0a0f18]">
         <p className="text-[#7b8698] text-xs tracking-[0.12em]">
-          © 2004 - {new Date().getFullYear()} <span className="text-white font-medium">BORCELLE</span> Fine Dining
+          © 2004 - {new Date().getFullYear()} <span className="text-white font-medium">{s.name?.split(' ')[0]?.toUpperCase() || 'BORCELLE'}</span> Fine Dining
         </p>
         <p className="text-[#556070] text-xs mt-2">Tüm hakları saklıdır.</p>
       </footer>

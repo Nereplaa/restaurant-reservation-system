@@ -19,6 +19,7 @@ const BookingPage: React.FC = () => {
   const [formData, setFormData] = useState({
     date: '',
     time: '',
+    endTime: '',
     partySize: 2,
     specialRequest: '',
     tableId: '',
@@ -92,6 +93,7 @@ const BookingPage: React.FC = () => {
       const response = await api.post('/reservations', {
         date: formData.date,
         time: formData.time,
+        end_time: formData.endTime,
         party_size: formData.partySize,
         special_request: formData.specialRequest,
         table_id: formData.tableId || null,
@@ -161,27 +163,40 @@ const BookingPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Date & Time Row */}
+              {/* Date Field */}
+              <div>
+                <label className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
+                  Tarih *
+                </label>
+                <CustomDatePicker
+                  value={formData.date}
+                  onChange={(val) => setFormData({ ...formData, date: val })}
+                />
+              </div>
+
+              {/* Time Row - Start & End */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
-                    Tarih *
+                    Başlangıç Saati *
                   </label>
-                  <CustomDatePicker
-                    value={formData.date}
-                    onChange={(val) => setFormData({ ...formData, date: val })}
+                  <CustomTimePicker
+                    value={formData.time}
+                    onChange={(val) => setFormData({ ...formData, time: val, endTime: '' })}
+                    minHour={11}
+                    maxHour={21}
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-medium text-white/70 uppercase tracking-wider mb-2">
-                    Saat *
+                    Bitiş Saati *
                   </label>
                   <CustomTimePicker
-                    value={formData.time}
-                    onChange={(val) => setFormData({ ...formData, time: val })}
-                    minHour={11}
-                    maxHour={21}
+                    value={formData.endTime}
+                    onChange={(val) => setFormData({ ...formData, endTime: val })}
+                    minHour={formData.time ? parseInt(formData.time.split(':')[0]) + 1 : 12}
+                    maxHour={22}
                   />
                 </div>
               </div>
@@ -235,7 +250,7 @@ const BookingPage: React.FC = () => {
               <div className="flex gap-4 pt-2">
                 <button
                   type="submit"
-                  disabled={isLoading || !formData.date || !formData.time}
+                  disabled={isLoading || !formData.date || !formData.time || !formData.endTime}
                   className="flex-1 py-3.5 px-6 rounded-xl font-medium bg-gradient-to-r from-[#cfd4dc] to-[#9aa3b2] text-[#0f1a2b] hover:shadow-lg hover:shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   {isLoading ? (

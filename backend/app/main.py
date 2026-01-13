@@ -4,12 +4,14 @@ Main FastAPI application
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import socketio
+import os
 from app.config import settings
-from app.routers import auth, reservation, menu, order, table, admin, chat, category
+from app.routers import auth, reservation, menu, order, table, admin, chat, category, upload
 from app.routers import settings as settings_router
 from app.utils.logger import logger
 from app.database import engine, Base
@@ -61,6 +63,12 @@ app.include_router(admin.router, prefix="/api/v1")
 app.include_router(chat.router, prefix="/api/v1")
 app.include_router(settings_router.router, prefix="/api/v1")
 app.include_router(category.router, prefix="/api/v1")
+app.include_router(upload.router, prefix="/api/v1")
+
+# Mount static files for uploaded images
+static_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static")
+os.makedirs(os.path.join(static_dir, "uploads"), exist_ok=True)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Health check endpoint
 @app.get("/health")
