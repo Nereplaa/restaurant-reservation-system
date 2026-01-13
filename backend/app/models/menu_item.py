@@ -10,15 +10,19 @@ from app.database import Base
 
 
 class MenuCategory(str, enum.Enum):
-    """Menu category enumeration"""
-    soups = "soups"
-    appetizers = "appetizers"
-    mains = "mains"
-    kebabs = "kebabs"
-    grills = "grills"
-    desserts = "desserts"
-    drinks = "drinks"
-    specials = "specials"
+    """Menu category enumeration - Borcelle Fine Dining"""
+    starters = "starters"      # Başlangıçlar
+    appetizers = "appetizers"  # Başlangıçlar (alias)
+    soups = "soups"            # Çorbalar
+    mains = "mains"            # Ana Yemekler
+    grills = "grills"          # Izgara
+    kebabs = "kebabs"          # Kebaplar
+    pizzas = "pizzas"          # Gurme Pizzalar
+    chef = "chef"              # Şef Özel
+    desserts = "desserts"      # Tatlılar
+    drinks = "drinks"          # İçecekler
+    wines = "wines"            # Şarap Koleksiyonu
+    specials = "specials"      # Özel Menü
 
 
 class MenuItem(Base):

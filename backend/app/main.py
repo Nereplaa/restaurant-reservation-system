@@ -9,7 +9,8 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 import socketio
 from app.config import settings
-from app.routers import auth, reservation, menu, order, table, admin, chat
+from app.routers import auth, reservation, menu, order, table, admin, chat, category
+from app.routers import settings as settings_router
 from app.utils.logger import logger
 from app.database import engine, Base
 
@@ -58,6 +59,8 @@ app.include_router(order.router, prefix="/api/v1")
 app.include_router(table.router, prefix="/api/v1")
 app.include_router(admin.router, prefix="/api/v1")
 app.include_router(chat.router, prefix="/api/v1")
+app.include_router(settings_router.router, prefix="/api/v1")
+app.include_router(category.router, prefix="/api/v1")
 
 # Health check endpoint
 @app.get("/health")

@@ -1,8 +1,27 @@
 import { useState, useEffect } from 'react';
 import CustomSelect from '../components/CustomSelect';
-import { MenuItem, getMenuData, saveMenuData, categoryList } from '../data/menuData';
+import api from '../services/api';
 
-const categoryOptions = categoryList.map(c => ({ value: c.key, label: c.label }));
+// Types
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  calories: number;
+  image_url: string;
+  category: string;
+  dietary_tags: string[];
+  available: boolean;
+}
+
+interface Category {
+  id: string;
+  key: string;
+  label: string;
+  emoji: string;
+}
+
 const availabilityOptions = [
   { value: 'true', label: 'Evet' },
   { value: 'false', label: 'Hayır' },
@@ -10,32 +29,46 @@ const availabilityOptions = [
 
 export default function MenuPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [currentItem, setCurrentItem] = useState<Partial<MenuItem>>({
     name: '',
     description: '',
     price: 0,
     calories: 0,
-    image: '',
+    image_url: '',
     category: 'starters',
-    tags: [],
-    priceNote: '',
+    dietary_tags: [],
     available: true,
   });
 
-  // Load menu data on mount
+  // Load menu data from API
   useEffect(() => {
-    setMenuItems(getMenuData());
+    loadData();
   }, []);
 
-  // Save to localStorage whenever menuItems changes
-  useEffect(() => {
-    if (menuItems.length > 0) {
-      saveMenuData(menuItems);
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [menuRes, catRes] = await Promise.all([
+        api.get('/menu'),
+        api.get('/categories')
+      ]);
+      setMenuItems(menuRes.data || []);
+      setCategories(catRes.data || []);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      alert('Menü verileri yüklenirken hata oluştu');
+    } finally {
+      setLoading(false);
     }
-  }, [menuItems]);
+  };
+
+  const categoryOptions = categories.map(c => ({ value: c.key, label: c.label }));
 
   const getFilteredItems = () => {
     if (selectedCategory === 'all') {
@@ -57,11 +90,11 @@ export default function MenuPage() {
   };
 
   const getCategoryLabel = (key: string) => {
-    return categoryList.find(c => c.key === key)?.label || key;
+    return categories.find(c => c.key === key)?.label || key;
   };
 
   const getCategoryEmoji = (key: string) => {
-    return categoryList.find(c => c.key === key)?.emoji || '🍽️';
+    return categories.find(c => c.key === key)?.emoji || '🍽️';
   };
 
   const openCreateModal = () => {
@@ -71,10 +104,9 @@ export default function MenuPage() {
       description: '',
       price: 0,
       calories: 0,
-      image: '',
+      image_url: '',
       category: 'starters',
-      tags: [],
-      priceNote: '',
+      dietary_tags: [],
       available: true,
     });
     setShowModal(true);
@@ -90,26 +122,70 @@ export default function MenuPage() {
     setShowModal(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
 
-    if (isEditing && currentItem.id) {
-      setMenuItems(prev => prev.map(item =>
-        item.id === currentItem.id ? { ...item, ...currentItem } as MenuItem : item
-      ));
-    } else {
-      const newId = Math.max(...menuItems.map(i => i.id), 0) + 1;
-      setMenuItems(prev => [...prev, { ...currentItem, id: newId } as MenuItem]);
+    try {
+      if (isEditing && currentItem.id) {
+        // Update existing item via API
+        const response = await api.patch(`/menu/${currentItem.id}`, {
+          name: currentItem.name,
+          description: currentItem.description,
+          price: currentItem.price,
+          calories: currentItem.calories,
+          category: currentItem.category,
+          available: currentItem.available,
+          dietary_tags: currentItem.dietary_tags || [],
+        });
+
+        setMenuItems(prev => prev.map(item =>
+          item.id === currentItem.id ? response.data : item
+        ));
+      } else {
+        // Create new item via API
+        const response = await api.post('/menu', {
+          name: currentItem.name,
+          description: currentItem.description,
+          price: currentItem.price,
+          calories: currentItem.calories,
+          category: currentItem.category,
+          available: currentItem.available ?? true,
+          dietary_tags: currentItem.dietary_tags || [],
+        });
+
+        setMenuItems(prev => [...prev, response.data]);
+      }
+      closeModal();
+    } catch (error) {
+      console.error('Error saving menu item:', error);
+      alert('Menü öğesi kaydedilirken hata oluştu');
+    } finally {
+      setSaving(false);
     }
-    closeModal();
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Bu menü öğesini silmek istediğinize emin misiniz?')) return;
-    setMenuItems(prev => prev.filter(item => item.id !== id));
+
+    try {
+      await api.delete(`/menu/${id}`);
+      setMenuItems(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Error deleting menu item:', error);
+      alert('Menü öğesi silinirken hata oluştu');
+    }
   };
 
   const groupedItems = getGroupedItems();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-premium flex items-center justify-center">
+        <div className="text-white/60">Yükleniyor...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-premium">
@@ -147,7 +223,7 @@ export default function MenuPage() {
             >
               🍽️ Tümü ({menuItems.length})
             </button>
-            {categoryList.map((cat) => {
+            {categories.map((cat) => {
               const count = menuItems.filter(i => i.category === cat.key).length;
               return (
                 <button
@@ -191,9 +267,9 @@ export default function MenuPage() {
                 >
                   {/* Image */}
                   <div className="h-32 rounded-lg overflow-hidden mb-3 bg-gradient-to-br from-[#1a2a40] to-[#0d1520] relative">
-                    {item.image ? (
+                    {item.image_url ? (
                       <img
-                        src={item.image}
+                        src={item.image_url}
                         alt={item.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
@@ -203,12 +279,11 @@ export default function MenuPage() {
                         }}
                       />
                     ) : null}
-                    <div className={`absolute inset-0 flex items-center justify-center ${item.image ? 'hidden' : ''}`}>
+                    <div className={`absolute inset-0 flex items-center justify-center ${item.image_url ? 'hidden' : ''}`}>
                       <span className="text-5xl opacity-60 group-hover:scale-110 transition-transform duration-300">
                         {getCategoryEmoji(item.category)}
                       </span>
                     </div>
-                    {/* Hover glow overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </div>
 
@@ -229,9 +304,9 @@ export default function MenuPage() {
                     )}
                   </div>
 
-                  {item.tags && item.tags.length > 0 && (
+                  {item.dietary_tags && item.dietary_tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-2">
-                      {item.tags.map((tag) => (
+                      {item.dietary_tags.map((tag) => (
                         <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full border border-[#cfd4dc]/30 text-[#cfd4dc]/80 group-hover:bg-[#cfd4dc]/10 transition-colors duration-300">
                           {tag}
                         </span>
@@ -341,17 +416,6 @@ export default function MenuPage() {
               </div>
 
               <div>
-                <label className="text-[11px] text-white/60 uppercase tracking-wider mb-1.5 block">Fiyat Notu (opsiyonel)</label>
-                <input
-                  type="text"
-                  value={currentItem.priceNote || ''}
-                  onChange={(e) => setCurrentItem({ ...currentItem, priceNote: e.target.value })}
-                  className="input-premium w-full"
-                  placeholder="örn: Kadeh 200₺"
-                />
-              </div>
-
-              <div>
                 <label className="text-[11px] text-white/60 uppercase tracking-wider mb-1.5 block">Stokta Mevcut</label>
                 <CustomSelect
                   options={availabilityOptions}
@@ -365,14 +429,16 @@ export default function MenuPage() {
                   type="button"
                   onClick={closeModal}
                   className="flex-1 btn-secondary py-2.5 rounded-[14px] font-medium"
+                  disabled={saving}
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
                   className="flex-1 btn-primary py-2.5 rounded-[14px] font-medium"
+                  disabled={saving}
                 >
-                  {isEditing ? 'Güncelle' : 'Ekle'}
+                  {saving ? 'Kaydediliyor...' : (isEditing ? 'Güncelle' : 'Ekle')}
                 </button>
               </div>
             </form>

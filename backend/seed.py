@@ -2,7 +2,7 @@
 Database seeding script
 """
 from app.database import SessionLocal, engine, Base
-from app.models import User, Table, MenuItem, Reservation, Order, OrderItem
+from app.models import User, Table, MenuItem, Reservation, Order, OrderItem, RestaurantSettings, Category
 from app.models.user import UserRole
 from app.models.table import TableStatus, TableArea
 from app.models.menu_item import MenuCategory
@@ -79,6 +79,57 @@ def seed_database():
         db.add_all([admin_user, manager_user, server_user, kitchen_user, customer_user])
         db.commit()
         print("✓ Users created")
+        
+        # Create restaurant settings
+        restaurant_settings = RestaurantSettings(
+            name="Borcelle Fine Dining",
+            slogan="Fine Dining • 2004",
+            description="Zamansız zarafet, titiz servis ve şefin imzasını taşıyan tabaklar…",
+            address="Merkez Mah. Lüks Sokak No:1, İstanbul",
+            phone="+90 (212) 555 01 23",
+            email="info@borcellefinedining.com",
+            opening_time="11:00",
+            closing_time="23:00",
+            total_tables="26",
+            total_capacity="120",
+            hero_video_url="https://www.youtube.com/embed/F3zw1Gvn4Mk?autoplay=1&mute=1&loop=1&playlist=F3zw1Gvn4Mk&controls=0&modestbranding=1&rel=0&playsinline=1&showinfo=0",
+            hero_title="Borcelle Fine Dining",
+            hero_subtitle="Zamansız zarafet, titiz servis ve şefin imzasını taşıyan tabaklar…\nHer detay fine-dining sofralarına yakışır bir ritüele dönüşür.",
+            gallery_images=["fined1.webp", "fined2.jpeg", "fined3.webp", "fined4.webp"],
+            mission="En nadide hammaddeleri rafine tekniklerle buluşturarak, her tabakta sanat eseri yaratmak. Misafirlerimize tutarlı lezzet ve kusursuz servis standardı sunmak.",
+            vision="Modern gastronomi anlayışını zamansız bir atmosferle birleştirerek, Türkiye'nin en prestijli fine-dining deneyimini sunmak.",
+            experience="Sakin bir lüks atmosferi, özenle tasarlanmış ambiyans ve mevsimin en taze ürünleriyle hazırlanan tadım menüsü. Her kurs, şefin yaratıcılığının bir yansıması.",
+            philosophy='"Az ama öz" yaklaşımıyla, her detayda mükemmellik arayışı. Yemeğin ötesinde, unutulmaz anılar biriktirdiğiniz bir mekan.',
+            services=["Vale park", "Çocuk sandalyesi", "Cuma-Cumartesi canlı müzik", "Özel günler için pasta"],
+            hero_badges=["Tadım Menüsü", "Şefin Seçkisi", "Rezervasyon Önerilir"],
+            features=[
+                {"icon": "🍽️", "title": "Ustalık & Lezzet", "description": "Michelin yıldızlı mutfaklardan ilham alan şefimiz, en seçkin malzemelerle damağınızda iz bırakan tatlar yaratıyor. Her tabak, bir sanat eseri."},
+                {"icon": "✨", "title": "Zarif Atmosfer", "description": "Özenle tasarlanmış iç mekan, yumuşak aydınlatma ve klasik müzik eşliğinde romantik akşam yemeklerinden iş görüşmelerine ideal ortam."},
+                {"icon": "⭐", "title": "Kusursuz Hizmet", "description": "Deneyimli ekibimiz, her misafirimize özel ilgi göstererek beklentilerin ötesinde bir deneyim sunmak için titizlikle çalışıyor."}
+            ]
+        )
+        db.add(restaurant_settings)
+        db.commit()
+        print("✓ Restaurant settings created")
+        
+        # Create categories
+        categories_data = [
+            {"key": "starters", "label": "Başlangıçlar", "label_tr": "Başlangıçlar", "emoji": "🥗", "sort_order": 1},
+            {"key": "mains", "label": "Ana Yemekler", "label_tr": "Ana Yemekler", "emoji": "🍛", "sort_order": 2},
+            {"key": "pizzas", "label": "Gurme Pizzalar", "label_tr": "Gurme Pizzalar", "emoji": "🍕", "sort_order": 3},
+            {"key": "chef", "label": "Şef Özel", "label_tr": "Şef Özel", "emoji": "👨‍🍳", "sort_order": 4},
+            {"key": "specials", "label": "Şef Özel", "label_tr": "Şef Özel", "emoji": "👨‍🍳", "sort_order": 5},
+            {"key": "desserts", "label": "Tatlılar", "label_tr": "Tatlılar", "emoji": "🍰", "sort_order": 6},
+            {"key": "drinks", "label": "İçecekler", "label_tr": "İçecekler", "emoji": "🥤", "sort_order": 7},
+            {"key": "wines", "label": "Şaraplar", "label_tr": "Şaraplar", "emoji": "🍷", "sort_order": 8},
+        ]
+        
+        for cat_data in categories_data:
+            category = Category(**cat_data)
+            db.add(category)
+        
+        db.commit()
+        print("✓ Categories created")
         
         # Create tables with enhanced features
         # Rules:
@@ -157,184 +208,355 @@ def seed_database():
         db.commit()
         print("✓ Tables created (8 Terrace + 16 Main Hall + 2 VIP = 26 total)")
         
-        # Create menu items - Turkish Restaurant Menu
+        # Create menu items - Borcelle Fine Dining Menu
         menu_items = [
-            # Soups
+            # Başlangıçlar (Starters)
             {
-                "name": "Lentil Soup",
-                "name_tr": "Mercimek Çorbası",
-                "description": "Traditional Turkish red lentil soup",
-                "price": Decimal("8.99"),
-                "category": MenuCategory.soups,
-                "dietary_tags": ["vegetarian", "vegan"],
+                "name": "Zeytin & Kekikli Artizan Ekmek Trio",
+                "name_tr": "Zeytin & Kekikli Artizan Ekmek Trio",
+                "description": "Sıcak taş fırın ekmekleri, zeytinyağı-balsamik dip sos ve deniz tuzu ile.",
+                "price": Decimal("220"),
+                "category": MenuCategory.starters,
                 "preparation_time": 10,
-                "calories": 180
-            },
-            {
-                "name": "Yogurt Soup",
-                "name_tr": "Yayla Çorbası",
-                "description": "Creamy yogurt and rice soup with mint",
-                "price": Decimal("9.99"),
-                "category": MenuCategory.soups,
-                "dietary_tags": ["vegetarian"],
-                "preparation_time": 15,
                 "calories": 220
             },
-            
-            # Appetizers
             {
-                "name": "Hummus",
-                "name_tr": "Humus",
-                "description": "Chickpea puree with tahini, olive oil, and garlic",
-                "price": Decimal("12.99"),
-                "category": MenuCategory.appetizers,
-                "dietary_tags": ["vegetarian", "vegan"],
-                "preparation_time": 5,
-                "calories": 240
-            },
-            {
-                "name": "Stuffed Grape Leaves",
-                "name_tr": "Yaprak Sarma",
-                "description": "Grape leaves stuffed with rice, herbs, and spices",
-                "price": Decimal("14.99"),
-                "category": MenuCategory.appetizers,
-                "dietary_tags": ["vegetarian", "vegan"],
-                "preparation_time": 10,
-                "calories": 180
-            },
-            {
-                "name": "Fried Calamari",
-                "name_tr": "Kalamar Tava",
-                "description": "Crispy fried squid rings with special sauce",
-                "price": Decimal("16.99"),
-                "category": MenuCategory.appetizers,
+                "name": "Izgara Halloumi & Nar Roka",
+                "name_tr": "Izgara Halloumi & Nar Roka",
+                "description": "Nar ekşili roka yatağında ızgara hellim, kavrulmuş fındık parçaları ile.",
+                "price": Decimal("260"),
+                "category": MenuCategory.starters,
                 "preparation_time": 15,
-                "calories": 320
-            },
-            
-            # Kebabs
-            {
-                "name": "Adana Kebab",
-                "name_tr": "Adana Kebap",
-                "description": "Spicy minced lamb kebab on skewer",
-                "price": Decimal("24.99"),
-                "category": MenuCategory.kebabs,
-                "preparation_time": 25,
-                "calories": 480,
-                "protein": Decimal("35.0")
+                "calories": 310
             },
             {
-                "name": "Chicken Shish Kebab",
-                "name_tr": "Tavuk Şiş",
-                "description": "Marinated grilled chicken cubes",
-                "price": Decimal("22.99"),
-                "category": MenuCategory.kebabs,
+                "name": "Trüf Aromalı Mantarlı Bruschetta",
+                "name_tr": "Trüf Aromalı Mantarlı Bruschetta",
+                "description": "Karamelize soğan, sote mantar ve hafif trüf yağı ile kızarmış ekmek üstü lezzet.",
+                "price": Decimal("240"),
+                "category": MenuCategory.starters,
+                "preparation_time": 12,
+                "calories": 270
+            },
+            {
+                "name": "Somon Tartar Lime Breeze",
+                "name_tr": "Somon Tartar Lime Breeze",
+                "description": "Taze somon, avokado, lime sos ve susam ile rafine bir soğuk başlangıç.",
+                "price": Decimal("320"),
+                "category": MenuCategory.starters,
+                "preparation_time": 15,
+                "calories": 260
+            },
+            {
+                "name": "Kabak Çiçeği Dolması Serisi",
+                "name_tr": "Kabak Çiçeği Dolması Serisi",
+                "description": "Otlu pirinç iç harcı ile doldurulmuş hafif Ege klasiği. (4 adet)",
+                "price": Decimal("230"),
+                "category": MenuCategory.starters,
+                "dietary_tags": ["vegetarian"],
                 "preparation_time": 20,
-                "calories": 380,
-                "protein": Decimal("40.0")
-            },
-            {
-                "name": "Lamb Shish Kebab",
-                "name_tr": "Kuzu Şiş",
-                "description": "Tender grilled lamb cubes",
-                "price": Decimal("26.99"),
-                "category": MenuCategory.kebabs,
-                "preparation_time": 25,
-                "calories": 420,
-                "protein": Decimal("38.0")
+                "calories": 190
             },
             
-            # Mains
+            # Ana Yemekler (Mains)
             {
-                "name": "Lamb Stew",
-                "name_tr": "Kuzu Güveç",
-                "description": "Slow-cooked lamb with vegetables in clay pot",
-                "price": Decimal("28.99"),
+                "name": "Borcelle Signature Steak",
+                "name_tr": "Borcelle Signature Steak",
+                "description": "250 gr dry-aged dana antrikot, demi-glace sos, ızgara sebzeler ve patates püresi ile.",
+                "price": Decimal("780"),
                 "category": MenuCategory.mains,
                 "preparation_time": 30,
+                "calories": 720
+            },
+            {
+                "name": "Kremalı Porçini Risotto",
+                "name_tr": "Kremalı Porçini Risotto",
+                "description": "Parmesan ve tereyağı ile bağlanmış, yoğun aromalı porçini mantarlı risotto.",
+                "price": Decimal("520"),
+                "category": MenuCategory.mains,
+                "dietary_tags": ["vegetarian"],
+                "preparation_time": 25,
+                "calories": 580
+            },
+            {
+                "name": "Deniz Mahsullü Linguine",
+                "name_tr": "Deniz Mahsullü Linguine",
+                "description": "Karides, midye ve kalamarla zenginleştirilmiş, beyaz şarap soslu ince makarna.",
+                "price": Decimal("560"),
+                "category": MenuCategory.mains,
+                "preparation_time": 25,
+                "calories": 650
+            },
+            {
+                "name": "Ballı Hardallı Fırın Somon",
+                "name_tr": "Ballı Hardallı Fırın Somon",
+                "description": "Kinoa yatağında narenciye dokunuşlu ballı hardal sos ile fırınlanmış somon.",
+                "price": Decimal("590"),
+                "category": MenuCategory.mains,
+                "preparation_time": 25,
                 "calories": 520
             },
             {
-                "name": "Turkish Meatballs",
-                "name_tr": "İnegöl Köfte",
-                "description": "Traditional Turkish meatballs with spices",
-                "price": Decimal("21.99"),
+                "name": "Osmanlı Usulü Kuzu İncik",
+                "name_tr": "Osmanlı Usulü Kuzu İncik",
+                "description": "8 saat düşük ısıda pişirilmiş kuzu incik, patlıcan püresi ve kendi sosu ile.",
+                "price": Decimal("640"),
                 "category": MenuCategory.mains,
-                "preparation_time": 20,
-                "calories": 450
+                "preparation_time": 35,
+                "calories": 780
             },
             {
-                "name": "Sultan's Delight",
-                "name_tr": "Hünkar Beğendi",
-                "description": "Lamb stew on smoky eggplant puree",
-                "price": Decimal("29.99"),
+                "name": "Vegan Izgara Köz Tabağı",
+                "name_tr": "Vegan Izgara Köz Tabağı",
+                "description": "Köz patlıcan, kabak, kapya biber ve humus ile dengeli bir bitkisel ana yemek.",
+                "price": Decimal("450"),
                 "category": MenuCategory.mains,
-                "preparation_time": 30,
-                "calories": 560
+                "dietary_tags": ["vegan"],
+                "preparation_time": 20,
+                "calories": 470
             },
             
-            # Desserts
+            # Gurme Pizzalar (Gourmet Pizzas)
             {
-                "name": "Baklava",
-                "name_tr": "Baklava",
-                "description": "Layers of filo pastry with nuts and honey syrup",
-                "price": Decimal("10.99"),
-                "category": MenuCategory.desserts,
-                "dietary_tags": ["vegetarian"],
-                "preparation_time": 5,
-                "calories": 380
+                "name": "Truffle Mushroom Pizza",
+                "name_tr": "Truffle Mushroom Pizza",
+                "description": "Mozzarella, mantar ve trüf yağı ile yoğun aromalı gurme pizza.",
+                "price": Decimal("430"),
+                "category": MenuCategory.pizzas,
+                "preparation_time": 20,
+                "calories": 690
             },
             {
-                "name": "Turkish Delight",
-                "name_tr": "Lokum",
-                "description": "Traditional Turkish candy",
-                "price": Decimal("8.99"),
-                "category": MenuCategory.desserts,
-                "dietary_tags": ["vegetarian", "vegan"],
-                "preparation_time": 5,
-                "calories": 280
+                "name": "Napoli Margherita Deluxe",
+                "name_tr": "Napoli Margherita Deluxe",
+                "description": "San Marzano domates sosu, buffalo mozzarella ve taze fesleğen.",
+                "price": Decimal("390"),
+                "category": MenuCategory.pizzas,
+                "dietary_tags": ["vegetarian"],
+                "preparation_time": 18,
+                "calories": 610
             },
             {
-                "name": "Kunefe",
-                "name_tr": "Künefe",
-                "description": "Shredded pastry with cheese, soaked in syrup",
-                "price": Decimal("12.99"),
+                "name": "Prosciutto & Roka",
+                "name_tr": "Prosciutto & Roka",
+                "description": "İnce dilim prosciutto, roka ve parmesan ile dengeli tuzlulukta.",
+                "price": Decimal("460"),
+                "category": MenuCategory.pizzas,
+                "preparation_time": 20,
+                "calories": 720
+            },
+            {
+                "name": "Quattro Formaggi",
+                "name_tr": "Quattro Formaggi",
+                "description": "Gorgonzola, mozzarella, parmesan ve kaşar karışımı peynir şöleni.",
+                "price": Decimal("440"),
+                "category": MenuCategory.pizzas,
+                "preparation_time": 18,
+                "calories": 780
+            },
+            
+            # Şef Özel (Chef's Specials)
+            {
+                "name": "Karamelize Soğanlı T-Bone",
+                "name_tr": "Karamelize Soğanlı T-Bone",
+                "description": "350 gr premium T-Bone, karamelize soğan ve rosmarinli patatesler ile.",
+                "price": Decimal("890"),
+                "category": MenuCategory.chef,
+                "preparation_time": 35,
+                "calories": 950
+            },
+            {
+                "name": "Borcelle Fileto Sufle",
+                "name_tr": "Borcelle Fileto Sufle",
+                "description": "Şarap indirgemeli sos ile tereyağında mühürlenmiş dana fileto.",
+                "price": Decimal("840"),
+                "category": MenuCategory.chef,
+                "preparation_time": 30,
+                "calories": 860
+            },
+            {
+                "name": "Kestane Püreli Ördek Göğsü",
+                "name_tr": "Kestane Püreli Ördek Göğsü",
+                "description": "Portakal glaze ve kestane püresi ile dengelenmiş gurme ördek tabağı.",
+                "price": Decimal("820"),
+                "category": MenuCategory.chef,
+                "preparation_time": 35,
+                "calories": 740
+            },
+            
+            # Tatlılar (Desserts)
+            {
+                "name": "Çikolatalı Volkan Sufle",
+                "name_tr": "Çikolatalı Volkan Sufle",
+                "description": "Akışkan bitter çekirdek, yanında dondurma ile servis edilir.",
+                "price": Decimal("260"),
                 "category": MenuCategory.desserts,
-                "dietary_tags": ["vegetarian"],
                 "preparation_time": 15,
+                "calories": 480
+            },
+            {
+                "name": "San Sebastian Cheesecake",
+                "name_tr": "San Sebastian Cheesecake",
+                "description": "Orta şekerli, kremamsı dokuda klasik yanık cheesecake.",
+                "price": Decimal("270"),
+                "category": MenuCategory.desserts,
+                "preparation_time": 5,
+                "calories": 510
+            },
+            {
+                "name": "Limonlu Mascarpone Cup",
+                "name_tr": "Limonlu Mascarpone Cup",
+                "description": "Limon kreması, mascarpone ve bisküvi katmanlı ferahlatıcı tatlı.",
+                "price": Decimal("240"),
+                "category": MenuCategory.desserts,
+                "preparation_time": 5,
+                "calories": 390
+            },
+            {
+                "name": "Fıstıklı Kadayıf Parfe",
+                "name_tr": "Fıstıklı Kadayıf Parfe",
+                "description": "Antep fıstığı, kıtır kadayıf ve parfe katmanlarıyla modernleştirilmiş yerel tat.",
+                "price": Decimal("280"),
+                "category": MenuCategory.desserts,
+                "preparation_time": 5,
                 "calories": 520
             },
             
-            # Drinks
+            # İçecekler (Drinks)
             {
-                "name": "Turkish Tea",
-                "name_tr": "Çay",
-                "description": "Traditional black tea in tulip glass",
-                "price": Decimal("3.99"),
+                "name": "Taze Portakal Suyu",
+                "name_tr": "Taze Portakal Suyu",
+                "description": "Sıkma günlük portakal suyu.",
+                "price": Decimal("120"),
                 "category": MenuCategory.drinks,
-                "dietary_tags": ["vegetarian", "vegan"],
+                "dietary_tags": ["vegan"],
                 "preparation_time": 5,
-                "calories": 0
+                "calories": 120
             },
             {
-                "name": "Turkish Coffee",
+                "name": "Ev Yapımı Limonata",
+                "name_tr": "Ev Yapımı Limonata",
+                "description": "Buzlu, naneli seçenekleriyle hafif ekşi-dengeli lezzet.",
+                "price": Decimal("110"),
+                "category": MenuCategory.drinks,
+                "dietary_tags": ["vegan"],
+                "preparation_time": 5,
+                "calories": 140
+            },
+            {
+                "name": "Şeftalili Soğuk Çay",
+                "name_tr": "Şeftalili Soğuk Çay",
+                "description": "Demlenmiş çay bazlı, şeftali aromalı ferah içecek.",
+                "price": Decimal("105"),
+                "category": MenuCategory.drinks,
+                "dietary_tags": ["vegan"],
+                "preparation_time": 3,
+                "calories": 110
+            },
+            {
+                "name": "Türk Kahvesi",
                 "name_tr": "Türk Kahvesi",
-                "description": "Strong traditional coffee",
-                "price": Decimal("5.99"),
+                "description": "Klasik, orta kavrum Türk kahvesi.",
+                "price": Decimal("80"),
                 "category": MenuCategory.drinks,
-                "dietary_tags": ["vegetarian", "vegan"],
-                "preparation_time": 10,
+                "dietary_tags": ["vegan"],
+                "preparation_time": 8,
                 "calories": 5
             },
             {
-                "name": "Ayran",
-                "name_tr": "Ayran",
-                "description": "Refreshing yogurt drink",
-                "price": Decimal("4.99"),
+                "name": "Cappuccino",
+                "name_tr": "Cappuccino",
+                "description": "Yoğun espresso ve süt köpüğü ile.",
+                "price": Decimal("95"),
                 "category": MenuCategory.drinks,
                 "dietary_tags": ["vegetarian"],
                 "preparation_time": 5,
                 "calories": 80
+            },
+            {
+                "name": "Latte",
+                "name_tr": "Latte",
+                "description": "Yumuşak içimli, süt oranı yüksek kahve.",
+                "price": Decimal("105"),
+                "category": MenuCategory.drinks,
+                "dietary_tags": ["vegetarian"],
+                "preparation_time": 5,
+                "calories": 120
+            },
+            {
+                "name": "Sade Soda",
+                "name_tr": "Sade Soda",
+                "description": "Gazlı mineral içecek.",
+                "price": Decimal("60"),
+                "category": MenuCategory.drinks,
+                "dietary_tags": ["vegan"],
+                "preparation_time": 1,
+                "calories": 0
+            },
+            
+            # Şaraplar (Wines)
+            {
+                "name": "Château Elegante Reserva",
+                "name_tr": "Château Elegante Reserva",
+                "description": "Yoğun tanenli, karadut ve siyah erik notalarına sahip gövdeli kırmızı.",
+                "price": Decimal("1700"),
+                "category": MenuCategory.wines,
+                "preparation_time": 2,
+                "calories": 125
+            },
+            {
+                "name": "Borcelle Cabernet Special",
+                "name_tr": "Borcelle Cabernet Special",
+                "description": "Meşe fıçıda dinlendirilmiş, baharat ve siyah meyve notaları taşıyan özel harman.",
+                "price": Decimal("950"),
+                "category": MenuCategory.wines,
+                "preparation_time": 2,
+                "calories": 130
+            },
+            {
+                "name": "Pinot Noir Rosé Serenade",
+                "name_tr": "Pinot Noir Rosé Serenade",
+                "description": "Çilek ve narenciye profiline sahip, hafif gövdeli taze roze.",
+                "price": Decimal("850"),
+                "category": MenuCategory.wines,
+                "preparation_time": 2,
+                "calories": 115
+            },
+            {
+                "name": "Sauvignon Blanc Crystal",
+                "name_tr": "Sauvignon Blanc Crystal",
+                "description": "Tropik meyve ve bitkisel notalara sahip, yüksek asiditeli ferah beyaz şarap.",
+                "price": Decimal("900"),
+                "category": MenuCategory.wines,
+                "preparation_time": 2,
+                "calories": 105
+            },
+            {
+                "name": "Chardonnay Gold Barrel",
+                "name_tr": "Chardonnay Gold Barrel",
+                "description": "Vanilya ve tereyağı hissi barındıran, tam gövdeli fıçı Chardonnay.",
+                "price": Decimal("1100"),
+                "category": MenuCategory.wines,
+                "preparation_time": 2,
+                "calories": 120
+            },
+            {
+                "name": "Prosecco Stella",
+                "name_tr": "Prosecco Stella",
+                "description": "İnce kabarcıklı, hafif tatlı bitişli İtalyan prosecco.",
+                "price": Decimal("820"),
+                "category": MenuCategory.wines,
+                "preparation_time": 2,
+                "calories": 98
+            },
+            {
+                "name": "Champagne Maison Royale",
+                "name_tr": "Champagne Maison Royale",
+                "description": "Özel anlar için önerilen, dengeli asiditeye sahip prestijli Champagne.",
+                "price": Decimal("4800"),
+                "category": MenuCategory.wines,
+                "preparation_time": 2,
+                "calories": 95
             },
         ]
         

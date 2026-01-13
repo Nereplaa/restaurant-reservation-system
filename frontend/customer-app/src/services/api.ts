@@ -1,8 +1,9 @@
 import axios from 'axios';
 
 // Create axios instance with base URL
+// Using relative URL so nginx can proxy to backend
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:7001/api/v1',
+  baseURL: '/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },

@@ -1,10 +1,36 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useState, useEffect } from 'react';
+import { fetchSettings, RestaurantSettings } from '../services/menuApi';
+
+// Default settings fallback
+const defaultSettings: Partial<RestaurantSettings> = {
+  name: 'Borcelle Fine Dining',
+  slogan: 'Fine Dining • 2004',
+  heroVideoUrl: 'https://www.youtube.com/embed/F3zw1Gvn4Mk?autoplay=1&mute=1&loop=1&playlist=F3zw1Gvn4Mk&controls=0&modestbranding=1&rel=0&playsinline=1&showinfo=0',
+  heroTitle: 'Borcelle Fine Dining',
+  heroSubtitle: 'Zamansız zarafet, titiz servis ve şefin imzasını taşıyan tabaklar…\nHer detay fine-dining sofralarına yakışır bir ritüele dönüşür.',
+  heroBadges: ['Tadım Menüsü', 'Şefin Seçkisi', 'Rezervasyon Önerilir'],
+  openingTime: '11:00',
+  closingTime: '23:00',
+  address: 'Merkez Mah. Lüks Sokak No:1, İstanbul',
+  phone: '+90 (212) 555 01 23',
+  galleryImages: ['fined1.webp', 'fined2.jpeg', 'fined3.webp', 'fined4.webp'],
+  mission: 'En nadide hammaddeleri rafine tekniklerle buluşturarak, her tabakta sanat eseri yaratmak. Misafirlerimize tutarlı lezzet ve kusursuz servis standardı sunmak.',
+  vision: 'Modern gastronomi anlayışını zamansız bir atmosferle birleştirerek, Türkiye\'nin en prestijli fine-dining deneyimini sunmak.',
+  experience: 'Sakin bir lüks atmosferi, özenle tasarlanmış ambiyans ve mevsimin en taze ürünleriyle hazırlanan tadım menüsü. Her kurs, şefin yaratıcılığının bir yansıması.',
+  philosophy: '"Az ama öz" yaklaşımıyla, her detayda mükemmellik arayışı. Yemeğin ötesinde, unutulmaz anılar biriktirdiğiniz bir mekan.',
+  features: [
+    { icon: '🍽️', title: 'Ustalık & Lezzet', description: 'Michelin yıldızlı mutfaklardan ilham alan şefimiz, en seçkin malzemelerle damağınızda iz bırakan tatlar yaratıyor. Her tabak, bir sanat eseri.' },
+    { icon: '✨', title: 'Zarif Atmosfer', description: 'Özenle tasarlanmış iç mekan, yumuşak aydınlatma ve klasik müzik eşliğinde romantik akşam yemeklerinden iş görüşmelerine ideal ortam.' },
+    { icon: '⭐', title: 'Kusursuz Hizmet', description: 'Deneyimli ekibimiz, her misafirimize özel ilgi göstererek beklentilerin ötesinde bir deneyim sunmak için titizlikle çalışıyor.' }
+  ]
+};
 
 const HomePage = () => {
   const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const [_settings, setSettings] = useState<Partial<RestaurantSettings>>(defaultSettings);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -12,6 +38,21 @@ const HomePage = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Fetch settings from API
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const data = await fetchSettings();
+        if (data) {
+          setSettings(data);
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
+    };
+    loadSettings();
   }, []);
 
   return (

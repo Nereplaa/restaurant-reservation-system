@@ -1,40 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { MenuItem, getMenuData, categoryList } from '../data/menuData';
+import { fetchMenuItems, fetchCategories, toLegacyFormat, toLegacyCategoryFormat, LegacyMenuItem, LegacyCategory } from '../services/menuApi';
 
 interface Category {
   title: string;
-  items: MenuItem[];
+  items: LegacyMenuItem[];
 }
 
 const MenuPage: React.FC = () => {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [menuItems, setMenuItems] = useState<LegacyMenuItem[]>([]);
+  const [categoryList, setCategoryList] = useState<LegacyCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [hoveredItem, setHoveredItem] = useState<MenuItem | null>(null);
+  const [hoveredItem, setHoveredItem] = useState<LegacyMenuItem | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [_loading, setLoading] = useState(true);
 
-  // Load menu data on mount and listen for updates
+  // Load menu data from API on mount
   useEffect(() => {
-    setMenuItems(getMenuData());
-
-    // Listen for menu updates from admin panel
-    const handleMenuUpdate = (e: CustomEvent<MenuItem[]>) => {
-      setMenuItems(e.detail);
-    };
-
-    window.addEventListener('menuDataUpdated', handleMenuUpdate as EventListener);
-
-    // Also listen for storage changes from other tabs
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'borcelle_menu_data') {
-        setMenuItems(getMenuData());
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [items, categories] = await Promise.all([
+          fetchMenuItems(),
+          fetchCategories()
+        ]);
+        setMenuItems(toLegacyFormat(items));
+        setCategoryList(toLegacyCategoryFormat(categories));
+      } catch (error) {
+        console.error('Error loading menu data:', error);
+      } finally {
+        setLoading(false);
       }
     };
-    window.addEventListener('storage', handleStorageChange);
 
-    return () => {
-      window.removeEventListener('menuDataUpdated', handleMenuUpdate as EventListener);
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    loadData();
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {

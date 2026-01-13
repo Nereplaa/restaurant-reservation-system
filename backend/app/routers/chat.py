@@ -1,12 +1,19 @@
 """
 Chat router that proxies requests to a local AI model server (e.g. LM Studio).
+System prompt is now dynamically generated from database.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 import httpx
 
 from app.config import settings
+from app.database import get_db
+from app.models.restaurant_settings import RestaurantSettings
+from app.models.menu_item import MenuItem
+from app.models.table import Table, TableArea
+from app.models.category import Category
 
 
 router = APIRouter(tags=["chat"])
@@ -20,7 +27,136 @@ class ChatResponse(BaseModel):
     reply: str
 
 
-async def _call_llm(message: str) -> str:
+def generate_system_prompt(db: Session) -> str:
+    """
+    Generate system prompt dynamically from database.
+    Fetches restaurant settings, menu items, and tables.
+    """
+    # Get restaurant settings
+    settings_record = db.query(RestaurantSettings).first()
+    
+    # Default values if no settings exist
+    if not settings_record:
+        restaurant_name = "Borcelle Fine Dining"
+        opening_time = "11:00"
+        closing_time = "23:00"
+        total_tables = "26"
+        total_capacity = "120"
+        services_list = ["Vale park", "Çocuk sandalyesi", "Cuma-Cumartesi canlı müzik", "Özel günler için pasta"]
+    else:
+        restaurant_name = settings_record.name
+        opening_time = settings_record.opening_time
+        closing_time = settings_record.closing_time
+        total_tables = settings_record.total_tables or "26"
+        total_capacity = settings_record.total_capacity or "120"
+        services_list = settings_record.services or []
+    
+    # Get menu items grouped by category
+    menu_items = db.query(MenuItem).filter(MenuItem.available == True).all()
+    
+    # Get categories
+    categories = db.query(Category).filter(Category.is_active == True).order_by(Category.sort_order).all()
+    category_map = {cat.key: cat.label for cat in categories}
+    
+    # Get tables grouped by area
+    tables = db.query(Table).all()
+    
+    # Build menu section
+    menu_by_category = {}
+    for item in menu_items:
+        cat_key = item.category.value if hasattr(item.category, 'value') else str(item.category)
+        if cat_key not in menu_by_category:
+            menu_by_category[cat_key] = []
+        menu_by_category[cat_key].append(item)
+    
+    menu_text = "\nMENÜMÜZ:\n"
+    
+    # Category order and Turkish names
+    category_order = ['starters', 'appetizers', 'mains', 'pizzas', 'chef', 'specials', 'desserts', 'drinks', 'wines']
+    category_names = {
+        'starters': 'BAŞLANGIÇLAR',
+        'appetizers': 'BAŞLANGIÇLAR',
+        'mains': 'ANA YEMEKLER',
+        'pizzas': 'PİZZALAR',
+        'chef': 'ŞEF ÖZEL',
+        'specials': 'ŞEF ÖZEL',
+        'desserts': 'TATLILAR',
+        'drinks': 'İÇECEKLER',
+        'wines': 'ŞARAPLAR'
+    }
+    
+    for cat_key in category_order:
+        if cat_key in menu_by_category:
+            items = menu_by_category[cat_key]
+            cat_name = category_map.get(cat_key) or category_names.get(cat_key, cat_key.upper())
+            menu_text += f"\n{cat_name}:\n"
+            for item in items:
+                dietary = ""
+                if item.dietary_tags:
+                    if 'vegan' in [t.lower() for t in item.dietary_tags]:
+                        dietary = ", vegan"
+                    elif 'vegetarian' in [t.lower() for t in item.dietary_tags]:
+                        dietary = ", vejetaryen"
+                menu_text += f"{item.name} {int(item.price)} lira{dietary}\n"
+    
+    # Build tables section
+    tables_text = "\nMASALARIMIZ:\n"
+    
+    terrace_tables = [t for t in tables if t.area == TableArea.TERRACE]
+    main_hall_tables = [t for t in tables if t.area == TableArea.MAIN_HALL]
+    vip_tables = [t for t in tables if t.area == TableArea.VIP]
+    
+    if terrace_tables:
+        tables_text += f"\nTERAS ({len(terrace_tables)} masa, sigara içilebilir, açık hava):\n"
+        for t in terrace_tables:
+            position = "cam kenarı" if t.is_window else ("duvar kenarı" if t.is_wall else "merkez")
+            tables_text += f"{t.table_number}: {t.capacity} kişilik, {position}\n"
+    
+    if main_hall_tables:
+        tables_text += f"\nANA SALON ({len(main_hall_tables)} masa, sigara içilmez, klimalı):\n"
+        for t in main_hall_tables:
+            position = "cam kenarı" if t.is_window else ("duvar kenarı" if t.is_wall else "merkez")
+            tables_text += f"{t.table_number}: {t.capacity} kişilik, {position}\n"
+    
+    if vip_tables:
+        tables_text += f"\nVIP ODALAR ({len(vip_tables)} oda, sigara serbest, özel):\n"
+        for t in vip_tables:
+            tables_text += f"{t.table_number}: {t.capacity} kişilik, özel oda\n"
+    
+    # Build services section
+    services_text = "\nHİZMETLER:\n"
+    for service in services_list:
+        services_text += f"{service}\n"
+    
+    # Build complete system prompt
+    system_prompt = f"""Sen "{restaurant_name}" restoranının yardımcı asistanısın.
+
+DİL KURALLARI:
+- SADECE sade, anlaşılır Türkçe kullan
+- Herkes anlasın: yaşlı, genç, çocuk, herkes
+- Teknik terim, İngilizce kelime, yıldız, madde işareti KULLANMA
+- Düz yazı yaz, kısa cümleler kur
+- Samimi ve sıcak ol
+
+SENİN ROLÜN:
+- Restoran için çalışan yardımcı asistanısın
+- Masa ayırtmak isteyen müşterilere yardım edersin
+- Menü hakkında bilgi verirsin
+- Sorular sorar, bilgi toplar, uygun masa önerirsin
+
+RESTORAN BİLGİLERİ:
+Ad: {restaurant_name}
+Çalışma Saatleri: Her gün {opening_time}'den {closing_time}'e kadar açığız
+Toplam Kapasite: {total_tables} masa, yaklaşık {total_capacity} kişi
+{tables_text}
+{menu_text}
+{services_text}
+ÖNEMLİ: Asla İngilizce konuşma, asla yıldız veya özel işaret kullanma, sadece sade Türkçe konuş."""
+
+    return system_prompt
+
+
+async def _call_llm(message: str, db: Session) -> str:
     """
     Call the local LLM server (LM Studio or similar) using an OpenAI-compatible API.
 
@@ -39,103 +175,8 @@ async def _call_llm(message: str) -> str:
             detail="LLM_API_URL is not configured on the server.",
         )
 
-    system_prompt = """Sen "Borcelle Fine Dining" restoranının yardımcı asistanısın.
-
-DİL KURALLARI:
-- SADECE sade, anlaşılır Türkçe kullan
-- Herkes anlasın: yaşlı, genç, çocuk, herkes
-- Teknik terim, İngilizce kelime, yıldız, madde işareti KULLANMA
-- Düz yazı yaz, kısa cümleler kur
-- Samimi ve sıcak ol
-
-SENİN ROLÜN:
-- Restoran için çalışan yardımcı asistanısın
-- Masa ayırtmak isteyen müşterilere yardım edersin
-- Menü hakkında bilgi verirsin
-- Sorular sorar, bilgi toplar, uygun masa önerirsin
-
-RESTORAN BİLGİLERİ:
-Ad: Borcelle Fine Dining
-Çalışma Saatleri: Her gün öğlen 12'den gece 12'ye kadar açığız
-Toplam Kapasite: 26 masa, yaklaşık 120 kişi
-
-MASALARIMIZ:
-
-TERAS (8 masa, sigara içilebilir, açık hava):
-T-01: 2 kişilik, cam kenarı, manzaralı
-T-02: 4 kişilik, cam kenarı, manzaralı
-T-03: 2 kişilik, duvar kenarı
-T-04: 4 kişilik, duvar kenarı
-T-05: 6 kişilik, duvar kenarı
-T-06: 4 kişilik, merkez
-T-07: 6 kişilik, merkez
-T-08: 8 kişilik, merkez, büyük gruplar için
-
-ANA SALON (16 masa, sigara içilmez, klimalı):
-H-01, H-02: 2 kişilik, cam kenarı, şehir manzaralı
-H-03, H-04: 4 kişilik, cam kenarı, şehir manzaralı
-H-05, H-06: 2 kişilik, duvar kenarı, sessiz
-H-07, H-08: 4 kişilik, duvar kenarı
-H-09, H-10: 6 kişilik, duvar kenarı
-H-11: 8 kişilik, duvar kenarı
-H-12: 2 kişilik, merkez
-H-13, H-14: 4 kişilik, merkez
-H-15: 6 kişilik, merkez
-H-16: 8 kişilik, merkez
-
-VIP ODALAR (2 oda, sigara serbest, özel):
-V-01: 8 kişilik, iş yemekleri için
-V-02: 12 kişilik, kutlamalar için
-
-MENÜMÜZ:
-
-BAŞLANGIÇLAR:
-Artizan Ekmek 220 lira, zeytinyağı ile
-Izgara Hellim 260 lira, nar roka ile
-Mantarlı Bruschetta 240 lira, trüf aromalı
-Somon Tartar 320 lira, avokado lime ile
-Kabak Çiçeği Dolması 230 lira, 4 adet, vejetaryen
-
-ANA YEMEKLER:
-Borcelle Signature Steak 780 lira, 250gr antrikot, şefin önerisi
-Mantarlı Risotto 520 lira, vejetaryen
-Deniz Ürünlü Makarna 560 lira, karides midye kalamar
-Ballı Somon 590 lira, kinoa ile
-Kuzu İncik 640 lira, 8 saat pişmiş çok yumuşak
-Vegan Izgara Tabağı 450 lira, köz sebzeler humus
-
-PİZZALAR:
-Trüf Mantarlı Pizza 430 lira
-Margherita 390 lira, vejetaryen
-Jambon Roka 460 lira
-Dört Peynirli 440 lira
-
-ŞEF ÖZEL:
-T-Bone 890 lira, 350gr
-Fileto 840 lira, şarap soslu
-Ördek Göğsü 820 lira, kestane püreli
-
-TATLILAR:
-Çikolatalı Sufle 260 lira, içi akışkan
-Cheesecake 270 lira
-Limonlu Mascarpone 240 lira
-Kadayıf Parfe 280 lira, fıstıklı
-
-İÇECEKLER:
-Portakal Suyu 120, Limonata 110, Şeftalili Çay 105
-Türk Kahvesi 80, Cappuccino 95, Latte 105, Soda 60 lira
-
-ŞARAPLAR:
-Kırmızı kadeh 210, şişe 950 liradan başlıyor
-Beyaz kadeh 190, şişe 900 liradan başlıyor
-Şampanya şişe 4800 lira
-
-HİZMETLER:
-Vale park var, çocuk sandalyesi var
-Cuma Cumartesi canlı müzik
-Özel günler için pasta ayarlanır
-
-ÖNEMLİ: Asla İngilizce konuşma, asla yıldız veya özel işaret kullanma, sadece sade Türkçe konuş."""
+    # Generate dynamic system prompt from database
+    system_prompt = generate_system_prompt(db)
 
     payload = {
         "model": llm_model,
@@ -171,9 +212,7 @@ Cuma Cumartesi canlı müzik
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest) -> ChatResponse:
+async def chat(request: ChatRequest, db: Session = Depends(get_db)) -> ChatResponse:
     """Chat endpoint used by the customer-facing chatbot."""
-    reply = await _call_llm(request.message)
+    reply = await _call_llm(request.message, db)
     return ChatResponse(reply=reply)
-
-
