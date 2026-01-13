@@ -54,21 +54,28 @@ async def get_available_tables(
     date: str = Query(..., description="Date in YYYY-MM-DD format"),
     time: str = Query(..., description="Time in HH:MM format"),
     party_size: int = Query(1, ge=1, description="Minimum party size"),
+    end_time: str = Query(None, description="End time in HH:MM format (optional)"),
     db: Session = Depends(get_db)
 ):
     """
     Get available tables for a specific date and time, filtered by capacity.
     Returns only tables that:
     1. Have capacity >= party_size
-    2. Are not reserved for the given date and time slot (±2 hours)
+    2. Are not reserved for the given date and time slot (checks overlap)
     """
     from app.models.reservation import Reservation, ReservationStatus
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, time as dt_time
     
     # Parse date and time
     try:
         reservation_date = datetime.strptime(date, "%Y-%m-%d").date()
-        reservation_time = datetime.strptime(time, "%H:%M").time()
+        reservation_start = datetime.strptime(time, "%H:%M").time()
+        if end_time:
+            reservation_end = datetime.strptime(end_time, "%H:%M").time()
+        else:
+            # Default: 2 hours after start
+            start_dt = datetime.combine(reservation_date, reservation_start)
+            reservation_end = (start_dt + timedelta(hours=2)).time()
     except ValueError:
         from fastapi import HTTPException
         raise HTTPException(status_code=400, detail="Invalid date or time format")
@@ -78,16 +85,28 @@ async def get_available_tables(
         Table.capacity >= party_size
     ).order_by(Table.capacity.asc(), Table.table_number).all()
     
-    # Get reservations for that date within the time window (±2 hours)
-    time_start = datetime.combine(reservation_date, reservation_time) - timedelta(hours=2)
-    time_end = datetime.combine(reservation_date, reservation_time) + timedelta(hours=2)
-    
-    reserved_table_ids = db.query(Reservation.table_id).filter(
+    # Get all confirmed reservations for that date
+    reservations = db.query(Reservation).filter(
         Reservation.date == reservation_date,
         Reservation.table_id.isnot(None),
         Reservation.status == ReservationStatus.confirmed
     ).all()
-    reserved_ids = {str(r[0]) for r in reserved_table_ids if r[0]}
+    
+    # Find reserved table IDs for overlapping time slots
+    reserved_ids = set()
+    for res in reservations:
+        res_start = res.time
+        # Use end_time if available, otherwise assume 2 hours
+        if res.end_time:
+            res_end = res.end_time
+        else:
+            res_start_dt = datetime.combine(reservation_date, res_start)
+            res_end = (res_start_dt + timedelta(hours=2)).time()
+        
+        # Check time overlap: new reservation overlaps with existing
+        # Overlap if: new_start < existing_end AND new_end > existing_start
+        if reservation_start < res_end and reservation_end > res_start:
+            reserved_ids.add(str(res.table_id))
     
     # Filter available tables
     available_tables = []
@@ -108,6 +127,7 @@ async def get_available_tables(
         "meta": {
             "date": date,
             "time": time,
+            "endTime": end_time,
             "partySize": party_size,
             "totalAvailable": len(available_tables)
         }

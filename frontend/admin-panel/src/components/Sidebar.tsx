@@ -8,14 +8,14 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { name: 'Dashboard', path: '/dashboard', icon: '▦' },
-  { name: 'Reservations', path: '/reservations', icon: '▤' },
+  { name: 'Kontrol Paneli', path: '/dashboard', icon: '▦' },
+  { name: 'Rezervasyonlar', path: '/reservations', icon: '▤' },
   { name: 'Takvim', path: '/calendar', icon: '📅' },
-  { name: 'Customers', path: '/customers', icon: '👥' },
-  { name: 'Tables', path: '/tables', icon: '⧉' },
+  { name: 'Musteriler', path: '/customers', icon: '👥' },
+  { name: 'Masalar', path: '/tables', icon: '⧉' },
   { name: 'Menu', path: '/menu', icon: '🍽' },
-  { name: 'Orders', path: '/orders', icon: '🧾' },
-  { name: 'Settings', path: '/settings', icon: '⚙' },
+  { name: 'Siparisler', path: '/orders', icon: '🧾' },
+  { name: 'Ayarlar', path: '/settings', icon: '⚙' },
 ];
 
 export default function Sidebar() {
@@ -36,10 +36,10 @@ export default function Sidebar() {
         </div>
         <div className="flex flex-col leading-tight">
           <span className="font-playfair font-semibold tracking-[0.06em] text-white text-base">
-            Restaurant Admin
+            Restoran Yonetimi
           </span>
           <span className="text-[11px] tracking-[0.12em] uppercase text-[#9aa3b2] mt-0.5">
-            Management System
+            Admin Paneli
           </span>
         </div>
       </div>
@@ -57,7 +57,7 @@ export default function Sidebar() {
             {user?.firstName} {user?.lastName}
           </span>
           <span className="text-[11px] tracking-[0.10em] uppercase text-[#9aa3b2]">
-            signed in
+            giris yapildi
           </span>
         </div>
       </div>
@@ -91,7 +91,7 @@ export default function Sidebar() {
           onClick={logout}
           className="w-full border border-white/[0.12] bg-white/[0.06] text-white/[0.92] px-3.5 py-3 rounded-[14px] text-[13px] tracking-[0.06em] transition-all hover:bg-white/[0.10] hover:border-[#cfd4dc]/[0.22]"
         >
-          Logout
+          Cikis Yap
         </button>
       </div>
     </aside>

@@ -26,6 +26,7 @@ class Reservation(Base):
     table_id = Column(String, ForeignKey("tables.id", ondelete="SET NULL"), nullable=True, index=True)
     date = Column(Date, nullable=False, index=True)
     time = Column(Time, nullable=False)
+    end_time = Column(Time, nullable=True)
     party_size = Column(Integer, nullable=False)
     status = Column(SQLEnum(ReservationStatus), default=ReservationStatus.confirmed, nullable=False, index=True)
     special_request = Column(Text, nullable=True)

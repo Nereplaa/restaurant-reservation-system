@@ -17,13 +17,15 @@ class ReservationBase(BaseModel):
 
 class ReservationCreate(ReservationBase):
     """Reservation creation schema"""
-    pass
+    end_time: Optional[time] = None
+    table_id: Optional[str] = None
 
 
 class ReservationUpdate(BaseModel):
     """Reservation update schema"""
     date: Optional[date] = None
     time: Optional[time] = None
+    end_time: Optional[time] = None
     party_size: Optional[int] = None
     special_request: Optional[str] = None
     status: Optional[ReservationStatus] = None
@@ -35,6 +37,7 @@ class ReservationResponse(ReservationBase):
     id: str
     user_id: str
     table_id: Optional[str]
+    end_time: Optional[time]
     status: ReservationStatus
     confirmation_number: str
     created_at: datetime
@@ -42,4 +45,3 @@ class ReservationResponse(ReservationBase):
     
     class Config:
         from_attributes = True
-

@@ -7,6 +7,7 @@ interface Reservation {
   id: string;
   reservationDate: string;
   reservationTime: string;
+  endTime: string | null;
   guestCount: number;
   status: string;
   specialRequests: string | null;
@@ -214,7 +215,7 @@ const ReservationsPage = () => {
                       <div>
                         <div className="text-xs text-white/40 mb-1 uppercase tracking-wider">Saat</div>
                         <div className="font-medium text-white">
-                          {formatTime(reservation.reservationTime)}
+                          {formatTime(reservation.reservationTime)} - {formatTime(reservation.endTime)}
                         </div>
                       </div>
 

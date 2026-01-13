@@ -39,15 +39,15 @@ const BookingPage: React.FC = () => {
     label: `${i + 1} Kişi`,
   }));
 
-  // Fetch available tables when date, time, or partySize changes
+  // Fetch available tables when date, time, endTime, or partySize changes
   useEffect(() => {
-    if (formData.date && formData.time && formData.partySize) {
+    if (formData.date && formData.time && formData.endTime && formData.partySize) {
       fetchAvailableTables();
     } else {
       setAvailableTables([]);
       setFormData((prev) => ({ ...prev, tableId: '' }));
     }
-  }, [formData.date, formData.time, formData.partySize]);
+  }, [formData.date, formData.time, formData.endTime, formData.partySize]);
 
   const fetchAvailableTables = async () => {
     setLoadingTables(true);
@@ -57,6 +57,7 @@ const BookingPage: React.FC = () => {
         params: {
           date: formData.date,
           time: formData.time,
+          end_time: formData.endTime,
           party_size: formData.partySize,
         },
       });

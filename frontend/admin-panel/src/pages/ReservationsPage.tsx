@@ -4,19 +4,19 @@ import { Reservation, Table } from '../types';
 import CustomSelect from '../components/CustomSelect';
 
 const reservationStatusOptions = [
-  { value: 'CONFIRMED', label: 'Confirmed' },
-  { value: 'COMPLETED', label: 'Completed' },
-  { value: 'CANCELLED', label: 'Cancelled' },
-  { value: 'NO_SHOW', label: 'No Show' },
+  { value: 'CONFIRMED', label: 'Onaylandi' },
+  { value: 'COMPLETED', label: 'Tamamlandi' },
+  { value: 'CANCELLED', label: 'Iptal Edildi' },
+  { value: 'NO_SHOW', label: 'Gelmedi' },
 ];
 
 const filterStatusOptions = [
-  { value: 'ALL', label: 'All' },
-  { value: 'CONFIRMED', label: 'Confirmed' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'COMPLETED', label: 'Completed' },
-  { value: 'CANCELLED', label: 'Cancelled' },
-  { value: 'NO_SHOW', label: 'No Show' },
+  { value: 'ALL', label: 'Tumu' },
+  { value: 'CONFIRMED', label: 'Onaylandi' },
+  { value: 'PENDING', label: 'Beklemede' },
+  { value: 'COMPLETED', label: 'Tamamlandi' },
+  { value: 'CANCELLED', label: 'Iptal Edildi' },
+  { value: 'NO_SHOW', label: 'Gelmedi' },
 ];
 
 export default function ReservationsPage() {
@@ -58,7 +58,7 @@ export default function ReservationsPage() {
         setTables(tablesRes.data.data);
       }
     } catch (err: any) {
-      setError(err.response?.data?.error?.message || 'Failed to load data');
+      setError(err.response?.data?.error?.message || 'Veriler yuklenemedi');
     } finally {
       setIsLoading(false);
     }
@@ -84,18 +84,18 @@ export default function ReservationsPage() {
       setShowModal(false);
       setSelectedReservation(null);
     } catch (err: any) {
-      alert(err.response?.data?.detail || 'Failed to update reservation');
+      alert(err.response?.data?.detail || 'Rezervasyon guncellenemedi');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bu rezervasyonu silmek istediğinize emin misiniz?')) return;
+    if (!confirm('Bu rezervasyonu silmek istediginize emin misiniz?')) return;
 
     try {
       await api.delete(`/reservations/${id}`);
       fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.detail || 'Failed to delete reservation');
+      alert(err.response?.data?.detail || 'Rezervasyon silinemedi');
     }
   };
 
@@ -115,8 +115,24 @@ export default function ReservationsPage() {
     return badges[status] || 'badge';
   };
 
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      confirmed: 'Onaylandi',
+      CONFIRMED: 'Onaylandi',
+      pending: 'Beklemede',
+      PENDING: 'Beklemede',
+      completed: 'Tamamlandi',
+      COMPLETED: 'Tamamlandi',
+      cancelled: 'Iptal',
+      CANCELLED: 'Iptal',
+      no_show: 'Gelmedi',
+      NO_SHOW: 'Gelmedi',
+    };
+    return labels[status] || status;
+  };
+
   // Filter reservations by status and search query
-  const filteredReservations = reservations.filter(r => {
+  const filteredReservations = reservations.filter((r: Reservation) => {
     const matchesStatus = filterStatus === 'ALL' || r.status.toUpperCase() === filterStatus.toUpperCase();
     const matchesSearch = searchQuery === '' ||
       r.confirmationNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -129,7 +145,7 @@ export default function ReservationsPage() {
       <div className="flex items-center justify-center h-[80vh]">
         <div className="text-center">
           <div className="w-12 h-12 border-2 border-white/20 border-t-white/80 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white/60 text-sm">Loading reservations...</p>
+          <p className="text-white/60 text-sm">Yukleniyor...</p>
         </div>
       </div>
     );
@@ -141,16 +157,16 @@ export default function ReservationsPage() {
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="font-playfair text-3xl font-medium tracking-wide text-white m-0">
-            Reservations
+            Rezervasyonlar
           </h1>
           <p className="text-white/[0.78] text-[13px] mt-1.5 font-light">
-            Manage all restaurant reservations
+            Tum restoran rezervasyonlarini yonetin
           </p>
         </div>
         <div className="flex items-center gap-2.5">
           <span className="pill">
             <span className="dot"></span>
-            Connected
+            Bagli
           </span>
         </div>
       </div>
@@ -174,10 +190,10 @@ export default function ReservationsPage() {
           </div>
           <input
             type="text"
-            placeholder="Search by name / confirmation..."
+            placeholder="Isim veya onay kodu ile ara..."
             className="input-premium flex-1 min-w-[220px]"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
           />
         </div>
 
@@ -185,30 +201,30 @@ export default function ReservationsPage() {
         <table className="table-premium">
           <thead>
             <tr>
-              <th>Confirmation #</th>
-              <th>Customer</th>
-              <th>Date & Time</th>
-              <th>Guests</th>
-              <th>Table</th>
-              <th>Status</th>
-              <th className="text-right">Actions</th>
+              <th>Onay Kodu</th>
+              <th>Musteri</th>
+              <th>Tarih ve Saat</th>
+              <th>Kisi</th>
+              <th>Masa</th>
+              <th>Durum</th>
+              <th className="text-right">Islemler</th>
             </tr>
           </thead>
           <tbody>
-            {filteredReservations.map((reservation) => (
+            {filteredReservations.map((reservation: Reservation) => (
               <tr key={reservation.id}>
                 <td className="font-medium">{reservation.confirmationNumber}</td>
                 <td>
-                  {reservation.user ? `${reservation.user.firstName} ${reservation.user.lastName}` : 'N/A'}
+                  {reservation.user ? `${reservation.user.firstName} ${reservation.user.lastName}` : 'Bilinmiyor'}
                 </td>
                 <td className="text-white/70">
                   {new Date(reservation.reservationDate).toLocaleDateString('tr-TR')} — {reservation.reservationTime} - {calculateEndTime(reservation.reservationTime)}
                 </td>
                 <td>{reservation.guestCount}</td>
-                <td className="text-white/70">{reservation.table?.tableNumber || 'Not assigned'}</td>
+                <td className="text-white/70">{reservation.table?.tableNumber || 'Atanmadi'}</td>
                 <td>
                   <span className={getStatusBadge(reservation.status)}>
-                    {reservation.status}
+                    {getStatusLabel(reservation.status)}
                   </span>
                 </td>
                 <td className="text-right">
@@ -217,13 +233,13 @@ export default function ReservationsPage() {
                       onClick={() => openUpdateModal(reservation)}
                       className="btn-secondary px-3 py-1.5 rounded-[14px] text-[12px]"
                     >
-                      Manage
+                      Yonet
                     </button>
                     <button
                       onClick={() => handleDelete(reservation.id)}
                       className="btn-danger px-3 py-1.5 rounded-[14px] text-[12px]"
                     >
-                      Delete
+                      Sil
                     </button>
                   </div>
                 </td>
@@ -237,7 +253,7 @@ export default function ReservationsPage() {
             <div className="w-10 h-10 rounded-2xl border border-white/[0.14] bg-white/[0.06] flex items-center justify-center mx-auto mb-3 shadow-lg">
               📅
             </div>
-            <p className="text-[13px]">No reservations found</p>
+            <p className="text-[13px]">Rezervasyon bulunamadi</p>
           </div>
         )}
       </div>
@@ -247,7 +263,7 @@ export default function ReservationsPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="glass-card rounded-2xl p-6 max-w-md w-full mx-4 animate-fade-in-up">
             <h3 className="font-playfair text-xl font-medium text-white mb-2">
-              Manage Reservation
+              Rezervasyon Yonetimi
             </h3>
             <p className="text-[13px] text-white/60 mb-6">
               {selectedReservation.confirmationNumber} — {selectedReservation.user?.firstName} {selectedReservation.user?.lastName}
@@ -256,7 +272,7 @@ export default function ReservationsPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">
-                  Status
+                  Durum
                 </label>
                 <CustomSelect
                   options={reservationStatusOptions}
@@ -267,12 +283,12 @@ export default function ReservationsPage() {
 
               <div>
                 <label className="block text-[11px] font-medium text-white/70 uppercase tracking-wider mb-2">
-                  Assign Table
+                  Masa Ata
                 </label>
                 <CustomSelect
                   options={[
-                    { value: '', label: 'Masa atanmadı' },
-                    ...tables.map(table => ({
+                    { value: '', label: 'Masa atanmadi' },
+                    ...tables.map((table: Table) => ({
                       value: table.id,
                       label: `Masa ${table.tableNumber} - Kapasite: ${table.capacity} (${table.area || table.location || 'Ana Salon'})`
                     }))
@@ -288,7 +304,7 @@ export default function ReservationsPage() {
                 onClick={handleUpdate}
                 className="flex-1 btn-primary px-4 py-3 rounded-[14px] font-medium"
               >
-                Update
+                Guncelle
               </button>
               <button
                 onClick={() => {
@@ -297,7 +313,7 @@ export default function ReservationsPage() {
                 }}
                 className="flex-1 btn-secondary px-4 py-3 rounded-[14px] font-medium"
               >
-                Cancel
+                Iptal
               </button>
             </div>
           </div>

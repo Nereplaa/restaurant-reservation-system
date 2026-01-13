@@ -40,13 +40,15 @@ async def create_reservation(
     # Generate confirmation number
     confirmation_number = generate_confirmation_number()
     
-    # Create reservation
+    # Create reservation with end_time and table_id
     new_reservation = Reservation(
         user_id=current_user.id,
         date=reservation.date,
         time=reservation.time,
+        end_time=reservation.end_time,
         party_size=reservation.party_size,
         special_request=reservation.special_request,
+        table_id=reservation.table_id if reservation.table_id else None,
         confirmation_number=confirmation_number
     )
     
@@ -54,7 +56,7 @@ async def create_reservation(
     db.commit()
     db.refresh(new_reservation)
     
-    logger.info(f"New reservation created: {confirmation_number} for user {current_user.email}")
+    logger.info(f"New reservation created: {confirmation_number} for user {current_user.email}, table_id: {reservation.table_id}")
     
     return ReservationResponse.model_validate(new_reservation)
 
@@ -93,6 +95,7 @@ async def get_reservations(
             "guestCount": r.party_size,
             "reservationDate": r.date.isoformat() if r.date else None,
             "reservationTime": r.time.strftime("%H:%M") if r.time else None,
+            "endTime": r.end_time.strftime("%H:%M") if r.end_time else None,
             "status": r.status.value.upper() if r.status else None,
             "specialRequests": r.special_request,
             "confirmationNumber": r.confirmation_number,
