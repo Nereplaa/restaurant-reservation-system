@@ -1,295 +1,203 @@
-# Restaurant Service System
+# Borcelle Fine Dining - Restaurant Reservation System
 
+Yapay Zeka Destekli Restoran Rezervasyon Sistemi
 
-A complete restaurant management system with Python FastAPI backend and React frontends.
+**Kocaeli Sağlık ve Teknoloji Üniversitesi**  
+Mühendislik ve Doğa Bilimleri Fakültesi  
+Bilgisayar/Yazılım Mühendisliği
 
-## Overview
+## Proje Ekibi
 
-This system provides a comprehensive solution for restaurant operations including customer reservations, menu management, order processing, and real-time kitchen display updates.
+| İsim | Öğrenci No | Görev |
+|------|------------|-------|
+| Simanur Gürsoy | 230502027 | Raporlama, Dokümantasyon, Frontend |
+| Ebrar İkbal Karakuzu | 230502028 | Sunum, Görselleştirme, Frontend |
+| Alperen Yağmur | 250502015 | Backend, Frontend, Sistem Mimarisi |
+| Utku Daşar | 240502061 | Proje Takibi |
 
-### Key Features
+**Ders Sorumlusu:** Dr. Öğr. Üyesi Elif Pınar Hacıbeyoğlu
 
-- **Customer Portal**: Browse menu, make reservations, manage bookings
-- **Admin Dashboard**: Full system management and analytics
-- **Kitchen Display**: Real-time order tracking and status updates
-- **Multi-role Access**: Customer, Server, Kitchen Staff, Manager, and Admin roles
-- **Real-time Updates**: WebSocket-based live order notifications
-- **Bilingual Menu**: Turkish and English menu item names
+---
 
-## Tech Stack
+## Proje Hakkında
 
-### Backend
-- **Python 3.11+** with FastAPI framework
-- **SQLAlchemy** ORM for database operations
-- **PostgreSQL** database
-- **JWT** authentication
-- **Socket.IO** for real-time communication
-- **Pydantic** for data validation
+Bu proje, restoran rezervasyon süreçlerinde yaşanan manuel yönetim sorunlarına çözüm sunmak amacıyla geliştirilmiş yapay zeka destekli bir web uygulamasıdır.
 
-### Frontend
-- **React 18** with TypeScript
-- **Vite** build tool
-- **TailwindCSS** for styling
-- **Axios** for HTTP requests
-- **Socket.IO Client** for real-time updates
+### Temel Özellikler
 
-### Infrastructure
-- **Docker** and Docker Compose
-- **Nginx** for serving static files
-- **Alembic** for database migrations
+- **Müşteri Portalı**: Menü görüntüleme, rezervasyon oluşturma, AI chatbot desteği
+- **Admin Paneli**: Masa, menü, rezervasyon ve kullanıcı yönetimi
+- **Mutfak Ekranı**: Gerçek zamanlı sipariş takibi
+- **AI Chatbot**: Müşteri sorularını yanıtlayan yapay zeka asistanı
+- **Çoklu Rol Desteği**: Müşteri, Servis, Mutfak, Yönetici, Admin
 
-## Quick Start
+---
 
-### Using Docker (Recommended)
+## Teknoloji Stack
+
+| Katman | Teknoloji |
+|--------|-----------|
+| Backend | Python 3.11+, FastAPI, SQLAlchemy |
+| Frontend | React 18, TypeScript, Vite |
+| Veritabanı | PostgreSQL 15 |
+| Gerçek Zamanlı | Socket.IO (WebSocket) |
+| AI/LLM | LM Studio (Local LLM) |
+| Containerization | Docker, Docker Compose |
+| Kimlik Doğrulama | JWT, Bcrypt |
+
+---
+
+## Hızlı Başlangıç
+
+### Docker ile Çalıştırma (Önerilen)
 
 ```bash
 docker-compose up --build
 ```
 
-Then access:
-- Customer App: http://localhost:7002
-- Admin Panel: http://localhost:7003
-- Kitchen Display: http://localhost:7004
-- API Documentation: http://localhost:7001/api/docs
+### Erişim Adresleri
 
-### Local Development
+| Servis | Port | URL |
+|--------|------|-----|
+| Müşteri Uygulaması | 7002 | http://localhost:7002 |
+| Admin Paneli | 7003 | http://localhost:7003 |
+| Mutfak Ekranı | 7004 | http://localhost:7004 |
+| API Dokümantasyonu | 7001 | http://localhost:7001/api/docs |
+| PostgreSQL | 7005 | - |
+
+### Manuel Kurulum
 
 **Backend:**
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+venv\Scripts\activate  # Windows
 pip install -r requirements.txt
-cp .env.example .env
 python seed.py
 python run.py
 ```
 
 **Frontend:**
 ```bash
-cd frontend/customer-app  # or admin-panel, or kitchen-display
+cd frontend/customer-app  # veya admin-panel, kitchen-display
 npm install
 npm run dev
 ```
 
-## Test Accounts
+---
 
-After running the seed script:
+## Test Hesapları
 
-| Role     | Email                    | Password    |
-|----------|--------------------------|-------------|
-| Admin    | admin@restaurant.com     | admin123    |
-| Manager  | manager@restaurant.com   | manager123  |
-| Server   | server@restaurant.com    | server123   |
-| Kitchen  | kitchen@restaurant.com   | kitchen123  |
-| Customer | customer@example.com     | customer123 |
-
-## Project Structure
-
-```
-restaurant-service-system/
-├── backend/              # Python FastAPI backend
-│   ├── app/
-│   │   ├── models/       # SQLAlchemy models
-│   │   ├── schemas/      # Pydantic schemas
-│   │   ├── routers/      # API endpoints
-│   │   ├── middleware/   # Authentication
-│   │   └── utils/        # Helper functions
-│   ├── alembic/          # Database migrations
-│   └── requirements.txt  # Python dependencies
-├── frontend/
-│   ├── customer-app/     # Customer-facing application
-│   └── admin-panel/      # Admin dashboard
-├── kitchen-display/      # Kitchen order display
-└── docker-compose.yml    # Docker orchestration
-```
-
-## API Endpoints
-
-### Authentication
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login user
-- `GET /api/v1/auth/me` - Get current user
-
-### Reservations
-- `GET /api/v1/reservations` - List reservations
-- `POST /api/v1/reservations` - Create reservation
-- `PATCH /api/v1/reservations/:id` - Update reservation
-- `DELETE /api/v1/reservations/:id` - Delete reservation
-
-### Menu Management
-- `GET /api/v1/menu` - List menu items
-- `POST /api/v1/menu` - Create menu item (admin)
-- `PATCH /api/v1/menu/:id` - Update menu item (admin)
-- `DELETE /api/v1/menu/:id` - Delete menu item (admin)
-
-### Orders
-- `GET /api/v1/orders` - List orders (staff only)
-- `POST /api/v1/orders` - Create order (staff only)
-- `PATCH /api/v1/orders/:id/status` - Update order status
-- `DELETE /api/v1/orders/:id` - Delete order (admin)
-
-### Tables
-- `GET /api/v1/tables` - List tables
-- `POST /api/v1/tables` - Create table (admin)
-- `PATCH /api/v1/tables/:id` - Update table
-- `DELETE /api/v1/tables/:id` - Delete table (admin)
-
-### Admin
-- `GET /api/v1/admin/stats` - Get dashboard statistics
-- `GET /api/v1/admin/users` - List all users
-
-Full API documentation available at `/api/docs` when server is running.
-
-## Database Schema
-
-- **users** - User accounts with role-based access
-- **tables** - Restaurant table management
-- **reservations** - Customer booking records
-- **menu_items** - Restaurant menu with Turkish translations
-- **orders** - Order records
-- **order_items** - Individual items in orders
-
-## Environment Configuration
-
-### Backend (.env)
-```env
-PORT=7001
-DATABASE_URL=postgresql://postgres:postgres@localhost:7005/restaurant_db
-JWT_SECRET=your-secret-key
-JWT_ALGORITHM=HS256
-JWT_EXPIRATION_MINUTES=1440
-CORS_ORIGINS=http://localhost:7002,http://localhost:7003,http://localhost:7004
-LOG_LEVEL=INFO
-```
-
-### Frontend (.env)
-```env
-VITE_API_URL=http://localhost:7001/api/v1
-```
-
-## Development
-
-### Database Migrations
-
-```bash
-cd backend
-alembic revision --autogenerate -m "description"
-alembic upgrade head
-```
-
-### Running Tests
-
-```bash
-# Backend
-cd backend
-pytest
-
-# Frontend
-cd frontend/customer-app
-npm test
-```
-
-## Docker Commands
-
-```bash
-# Start all services
-docker-compose up
-
-# Build and start
-docker-compose up --build
-
-# Stop services
-docker-compose down
-
-# Remove all data
-docker-compose down -v
-```
-
-## Sample Data
-
-The seed script includes:
-- 5 user accounts with different roles
-- 8 restaurant tables
-- 17 menu items (Turkish restaurant theme)
-- Sample reservation
-
-Run `python backend/seed.py` to populate the database.
-
-## Documentation
-
-- **Backend Details**: See `backend/README.md`
-- **Quick Start Guide**: See `QUICK-START.md`
-- **Project Structure**: See `PROJECT-STRUCTURE.md`
-
-## Features by Role
-
-### Customer
-- Browse menu items
-- Create and manage reservations
-- View reservation history
-- Account management
-
-### Server
-- Create orders
-- Manage table status
-- View reservations
-- Access menu information
-
-### Kitchen Staff
-- View incoming orders in real-time
-- Update order preparation status
-- Mark orders as ready
-- Real-time notifications
-
-### Manager
-- All server capabilities
-- Manage menu items
-- Manage tables
-- View reservations
-
-### Admin
-- Full system access
-- User management
-- System statistics
-- All CRUD operations
-
-## Security Features
-
-- JWT-based authentication
-- Password hashing with bcrypt
-- Role-based access control
-- CORS configuration
-- Rate limiting
-- SQL injection protection via ORM
-
-## Performance
-
-- Async/await support in FastAPI
-- Database connection pooling
-- Optimized queries with SQLAlchemy
-- Frontend code splitting with Vite
-- Docker multi-stage builds
-
-## License
-
-MIT License - See LICENSE file for details
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## Support
-
-For issues and questions:
-- Check documentation in `backend/README.md`
-- Review `QUICK-START.md` for setup help
-- Open an issue on GitHub
+| Rol | E-posta | Şifre |
+|-----|---------|-------|
+| Admin | admin@restaurant.com | admin123 |
+| Yönetici | manager@restaurant.com | manager123 |
+| Servis | server@restaurant.com | server123 |
+| Mutfak | kitchen@restaurant.com | kitchen123 |
+| Müşteri | customer@example.com | customer123 |
 
 ---
 
-Built with Python, FastAPI, React, PostgreSQL, and Docker
+## Proje Yapısı
+
+```
+restaurant-reservation-system/
+├── backend/                 # Python FastAPI Backend
+│   ├── app/
+│   │   ├── models/         # Veritabanı modelleri
+│   │   ├── routers/        # API endpoint'leri
+│   │   ├── schemas/        # Pydantic şemaları
+│   │   └── utils/          # Yardımcı fonksiyonlar
+│   ├── alembic/            # Veritabanı migration'ları
+│   └── requirements.txt
+├── frontend/
+│   ├── customer-app/       # Müşteri uygulaması
+│   └── admin-panel/        # Yönetici paneli
+├── kitchen-display/        # Mutfak ekranı
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
+## API Endpoint'leri
+
+### Kimlik Doğrulama
+- `POST /api/v1/auth/register` - Kullanıcı kaydı
+- `POST /api/v1/auth/login` - Giriş
+- `GET /api/v1/auth/me` - Mevcut kullanıcı
+
+### Rezervasyonlar
+- `GET /api/v1/reservations` - Rezervasyon listesi
+- `POST /api/v1/reservations` - Yeni rezervasyon
+- `PATCH /api/v1/reservations/:id` - Güncelleme
+- `DELETE /api/v1/reservations/:id` - Silme
+
+### Menü
+- `GET /api/v1/menu` - Menü listesi
+- `POST /api/v1/menu` - Yeni öğe (admin)
+- `PATCH /api/v1/menu/:id` - Güncelleme
+- `DELETE /api/v1/menu/:id` - Silme
+
+### Masalar
+- `GET /api/v1/tables` - Masa listesi
+- `POST /api/v1/tables` - Yeni masa
+- `PATCH /api/v1/tables/:id` - Güncelleme
+
+### Siparişler
+- `GET /api/v1/orders` - Sipariş listesi
+- `POST /api/v1/orders` - Yeni sipariş
+- `PATCH /api/v1/orders/:id/status` - Durum güncelleme
+
+---
+
+## Veritabanı Şeması
+
+- **users** - Kullanıcı hesapları ve rolleri
+- **tables** - Restoran masaları
+- **reservations** - Rezervasyon kayıtları
+- **menu_items** - Menü öğeleri
+- **orders** - Sipariş kayıtları
+- **order_items** - Sipariş detayları
+
+---
+
+## Kullanıcı Rolleri
+
+| Rol | Yetkiler |
+|-----|----------|
+| Müşteri | Rezervasyon oluşturma, menü görüntüleme, chatbot kullanımı |
+| Servis | Sipariş oluşturma, masa durumu yönetimi |
+| Mutfak | Sipariş görüntüleme, hazırlık durumu güncelleme |
+| Yönetici | Menü, masa ve rezervasyon yönetimi |
+| Admin | Tam sistem erişimi, kullanıcı yönetimi |
+
+---
+
+## Güvenlik
+
+- JWT tabanlı kimlik doğrulama
+- Bcrypt ile şifre hashleme
+- Rol tabanlı erişim kontrolü
+- CORS yapılandırması
+- Rate limiting
+- SQL injection koruması (ORM)
+
+---
+
+## Dokümantasyon
+
+- [Hızlı Başlangıç Rehberi](QUICK-START.md)
+- [Teknoloji Detayları](TECHNOLOGIES.md)
+- [Backend README](backend/README.md)
+- [Katkı Rehberi](CONTRIBUTING.md)
+
+---
+
+## Lisans
+
+MIT License - Detaylar için [LICENSE](LICENSE) dosyasına bakınız.
+
+---
+
+*Kocaeli Sağlık ve Teknoloji Üniversitesi - 2026*
